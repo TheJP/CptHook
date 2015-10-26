@@ -1,0 +1,31 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+ext {
+    jacksonVersion = '2.6.3'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    compile "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
+}
+
+eclipse {
+
+    classpath {
+
+        file {
+            withXml {
+                def node = it.asNode()
+                node.appendNode('classpathentry', [combineaccessrules: 'false', kind: 'src', path: '/EtherGL'])
+            }
+        }
+
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
