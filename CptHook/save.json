@@ -7,7 +7,6 @@
   },
   "npos" : [ {
     "type" : "block",
-    "type" : null,
     "x" : 30,
     "y" : 20
   } ]
