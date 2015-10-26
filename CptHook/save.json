@@ -1,0 +1,14 @@
+{
+  "width" : 100,
+  "height" : 200,
+  "player" : {
+    "x" : 5,
+    "y" : 6
+  },
+  "npos" : [ {
+    "type" : "block",
+    "type" : null,
+    "x" : 30,
+    "y" : 20
+  } ]
+}

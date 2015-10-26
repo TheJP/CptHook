@@ -3,6 +3,7 @@ apply plugin: 'eclipse'
 
 ext {
     jacksonVersion = '2.6.3'
+    lombokVersion   = '1.16.6'
 }
 
 repositories {
@@ -11,7 +12,12 @@ repositories {
 }
 
 dependencies {
+    // Lombok
+    compile "org.projectlombok:lombok:$lombokVersion"
+    // Jackson
     compile "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
+    compile "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
+    compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
 }
 
 eclipse {
