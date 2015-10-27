@@ -10,6 +10,7 @@ local.properties
 .settings/
 .worksheet
 .cache
+.cache-main
 .loadpath
 /RemoteSystemsTempFiles
 
