@@ -1,9 +1,13 @@
-apply plugin: 'java'
+apply plugin: 'scala'
 apply plugin: 'eclipse'
 
 ext {
-    jacksonVersion = '2.6.3'
-    lombokVersion   = '1.16.6'
+    // Scala
+	scalaMain = '2.11'
+	scalaVersion = "$scalaMain.7"
+	// Play JSON
+	playJsonVersion = '2.4.3'
+
 }
 
 repositories {
@@ -12,12 +16,10 @@ repositories {
 }
 
 dependencies {
-    // Lombok
-    compile "org.projectlombok:lombok:$lombokVersion"
-    // Jackson
-    compile "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
-    compile "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
-    compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    // Scala
+    compile "org.scala-lang:scala-library:$scalaVersion"
+    // Play json
+    compile "com.typesafe.play:play-json_$scalaMain:$playJsonVersion"
 }
 
 eclipse {

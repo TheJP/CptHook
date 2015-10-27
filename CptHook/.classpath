@@ -1,7 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="con" path="org.springsource.ide.eclipse.gradle.classpathcontainer"/>
+	<classpathentry kind="src" path="src/main/scala"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe.play/play-json_2.11/2.4.3/30f8694221932a0de84c978a4ba4e6f0f335f57b/play-json_2.11-2.4.3-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe.play/play-json_2.11/2.4.3/2a334d7d28aa30a075dbb68cac6565b8cd369ba0/play-json_2.11-2.4.3.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe.play/play-json_2.11/2.4.3/db96534034aeaa5e08324fbfa7137c9c1dfb2d0c/play-json_2.11-2.4.3-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe.play/play-iteratees_2.11/2.4.3/6ca4b9f2842019fb80c79576c75b1f3794f7bf3e/play-iteratees_2.11-2.4.3-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe.play/play-iteratees_2.11/2.4.3/4569f95cae5c06b925d2bcd685c17756486b4748/play-iteratees_2.11-2.4.3.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe.play/play-iteratees_2.11/2.4.3/fcfd91bdc8a56ff3b151d6b34b060491bcfd2447/play-iteratees_2.11-2.4.3-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe.play/play-functional_2.11/2.4.3/76fdf5fb8dc6c223fd4d0af832a1ff07cb03d297/play-functional_2.11-2.4.3-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe.play/play-functional_2.11/2.4.3/56912884973ed8b0337c149ddc106031712c39d7/play-functional_2.11-2.4.3.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe.play/play-functional_2.11/2.4.3/86ae277fecb0f68c6d7e8ccae00a9abaf89af803/play-functional_2.11-2.4.3-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe.play/play-datacommons_2.11/2.4.3/c8a948a598c1cf7524c1b1624bfb817219725b5d/play-datacommons_2.11-2.4.3-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe.play/play-datacommons_2.11/2.4.3/ae963b8839a63c9abc4ca748ad0964ff72c02b2f/play-datacommons_2.11-2.4.3.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe.play/play-datacommons_2.11/2.4.3/48e34d3a4bdab80f64d0a0cc91ae01ef2d10686f/play-datacommons_2.11-2.4.3-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/joda-time/joda-time/2.8.1/bf0996237b66ce00cd3132af179612df02ff9771/joda-time-2.8.1-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/joda-time/joda-time/2.8.1/f5bfc718c95a7b1d3c371bb02a188a4df18361a9/joda-time-2.8.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/joda-time/joda-time/2.8.1/df207c6f4b7bcfd5e143e545ca4604b322b35ba0/joda-time-2.8.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/org.joda/joda-convert/1.7/18580d7afd985e5e66b453465356794b26e3066a/joda-convert-1.7-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/org.joda/joda-convert/1.7/57c2432e54dc40f871f55295c676b22672713602/joda-convert-1.7.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/org.joda/joda-convert/1.7/4c5216554054b8f8fe40b3c7d66552e6e5c44614/joda-convert-1.7-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/org.scala-lang/scala-reflect/2.11.6/fd5644437e1f723409c93962fc925f09a581ea89/scala-reflect-2.11.6-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/org.scala-lang/scala-reflect/2.11.6/f539c9c9cf312472b3a7771ac85ecda859657a1d/scala-reflect-2.11.6.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/org.scala-lang/scala-reflect/2.11.6/b33523d296e9cd663773fe8e9e6d52ca0862e31a/scala-reflect-2.11.6-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.5.4/c906e414014890b228358bfcbeeb6b29afa62276/jackson-core-2.5.4-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.5.4/a57a2df1a23ca1ee32f129173ba7f5feaa9ac24/jackson-core-2.5.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.5.4/2fce3f409f9c6070ef1e88ef04aa01855ab1652a/jackson-core-2.5.4-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.5.4/ea497e77b3695405373364f8d1d6d9513ef2c8b1/jackson-annotations-2.5.4-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.5.4/7a93b60f5d2d43024f34e15893552ee6defdb971/jackson-annotations-2.5.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.5.4/3c2eed06d48fefe7f98bbba5158bf0fad79ca441/jackson-annotations-2.5.4-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.5.4/5d94b8a16dc19bddcf5394af6d23f32b62ed71dd/jackson-databind-2.5.4-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.5.4/5dfa42af84584b4a862ea488da84bbbebbb06c35/jackson-databind-2.5.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.5.4/661dfef53af20a1f6ca77edfab5efef5f3ca6105/jackson-databind-2.5.4-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.5.4/200f47d33a9a156be388b5c1c5ca73475ccb5139/jackson-datatype-jdk8-2.5.4-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.5.4/2305eb7fe454e8707ec378a5328cef9279e72c/jackson-datatype-jdk8-2.5.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.5.4/358013f8aeeb79f8a44dbda77ed7a3f1b1b720cd/jackson-datatype-jdk8-2.5.4-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.5.4/643bec640e59fab2ee119bc20a7f7755ce5af9f8/jackson-datatype-jsr310-2.5.4-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.5.4/8180ce2f3808001fba5f3b3c85bd80f28b733876/jackson-datatype-jsr310-2.5.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.5.4/f4d407f50690594c00e99c72f473d4bd1a53333/jackson-datatype-jsr310-2.5.4-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/org.scala-stm/scala-stm_2.11/0.7/4c087acd124ba7915f73339251ba8bbd4b466667/scala-stm_2.11-0.7-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/org.scala-stm/scala-stm_2.11/0.7/acece510055e8e47e142ad6671a9a8cf11a45007/scala-stm_2.11-0.7.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/org.scala-stm/scala-stm_2.11/0.7/f3cbfca0ea371e660df843afccc9c69eabc441b5/scala-stm_2.11-0.7-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe/config/1.3.0/b7f40ce00f9c552576c2675ba81b19365b74f83a/config-1.3.0-sources.jar" kind="lib" path="/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe/config/1.3.0/f533aa6ea13e443b50e639d070986c42d03efc35/config-1.3.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/david/.gradle/caches/modules-2/files-2.1/com.typesafe/config/1.3.0/b50295228b3f18cb52608a75b4bb347f2726f9b6/config-1.3.0-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/EtherGL"/>
 </classpath>
