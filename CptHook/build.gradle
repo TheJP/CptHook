@@ -5,9 +5,10 @@ ext {
     // Scala
 	scalaMain = '2.11'
 	scalaVersion = "$scalaMain.7"
-	// Play JSON
-	playJsonVersion = '2.4.3'
-
+	// json4s
+	json4sVersion = '3.3.0'
+	// truecommons-io
+	truecommonsIoVersion = '2.5.0'
 }
 
 repositories {
@@ -18,8 +19,10 @@ repositories {
 dependencies {
     // Scala
     compile "org.scala-lang:scala-library:$scalaVersion"
-    // Play json
-    compile "com.typesafe.play:play-json_$scalaMain:$playJsonVersion"
+    // json4s
+    compile "org.json4s:json4s-native_$scalaMain:$json4sVersion"
+    // truecommons-io
+    compile "net.java.truecommons:truecommons-io:$truecommonsIoVersion"
 }
 
 eclipse {
