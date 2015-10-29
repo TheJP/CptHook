@@ -1,9 +1,21 @@
 package ch.fhnw.cpthook
 
-import ch.fhnw.cpthook.json.JsonSerializer
-import ch.fhnw.cpthook.model._
+import ch.fhnw.ether.controller.DefaultController
+import ch.fhnw.ether.controller.event.IScheduler.IAction
+import ch.fhnw.ether.view.gl.DefaultView
+import ch.fhnw.ether.view.IView
+import ch.fhnw.ether.scene.DefaultScene
+import ch.fhnw.ether.scene.IScene
 
 object Main extends App {
-  JsonSerializer.writeLevel("save.json", Level(Size(10, 10), Position(1, 6), List(Block(Position(3, 4), Size(2, 2)))))
-  println(JsonSerializer.readLevel("save.json"))
+  val controller = new DefaultController
+  val scene: IScene = new DefaultScene(controller)
+  controller.run(ControllerAction)
+}
+
+object ControllerAction extends IAction {
+  def run(time: Double): Unit = {
+    new DefaultView(Main.controller, 100, 100, 500, 500, IView.INTERACTIVE_VIEW, "CptHook")
+    Main.controller.setScene(Main.scene)
+  }
 }
