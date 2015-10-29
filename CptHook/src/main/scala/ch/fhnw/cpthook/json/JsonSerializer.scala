@@ -4,7 +4,7 @@ import ch.fhnw.cpthook.model._
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization
-import org.json4s.native.Serialization.{read, write}
+import org.json4s.native.Serialization.{read, writePretty}
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import net.java.truecommons.io.Loan.loan
@@ -22,7 +22,7 @@ object JsonSerializer extends LevelSerializer {
 
   def writeLevel(filename: String, level: Level): Unit = {
     loan(new PrintWriter(filename, "UTF-8")) to {
-      writer => write[Level, PrintWriter](level, writer)
+      writer => writePretty[Level, PrintWriter](level, writer)
     }
   }
 }
