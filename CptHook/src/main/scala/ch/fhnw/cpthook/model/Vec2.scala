@@ -8,7 +8,7 @@ class Vec2[T](var pair: (T, T))(implicit num: Numeric[T]) {
   def -(other: Vec2[T]): Vec2[T] = new Vec2(pair._1 - other.pair._1, pair._2 - other.pair._2)
   def +=(other: Vec2[T]): Unit = pair = (pair._1 + other.pair._1, pair._2 + other.pair._2)
   def -=(other: Vec2[T]): Unit = pair = (pair._1 - other.pair._1, pair._2 - other.pair._2)
-  def toVec3(z: Float) = new Vec3(pair._1.toFloat, z, pair._2.toFloat) //TODO: Why has z to be the 2nd param?
+  def toVec3(z: Float) = new Vec3(pair._1.toFloat, pair._2.toFloat, z) //TODO: Why has z to be the 2nd param?
 }
 
 object Vec2 {

@@ -13,13 +13,14 @@ import ch.fhnw.ether.scene.camera.Camera
 import ch.fhnw.ether.view.IView._
 import ch.fhnw.cpthook.viewmodel.ILevelViewModel
 import ch.fhnw.cpthook.viewmodel.LevelViewModel
+import ch.fhnw.util.math.Vec3;
 
 trait Context {
   def controller: IController
   def scene: IScene
   var view: IView
-}
-
+} 
+ 
 object Main extends App with Context {
   override val controller = new DefaultController
   override val scene: IScene = new DefaultScene(controller)
@@ -38,6 +39,8 @@ class ControllerAction(val context: Context, val config: Configuration) extends 
     controller.setScene(scene)
     scene.add3DObject(new DirectionalLight(config.lightDirection, config.ambient, config.lightColor))
     val camera = controller.getCamera(view)
+    camera.setUp(new Vec3(0,1,0))
+    camera.setPosition(new Vec3(0,0,5))
     camera.setPosition(camera.getPosition scale 4)
     //Load the example level
     val level = JsonSerializer.readLevel("save.json")
