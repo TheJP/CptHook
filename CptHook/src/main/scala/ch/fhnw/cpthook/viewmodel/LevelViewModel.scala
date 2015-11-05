@@ -13,7 +13,7 @@ trait ILevelViewModel {
 }
 
 class LevelViewModel(val level: Level) extends ILevelViewModel {
-    var meshes = level.npos.map { npo => (npo, npo.npoType.to3DObject(npo)) } toMap
+    var meshes = level.npos.map { npo => (npo, npo.to3DObject) } toMap
     //Player indicator: map += ???
     def get3DObjects = meshes.values
 }
