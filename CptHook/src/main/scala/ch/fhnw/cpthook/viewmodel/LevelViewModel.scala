@@ -3,6 +3,8 @@ package ch.fhnw.cpthook.viewmodel
 import ch.fhnw.ether.scene.I3DObject
 import ch.fhnw.cpthook.model.Level
 import ch.fhnw.ether.scene.mesh.MeshLibrary
+import ch.fhnw.cpthook.model.Npo
+import scala.collection.breakOut;
 
 /**
  * Converts Level objects to 3d objects, which can be added to a Ether-GL IScene.
@@ -13,7 +15,7 @@ trait ILevelViewModel {
 }
 
 class LevelViewModel(val level: Level) extends ILevelViewModel {
-    var meshes = level.npos.map { npo => (npo, npo.to3DObject) } toMap
+    var meshes: Map[Npo, I3DObject] = level.npos.map(npo => (npo, npo.to3DObject))(breakOut)
     //Player indicator: map += ???
     def get3DObjects = meshes.values
 }
