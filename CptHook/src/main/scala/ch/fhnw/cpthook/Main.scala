@@ -1,7 +1,7 @@
 package ch.fhnw.cpthook
 
 import ch.fhnw.ether.controller.DefaultController
-import ch.fhnw.ether.controller.event.IScheduler.IAction
+import ch.fhnw.ether.controller.event.IEventScheduler.IAction
 import ch.fhnw.ether.view.gl.DefaultView
 import ch.fhnw.ether.view.IView
 import ch.fhnw.ether.scene.DefaultScene

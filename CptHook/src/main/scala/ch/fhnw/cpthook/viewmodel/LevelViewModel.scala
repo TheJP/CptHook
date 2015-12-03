@@ -2,7 +2,6 @@ package ch.fhnw.cpthook.viewmodel
 
 import ch.fhnw.ether.scene.I3DObject
 import ch.fhnw.cpthook.model.Level
-import ch.fhnw.ether.scene.mesh.MeshLibrary
 import ch.fhnw.cpthook.model.Npo
 import scala.collection.breakOut;
 
