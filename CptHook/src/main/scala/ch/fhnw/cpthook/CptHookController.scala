@@ -23,7 +23,6 @@ class CptHookController extends DefaultController {
   override def pointerDragged(event: IPointerEvent): Unit = {
     if(getUI != null && getUI.pointerDragged(event)){ return; }
     getCurrentTool.pointerDragged(event)
-    
   }
   override def pointerScrolled(event: IPointerEvent) = super.getCurrentTool.pointerScrolled(event)
 }

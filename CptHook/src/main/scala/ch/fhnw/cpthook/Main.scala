@@ -44,10 +44,9 @@ class ControllerAction(val context: Context, val config: Configuration) extends 
     camera.setPosition(config.cameraPosition)
     //Load the example level
     val level = JsonSerializer.readLevel("save.json")
-    val viewModel: ILevelViewModel = new LevelViewModel(level)
-    scene.add3DObjects(viewModel.get3DObjects.toList:_*)
+    val viewModel: ILevelViewModel = new LevelViewModel(level, scene)
     //Add editor tool
-    val editorTool = new EditorTool(controller, camera)
+    val editorTool = new EditorTool(controller, camera, viewModel)
     controller.setCurrentTool(editorTool)
   }
 }
