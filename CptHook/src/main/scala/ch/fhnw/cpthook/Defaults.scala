@@ -9,5 +9,5 @@ object Defaults extends Configuration {
   override val windowSize = (800, 600)
   override val ambient = RGB.BLACK
   override val lightColor = RGB.WHITE
-  override val lightDirection = Vec3.Z
+  override val lightDirection = new Vec3(-0.5, 0.5, 1)
 }

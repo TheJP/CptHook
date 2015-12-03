@@ -13,6 +13,7 @@ import ch.fhnw.ether.view.IView._
 import ch.fhnw.cpthook.viewmodel.ILevelViewModel
 import ch.fhnw.cpthook.viewmodel.LevelViewModel
 import ch.fhnw.util.math.Vec3;
+import ch.fhnw.ether.scene.light.PointLight
 
 trait Context {
   def controller: IController
