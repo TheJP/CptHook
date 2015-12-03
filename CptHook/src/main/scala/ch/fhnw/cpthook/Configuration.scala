@@ -11,4 +11,7 @@ trait Configuration {
   def ambient: RGB
   def lightColor: RGB
   def lightDirection: Vec3
+  //Camera
+  def cameraUp: Vec3
+  def cameraPosition: Vec3
 }

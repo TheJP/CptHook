@@ -12,8 +12,9 @@ import ch.fhnw.cpthook.json.JsonSerializer
 import ch.fhnw.ether.view.IView._
 import ch.fhnw.cpthook.viewmodel.ILevelViewModel
 import ch.fhnw.cpthook.viewmodel.LevelViewModel
-import ch.fhnw.util.math.Vec3;
+import ch.fhnw.util.math.Vec3
 import ch.fhnw.ether.scene.light.PointLight
+import ch.fhnw.cpthook.tools.EditorTool
 
 trait Context {
   def controller: IController
@@ -22,7 +23,7 @@ trait Context {
 }
 
 object Main extends App with Context {
-  override val controller = new DefaultController
+  override val controller = new CptHookController
   override val scene: IScene = new DefaultScene(controller)
   override var view: IView = null
   controller.run(new ControllerAction(Main, Defaults))
@@ -39,12 +40,14 @@ class ControllerAction(val context: Context, val config: Configuration) extends 
     controller.setScene(scene)
     scene.add3DObject(new DirectionalLight(config.lightDirection, config.ambient, config.lightColor))
     val camera = controller.getCamera(view)
-    camera.setUp(new Vec3(0,1,0))
-    camera.setPosition(new Vec3(0,0,5))
-    camera.setPosition(camera.getPosition scale 4)
+    camera.setUp(config.cameraUp)
+    camera.setPosition(config.cameraPosition)
     //Load the example level
     val level = JsonSerializer.readLevel("save.json")
     val viewModel: ILevelViewModel = new LevelViewModel(level)
     scene.add3DObjects(viewModel.get3DObjects.toList:_*)
+    //Add editor tool
+    val editorTool = new EditorTool(controller, camera)
+    controller.setCurrentTool(editorTool)
   }
 }

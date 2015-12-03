@@ -10,4 +10,6 @@ object Defaults extends Configuration {
   override val ambient = RGB.BLACK
   override val lightColor = RGB.WHITE
   override val lightDirection = new Vec3(-0.5, 0.5, 1)
+  override val cameraUp = Vec3.Y
+  override val cameraPosition = new Vec3(0, 0, 20)
 }
