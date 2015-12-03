@@ -31,8 +31,16 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
       cameraTarget = camera.getTarget
     case IPointerEvent.BUTTON_1 =>
       val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
-      val isHit = (mesh: (Npo, I3DObject)) => PickUtilities.pickObject(PickMode.POINT, event.getX, event.getY, 0, 0, viewCameraState, mesh._2) < Float.PositiveInfinity
-      viewModel.npos.filter { isHit } foreach { mesh => viewModel.removeNpo(mesh._1) }
+      //Find blocks, which were clicked => should be removed
+      val hitDistance = (mesh: I3DObject) => PickUtilities.pickObject(PickMode.POINT, event.getX, event.getY, 0, 0, viewCameraState, mesh)
+      val hits = viewModel.npos
+        .map(npo => (hitDistance(npo._2) -> npo._1))
+        .filter(_._1 < Float.PositiveInfinity)
+      if(!hits.isEmpty) { viewModel.removeNpo(hits.minBy(_._1)._2) }
+      //Try to add a block if none was removed
+      else {
+        //TODO: Add Block here
+      }
   }
 
   /**
