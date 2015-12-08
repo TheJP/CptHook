@@ -10,6 +10,8 @@ import ch.fhnw.ether.scene.camera.ICamera
 import ch.fhnw.util.math.Vec3
 import ch.fhnw.ether.scene.I3DObject
 import ch.fhnw.cpthook.model.Npo
+import ch.fhnw.ether.controller.event.IKeyEvent
+import com.jogamp.newt.event.KeyEvent
 
 /**
  * Tool, which is used in the editor.
@@ -53,6 +55,13 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
       val offset = new Vec3(event.getX - startX, 0, 0).scale(OffsetScale);
       camera.setTarget(cameraTarget.add(offset))
       camera.setPosition(cameraPosition.add(offset))
+    }
+  }
+  
+  override def keyPressed(event: IKeyEvent): Unit = {
+    if(event.getKeyCode == KeyEvent.VK_M) {
+      println("switching to game mode")
+      controller.setCurrentTool(new GameTool(controller, camera, viewModel))
     }
   }
 

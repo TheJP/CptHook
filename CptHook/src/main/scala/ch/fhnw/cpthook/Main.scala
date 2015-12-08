@@ -36,15 +36,18 @@ class ControllerAction(val context: Context, val config: Configuration) extends 
     val viewConfig = new Config(ViewType.INTERACTIVE_VIEW, 0, ViewFlag.SMOOTH_LINES)
     view = new DefaultView(
       controller, config.windowPosition._1, config.windowPosition._2,
-      config.windowSize._1, config.windowSize._2, viewConfig, config.windowTitle)
+      config.windowSize._1, config.windowSize._2, viewConfig, config.windowTitle)   
     controller.setScene(scene)
     scene.add3DObject(new DirectionalLight(config.lightDirection, config.ambient, config.lightColor))
+    
     val camera = controller.getCamera(view)
     camera.setUp(config.cameraUp)
     camera.setPosition(config.cameraPosition)
+    
     //Load the example level
     val level = JsonSerializer.readLevel("save.json")
     val viewModel: ILevelViewModel = new LevelViewModel(level, scene)
+    
     //Add editor tool
     val editorTool = new EditorTool(controller, camera, viewModel)
     controller.setCurrentTool(editorTool)
