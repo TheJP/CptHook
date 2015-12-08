@@ -41,6 +41,7 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
       else {
         //TODO: Add Block here
       }
+    case _ => //Default to prevent exceptions
   }
 
   /**
