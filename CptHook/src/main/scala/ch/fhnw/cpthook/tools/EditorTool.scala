@@ -41,6 +41,8 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
       else {
         //TODO: Add Block here
       }
+    case default =>
+      println(s"the mouse key $default is not supported yet")
   }
 
   /**
