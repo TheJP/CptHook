@@ -9,6 +9,8 @@ ext {
 	json4sVersion = '3.3.0'
 	// truecommons-io
 	truecommonsIoVersion = '2.5.0'
+	// JBox2D
+	jbox2dVersion = '2.2.1.1'
 }
 
 repositories {
@@ -23,6 +25,8 @@ dependencies {
     compile "org.json4s:json4s-native_$scalaMain:$json4sVersion"
     // truecommons-io
     compile "net.java.truecommons:truecommons-io:$truecommonsIoVersion"
+    // JBox2D
+    compile "org.jbox2d:jbox2d-library:$jbox2dVersion"
 }
 
 eclipse {
