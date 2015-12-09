@@ -76,28 +76,27 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
     viewModel.getPlayer3DObject.setPosition(new Vec3(playerBody.getPosition.x, playerBody.getPosition.y, 0))
   }
  
-  override def keyPressed(event: IKeyEvent): Unit = {
-    
-    event.getKeyCode match {
-      case KeyEvent.VK_M =>
-         println("switching to editor mode")
-          controller.setCurrentTool(new EditorTool(controller, camera, viewModel))
-      case KeyEvent.VK_RIGHT =>
-        val velocity = playerBody.getLinearVelocity
-        playerBody.setLinearVelocity(velocity.add(new Vec2(1f, 0f)))
-      case KeyEvent.VK_LEFT =>
-        val velocity = playerBody.getLinearVelocity
-        playerBody.setLinearVelocity(velocity.add(new Vec2(-1f, 0f)))
-      case KeyEvent.VK_SPACE =>
-        val velocity = playerBody.getLinearVelocity
-        playerBody.setLinearVelocity(new Vec2(0f, 5f))
-      case default =>
-        println(s"key $default does nothing")
-    }
-    
-    if(event.getKeyCode == KeyEvent.VK_M) {
-     
-    }
+  override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
+
+    case KeyEvent.VK_M =>
+       println("switching to editor mode")
+        controller.setCurrentTool(new EditorTool(controller, camera, viewModel))
+
+    case KeyEvent.VK_RIGHT =>
+      val velocity = playerBody.getLinearVelocity
+      playerBody.setLinearVelocity(velocity.add(new Vec2(1f, 0f)))
+
+    case KeyEvent.VK_LEFT =>
+      val velocity = playerBody.getLinearVelocity
+      playerBody.setLinearVelocity(velocity.add(new Vec2(-1f, 0f)))
+
+    case KeyEvent.VK_SPACE =>
+      val velocity = playerBody.getLinearVelocity
+      playerBody.setLinearVelocity(new Vec2(0f, 5f))
+
+    case default =>
+      println(s"key $default does nothing")
+
   }
   
 }
