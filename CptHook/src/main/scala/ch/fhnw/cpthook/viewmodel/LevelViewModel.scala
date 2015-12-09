@@ -1,7 +1,6 @@
 package ch.fhnw.cpthook.viewmodel
 
 import scala.collection.breakOut
-
 import ch.fhnw.cpthook.model.Level
 import ch.fhnw.cpthook.model.Npo
 import ch.fhnw.cpthook.model.Player
@@ -11,6 +10,7 @@ import ch.fhnw.ether.scene.IScene
 import ch.fhnw.ether.scene.mesh.MeshUtilities
 import ch.fhnw.ether.scene.mesh.material.ShadedMaterial
 import ch.fhnw.util.color.RGB
+import ch.fhnw.cpthook.json.JsonSerializer
 
 /**
  * Converts Level objects to 3d objects, which can be added to a Ether-GL IScene.
@@ -22,35 +22,53 @@ trait ILevelViewModel {
   def removeNpo(npo: Npo): Unit
   def addNpo(npo: Npo): Unit
   def getPlayer: Player
+  def saveLevel(filename: String): Unit
+  def openLevel(filename: String): Unit
+  def loadLevel(level: Level): Unit
 }
 
-class LevelViewModel(val level: Level, val scene: IScene) extends ILevelViewModel {
-  
-    // special player handling for now
-    var player: Player = new Player(level.start)
-    scene.add3DObject(player.mesh) 
+class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILevelViewModel {
 
-    var meshes: Map[Npo, I3DObject] = level.npos.map(npo => (npo, npo.to3DObject))(breakOut)
-   
-    //Add all meshes to the scene
-    scene.add3DObjects(get3DObjects.toList:_*)
+  // special player handling for now
+  private var player: Player = null
+  private var level: Level = null
+  private var meshes: Map[Npo, I3DObject] = Map()
 
-    //Player indicator: map += ???
-    def get3DObjects = meshes.values
-    def npos = meshes
-    
-    def removeNpo(npo: Npo): Unit = {
-      scene.remove3DObject(meshes(npo))
-      meshes -= npo
-      level.npos = level.npos filter { _ != npo } //TODO: Improve model => no linear search
+  loadLevel(initialLevel)
+
+  //Player indicator: map += ???
+  def get3DObjects = meshes.values
+  def npos = meshes
+
+  def removeNpo(npo: Npo): Unit = {
+    scene.remove3DObject(meshes(npo))
+    meshes -= npo
+    level.npos = level.npos filter { _ != npo } //TODO: Improve model => no linear search
+  }
+
+  def addNpo(npo: Npo): Unit = {
+    meshes += (npo -> npo.to3DObject)
+    level.npos ::= npo
+    scene.add3DObject(meshes(npo))
+  }
+
+  def getPlayer = player
+
+  def saveLevel(filename: String) = JsonSerializer.writeLevel(filename, level)
+
+  def openLevel(filename: String) = loadLevel(JsonSerializer.readLevel(filename))
+
+  def loadLevel(level: Level): Unit = {
+    //Unload old objects
+    if(this.level != null) {
+      scene.remove3DObjects(meshes.values.toList:_*)
+      scene.remove3DObject(player.mesh)
     }
-    
-    def addNpo(npo: Npo): Unit = {
-      meshes += (npo -> npo.to3DObject)
-      level.npos ::= npo
-      scene.add3DObject(meshes(npo))
-    }
-    
-    def getPlayer = player
-
+    //Load new ones
+    this.level = level
+    player = new Player(level.start)
+    meshes = level.npos.map(npo => (npo, npo.to3DObject))(breakOut)
+    scene.add3DObjects(meshes.values.toList:_*)
+    scene.add3DObject(player.mesh)
+  }
 }

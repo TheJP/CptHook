@@ -20,6 +20,8 @@ import ch.fhnw.util.math.Vec3
 import ch.fhnw.ether.scene.camera.IViewCameraState
 import com.sun.xml.internal.bind.annotation.OverrideAnnotationOf
 import ch.fhnw.cpthook.model.Npo
+import javax.swing.JFileChooser
+import ch.fhnw.cpthook.json.JsonSerializer
 
 /**
  * Tool, which is used in the editor.
@@ -110,11 +112,25 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
       println(s"the mouse key $default is not supported yet")
   }
   
-  override def keyPressed(event: IKeyEvent): Unit = {
-    if(event.getKeyCode == KeyEvent.VK_M) {
+  override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
+    case KeyEvent.VK_M =>
       println("switching to game mode")
       controller.setCurrentTool(new GameTool(controller, camera, viewModel))
-    }
+    case KeyEvent.VK_S if event.isControlDown =>
+      val fileChooser = new JFileChooser
+      fileChooser.setDialogTitle("Save Level")
+      if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
+        viewModel.saveLevel(fileChooser.getSelectedFile.getAbsolutePath)
+      }
+    case KeyEvent.VK_O if event.isControlDown =>
+      val fileChooser = new JFileChooser
+      fileChooser.setDialogTitle("Open Level")
+      if(fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
+        viewModel.openLevel(fileChooser.getSelectedFile.getAbsolutePath)
+      }
+    case default =>
+      //TODO: Remove debug log
+      println(s"the key $default is not supported yet")
   }
   
   override def pointerScrolled(event: IPointerEvent): Unit = {
