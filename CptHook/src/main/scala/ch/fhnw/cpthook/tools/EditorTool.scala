@@ -70,7 +70,7 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
       val delta = event.getX - startX
       offsetX += delta * OffsetScale
       camera.setTarget(new Vec3(offsetX, 0, 1))
-      camera.setPosition(new Vec3(offsetX, 0, 20))
+      camera.setPosition(new Vec3(offsetX, 0, offsetY))
       startX = event.getX
     }
   }
