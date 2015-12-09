@@ -1,25 +1,23 @@
 package ch.fhnw.cpthook.tools
 
+import com.jogamp.newt.event.KeyEvent
+
+import ch.fhnw.cpthook.Defaults
+import ch.fhnw.cpthook.model.Block
+import ch.fhnw.cpthook.model.Position
+import ch.fhnw.cpthook.model.Size
+import ch.fhnw.cpthook.model.Vec2.toVec3
 import ch.fhnw.cpthook.viewmodel.ILevelViewModel
 import ch.fhnw.ether.controller.IController
+import ch.fhnw.ether.controller.event.IKeyEvent
 import ch.fhnw.ether.controller.event.IPointerEvent
 import ch.fhnw.ether.controller.tool.AbstractTool
 import ch.fhnw.ether.controller.tool.PickUtilities
 import ch.fhnw.ether.controller.tool.PickUtilities.PickMode
-import ch.fhnw.ether.scene.camera.ICamera
-import ch.fhnw.util.math.Vec3
 import ch.fhnw.ether.scene.I3DObject
-import ch.fhnw.cpthook.model.Npo
-import ch.fhnw.ether.controller.event.IKeyEvent
-import com.jogamp.newt.event.KeyEvent
+import ch.fhnw.ether.scene.camera.ICamera
 import ch.fhnw.ether.view.ProjectionUtilities
-import ch.fhnw.util.math.geometry.Line
-import ch.fhnw.util.math.Vec4
-import ch.fhnw.cpthook.model.Block
-import ch.fhnw.cpthook.model.Size
-import ch.fhnw.cpthook.model.Position
-import ch.fhnw.cpthook.Configuration
-import ch.fhnw.cpthook.Defaults
+import ch.fhnw.util.math.Vec3
 
 /**
  * Tool, which is used in the editor.
@@ -31,10 +29,11 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
   val OffsetScale = 0.2f
   var offsetX: Float = 0;
   var startX: Float = 0
+  var offsetY: Float = 20
   
   camera.setUp(Defaults.cameraUp)
   camera.setTarget(new Vec3(offsetX, 0, 1))
-  camera.setPosition(new Vec3(offsetX, 0, 20))
+  camera.setPosition(new Vec3(offsetX, 0, offsetY))
   
   override def pointerPressed(event: IPointerEvent): Unit = event.getButton match {
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3=>
@@ -81,6 +80,11 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
       println("switching to game mode")
       controller.setCurrentTool(new GameTool(controller, camera, viewModel))
     }
+  }
+  
+  override def pointerScrolled(event: IPointerEvent): Unit = {
+    offsetY += event.getScrollY * OffsetScale
+    camera.setPosition(new Vec3(offsetX, 0, offsetY))
   }
 
 }
