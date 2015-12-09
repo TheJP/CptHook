@@ -92,7 +92,7 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
 
     case KeyEvent.VK_SPACE =>
       val velocity = playerBody.getLinearVelocity
-      playerBody.setLinearVelocity(new Vec2(0f, 5f))
+      playerBody.setLinearVelocity(velocity.add(new Vec2(0f, 5f)))
 
     case default =>
       println(s"key $default does nothing")
