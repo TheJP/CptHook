@@ -20,6 +20,7 @@ import org.jbox2d.dynamics.BodyDef
 import org.jbox2d.dynamics.BodyType
 import ch.fhnw.util.math.Vec3
 import org.jbox2d.common.Vec2
+import ch.fhnw.cpthook.CptHookController
 
 /**
  * Tool, which handles the game logic.
@@ -27,9 +28,7 @@ import org.jbox2d.common.Vec2
 class GameTool(val controller: IController, val camera: ICamera, val viewModel: ILevelViewModel)
   extends AbstractTool(controller) with IAnimationAction {
   
-  var playerBody: Body = null
-  val velocityIterations: Int = 6
-  val positionIterations: Int = 3
+  val inputManager = controller.asInstanceOf[CptHookController].inputManager
   
   val world: World = new World(new org.jbox2d.common.Vec2(0.0f, -10.0f))
   
@@ -40,28 +39,10 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
       body.createFixture(definition._1._2)
       body.setUserData(definition._2)
     }
+
+    viewModel.getPlayer.linkBox2D(world)
     
-    // special player handling
-    val playerBodyDef = new BodyDef
-    playerBodyDef.position.set(viewModel.getPlayer.position.x, viewModel.getPlayer.position.y)
-    playerBodyDef.`type` = BodyType.DYNAMIC
-    playerBodyDef.fixedRotation = true
-    
-    val playerShape: PolygonShape = new PolygonShape
-    playerShape.setAsBox(0.5f, 0.5f);
-    
-    val playerFixtureDef: FixtureDef = new FixtureDef
-    playerFixtureDef.shape = playerShape
-    playerFixtureDef.friction = 0.2f;        
-    playerFixtureDef.restitution = 0f;
-    playerFixtureDef.density = 1f;
-    
-    playerBody = world.createBody(playerBodyDef)
-    playerBody.createFixture(playerFixtureDef)
-    playerBody.setUserData(viewModel.getPlayer)
-    
-    
-   controller.animate(this)
+    controller.animate(this)
   }
   
   override def deactivate(): Unit = {
@@ -69,11 +50,11 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
   }
   
   def run(time: Double, interval: Double) : Unit = {
-    world.step(1f / 60f, velocityIterations, positionIterations)
+    world.step(1f / 60f, GameTool.VelocityIterations, GameTool.PositionIterations)
     
-    println(new Vec3(playerBody.getPosition.x, playerBody.getPosition.y, 0))
+    viewModel.getPlayer.update(inputManager)
     
-    viewModel.getPlayer3DObject.setPosition(new Vec3(playerBody.getPosition.x, playerBody.getPosition.y, 0))
+    inputManager.clearWasPressed()
   }
  
   override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
@@ -81,18 +62,6 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
     case KeyEvent.VK_M =>
        println("switching to editor mode")
         controller.setCurrentTool(new EditorTool(controller, camera, viewModel))
-
-    case KeyEvent.VK_RIGHT =>
-      val velocity = playerBody.getLinearVelocity
-      playerBody.setLinearVelocity(velocity.add(new Vec2(1f, 0f)))
-
-    case KeyEvent.VK_LEFT =>
-      val velocity = playerBody.getLinearVelocity
-      playerBody.setLinearVelocity(velocity.add(new Vec2(-1f, 0f)))
-
-    case KeyEvent.VK_SPACE =>
-      val velocity = playerBody.getLinearVelocity
-      playerBody.setLinearVelocity(velocity.add(new Vec2(0f, 5f)))
       
     case KeyEvent.VK_G =>
       world.setGravity(world.getGravity.mul(-1f))
@@ -102,4 +71,9 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
 
   }
   
+}
+
+object GameTool {
+  val VelocityIterations: Int = 6
+  val PositionIterations: Int = 3
 }

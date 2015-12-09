@@ -22,20 +22,13 @@ trait ILevelViewModel {
   def removeNpo(npo: Npo): Unit
   def addNpo(npo: Npo): Unit
   def getPlayer: Player
-  def getPlayer3DObject: I3DObject 
 }
 
 class LevelViewModel(val level: Level, val scene: IScene) extends ILevelViewModel {
   
     // special player handling for now
     var player: Player = new Player(level.start)
-    val playerMaterial = new ShadedMaterial(RGB.RED)
-    val playerMesh = MeshUtilities.createCube(playerMaterial)
-    playerMesh.setPosition((player.position toVec3 0))
-    scene.add3DObject(playerMesh)
-    
-    def getPlayer3DObject: I3DObject = playerMesh
-    
+    scene.add3DObject(player.mesh) 
 
     var meshes: Map[Npo, I3DObject] = level.npos.map(npo => (npo, npo.to3DObject))(breakOut)
    
