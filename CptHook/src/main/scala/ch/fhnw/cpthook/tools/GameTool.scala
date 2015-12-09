@@ -52,7 +52,7 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
   def run(time: Double, interval: Double) : Unit = {
     world.step(1f / 60f, GameTool.VelocityIterations, GameTool.PositionIterations)
     
-    viewModel.getPlayer.update(inputManager)
+    viewModel.getPlayer.update(world, inputManager)
     
     inputManager.clearWasPressed()
   }

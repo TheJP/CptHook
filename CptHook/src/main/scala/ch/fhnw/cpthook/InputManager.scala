@@ -12,16 +12,16 @@ class InputManager {
   def clearWasPressed(): Unit = keyWasPressed.clear
   
   def handleKeyPressedEvent(event: IKeyEvent): Unit = {
+    val keyCode = event.getKeyCode
     if (!event.isAutoRepeat()) {
-      keyPressed += event.getKeyCode
+      keyPressed += keyCode
+      keyWasPressed += keyCode
     }    
   }
   
   def handleKeyReleasedEvent(event: IKeyEvent): Unit =  {
-    if (!event.isAutoRepeat()) {
-      val keyCode = event.getKeyCode
-      keyPressed -= keyCode
-      keyWasPressed += keyCode
+    if (!event.isAutoRepeat()) { 
+      keyPressed -= event.getKeyCode
     } 
   }
   

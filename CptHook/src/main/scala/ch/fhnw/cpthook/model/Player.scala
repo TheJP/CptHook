@@ -30,8 +30,8 @@ class Player(var position: Position) {
     
     val fixtureDef: FixtureDef = new FixtureDef
     fixtureDef.shape = shape
-    fixtureDef.friction = 0.2f;        
-    fixtureDef.restitution = 0f;
+    fixtureDef.friction = 0.1f;        
+    fixtureDef.restitution = 0.1f;
     fixtureDef.density = 1f;
     
     body = world.createBody(bodyDef)
@@ -43,7 +43,7 @@ class Player(var position: Position) {
     body = null
   }
   
-  def update(inputManager: InputManager): Unit = {
+  def update(world: World, inputManager: InputManager): Unit = {
     
     if (body == null) {
       return
@@ -61,9 +61,14 @@ class Player(var position: Position) {
     }
     if (inputManager.keyWasPressed(KeyEvent.VK_SPACE)) {
       val velocity = body.getLinearVelocity
-      body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(0f, Player.JumpVelocity)))
+      if (world.getGravity.y < 0) {
+        body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(0f, Player.JumpVelocity)))
+      } else {
+        body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(0f, -Player.JumpVelocity)))
+      }
+      
     }
-    
+
     val velocity = body.getLinearVelocity
     if (Math.abs(velocity.x) > Player.MaxXVelocity) {
       if(velocity.x > 0) {
