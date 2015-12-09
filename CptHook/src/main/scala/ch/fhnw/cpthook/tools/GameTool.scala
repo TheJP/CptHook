@@ -77,8 +77,7 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
         camera.setPosition(new Vec3(0, 0, 20))
       }
       
-    case default =>
-      println(s"key $default does nothing")
+    case _ =>
 
   }
   
