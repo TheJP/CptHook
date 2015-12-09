@@ -26,7 +26,7 @@ class Player(var position: Position) {
     bodyDef.fixedRotation = true
     
     val shape: PolygonShape = new PolygonShape
-    shape.setAsBox(0.5f, 0.5f);
+    shape.setAsBox(0.45f, 0.45f);
     
     val fixtureDef: FixtureDef = new FixtureDef
     fixtureDef.shape = shape
@@ -43,7 +43,7 @@ class Player(var position: Position) {
     body = null
   }
   
-  def update(world: World, inputManager: InputManager): Unit = {
+  def update(inputManager: InputManager): Unit = {
     
     if (body == null) {
       return
@@ -61,7 +61,7 @@ class Player(var position: Position) {
     }
     if (inputManager.keyWasPressed(KeyEvent.VK_SPACE)) {
       val velocity = body.getLinearVelocity
-      if (world.getGravity.y < 0) {
+      if (body.getWorld.getGravity.y < 0) {
         body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(0f, Player.JumpVelocity)))
       } else {
         body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(0f, -Player.JumpVelocity)))

@@ -41,9 +41,7 @@ class ControllerAction(val context: Context, val config: Configuration) extends 
     scene.add3DObject(new DirectionalLight(config.lightDirection, config.ambient, config.lightColor))
     
     val camera = controller.getCamera(view)
-    camera.setUp(config.cameraUp)
-    camera.setPosition(config.cameraPosition)
-    
+
     //Load the example level
     val level = JsonSerializer.readLevel("save.json")
     val viewModel: ILevelViewModel = new LevelViewModel(level, scene)

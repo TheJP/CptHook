@@ -46,13 +46,16 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
   }
   
   override def deactivate(): Unit = {
-   controller.kill(this)
+    controller.kill(this)
   }
   
   def run(time: Double, interval: Double) : Unit = {
     world.step(1f / 60f, GameTool.VelocityIterations, GameTool.PositionIterations)
     
-    viewModel.getPlayer.update(world, inputManager)
+    viewModel.getPlayer.update(inputManager)
+    
+    camera.setTarget(viewModel.getPlayer.mesh.getPosition)
+    camera.setPosition(viewModel.getPlayer.mesh.getPosition.subtract(new Vec3(0, 0, -20)))
     
     inputManager.clearWasPressed()
   }

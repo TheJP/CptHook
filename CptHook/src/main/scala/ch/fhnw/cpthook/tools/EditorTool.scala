@@ -12,6 +12,14 @@ import ch.fhnw.ether.scene.I3DObject
 import ch.fhnw.cpthook.model.Npo
 import ch.fhnw.ether.controller.event.IKeyEvent
 import com.jogamp.newt.event.KeyEvent
+import ch.fhnw.ether.view.ProjectionUtilities
+import ch.fhnw.util.math.geometry.Line
+import ch.fhnw.util.math.Vec4
+import ch.fhnw.cpthook.model.Block
+import ch.fhnw.cpthook.model.Size
+import ch.fhnw.cpthook.model.Position
+import ch.fhnw.cpthook.Configuration
+import ch.fhnw.cpthook.Defaults
 
 /**
  * Tool, which is used in the editor.
@@ -21,16 +29,16 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
   extends AbstractTool(controller) {
 
   val OffsetScale = 0.2f
-
-  var startX = 0
-  var cameraPosition = camera.getPosition
-  var cameraTarget = camera.getTarget
-
+  var offsetX: Float = 0;
+  var startX: Float = 0
+  
+  camera.setUp(Defaults.cameraUp)
+  camera.setTarget(new Vec3(offsetX, 0, 1))
+  camera.setPosition(new Vec3(offsetX, 0, 20))
+  
   override def pointerPressed(event: IPointerEvent): Unit = event.getButton match {
-    case IPointerEvent.BUTTON_2 =>
+    case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3=>
       startX = event.getX
-      cameraPosition = camera.getPosition
-      cameraTarget = camera.getTarget
     case IPointerEvent.BUTTON_1 =>
       val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
       //Find blocks, which were clicked => should be removed
@@ -41,7 +49,15 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
       if(!hits.isEmpty) { viewModel.removeNpo(hits.minBy(_._1)._2) }
       //Try to add a block if none was removed
       else {
-        //TODO: Add Block here
+        val ray = ProjectionUtilities.getRay(viewCameraState, event.getX, event.getY)
+        
+        // check if we can hit the xy plane
+        if(ray.getDirection.z != 0f) {
+          val s: Float = -ray.getOrigin.z / ray.getDirection.z
+          val p: Vec3 = ray.getOrigin.add(ray.getDirection.scale(s))
+          val size = new Size(1, 1)
+          viewModel.addNpo(new Block(new Position((p.x - size.x / 2).round.toInt, (p.y - size.y / 2).round.toInt), size))
+        }
       }
     case default =>
       println(s"the mouse key $default is not supported yet")
@@ -51,10 +67,12 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
    * Moves the view horizontally in the editor mode.
    */
   override def pointerDragged(event: IPointerEvent): Unit = {
-    if(event.getButton == IPointerEvent.BUTTON_2){
-      val offset = new Vec3(event.getX - startX, 0, 0).scale(OffsetScale);
-      camera.setTarget(cameraTarget.add(offset))
-      camera.setPosition(cameraPosition.add(offset))
+    if(event.getButton == IPointerEvent.BUTTON_2 || event.getButton == IPointerEvent.BUTTON_3){
+      val delta = event.getX - startX
+      offsetX += delta * OffsetScale
+      camera.setTarget(new Vec3(offsetX, 0, 1))
+      camera.setPosition(new Vec3(offsetX, 0, 20))
+      startX = event.getX
     }
   }
   
