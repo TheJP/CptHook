@@ -49,7 +49,7 @@ class Player(var position: Position) {
       return
     }
     
-    mesh.setPosition(new Vec3(body.getPosition.x, body.getPosition.y, 0))
+    mesh.setPosition(new Vec3(body.getPosition.x, body.getPosition.y,0.5))
     
     if (inputManager.keyPressed(KeyEvent.VK_RIGHT)) {
       val velocity = body.getLinearVelocity
@@ -88,7 +88,7 @@ object Player {
   def createMesh(player: Player): I3DObject = {
     val material = new ShadedMaterial(RGB.RED)
     val mesh = MeshUtilities.createCube(material)
-    mesh.setPosition(player.position toVec3 0)
+    mesh.setPosition(player.position toVec3 0.5f)
     mesh
   }
 }
