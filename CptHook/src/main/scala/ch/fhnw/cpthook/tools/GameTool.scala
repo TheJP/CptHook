@@ -29,8 +29,8 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
   extends AbstractTool(controller) with IAnimationAction {
   
   val inputManager = controller.asInstanceOf[CptHookController].inputManager
-  
   val world: World = new World(new org.jbox2d.common.Vec2(0.0f, -10.0f))
+  var follow = true
   
   override def activate(): Unit = {
     
@@ -55,7 +55,9 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
     viewModel.getPlayer.update(inputManager)
     
     camera.setTarget(viewModel.getPlayer.mesh.getPosition)
-    camera.setPosition(viewModel.getPlayer.mesh.getPosition.subtract(new Vec3(0, 0, -20)))
+    if(follow) {
+      camera.setPosition(viewModel.getPlayer.mesh.getPosition.subtract(new Vec3(0, 0, -20)))
+    }   
     
     inputManager.clearWasPressed()
   }
@@ -68,7 +70,13 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
       
     case KeyEvent.VK_G =>
       world.setGravity(world.getGravity.mul(-1f))
-
+      
+    case KeyEvent.VK_F =>
+      follow = !follow
+      if(!follow) {
+        camera.setPosition(new Vec3(0, 0, 20))
+      }
+      
     case default =>
       println(s"key $default does nothing")
 
