@@ -13,6 +13,13 @@ import ch.fhnw.ether.scene.mesh.material.ShadedMaterial
 import ch.fhnw.ether.scene.mesh.MeshUtilities
 import ch.fhnw.util.color.RGB
 import ch.fhnw.cpthook.InputManager
+import ch.fhnw.ether.image.Frame
+import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
+import ch.fhnw.ether.scene.mesh.DefaultMesh
+import ch.fhnw.ether.scene.mesh.geometry.DefaultGeometry
+import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
+import ch.fhnw.ether.scene.mesh.IMesh.Queue;
+import ch.fhnw.util.color.RGBA
 
 class Player(var position: Position) {
   
@@ -84,10 +91,17 @@ object Player {
   val MaxXVelocity: Float = 10.0f
   val MoveVelocity: Float = 1.0f
   val JumpVelocity: Float = 7.0f
+  val z = 0f;
+  val e = .5f;
+  val texCoords = Array( 0f, 0f, 1f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, 0f, 1f )
+  val vertices = Array( -e, -e, z, e, -e, z, e, e, z, -e, -e, z, e, e, z, -e, e, z )
+  
+  val materialPlayer = new ColorMapMaterial(new RGBA(1,1,1,1), Frame.create(getClass.getResource("..\\assets\\player.png")).getTexture())
+  val g = DefaultGeometry.createVM(Primitive.TRIANGLES, vertices, texCoords);
   
   def createMesh(player: Player): I3DObject = {
-    val material = new ShadedMaterial(RGB.RED)
-    val mesh = MeshUtilities.createCube(material)
+
+    val mesh = new DefaultMesh(materialPlayer, g, Queue.TRANSPARENCY);
     mesh.setPosition(player.position toVec3 0.5f)
     mesh
   }

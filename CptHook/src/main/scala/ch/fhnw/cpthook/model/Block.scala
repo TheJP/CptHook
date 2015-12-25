@@ -14,9 +14,6 @@ import org.jbox2d.dynamics.BodyDef
 import org.jbox2d.dynamics.BodyType
 import org.jbox2d.collision.shapes.PolygonShape
 import ch.fhnw.ether.image.Frame
-import java.awt.image.BufferedImage 
-import javax.imageio.ImageIO
-import java.io.File
 import ch.fhnw.ether.scene.mesh.DefaultMesh
 import ch.fhnw.ether.scene.mesh.geometry.DefaultGeometry
 import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
