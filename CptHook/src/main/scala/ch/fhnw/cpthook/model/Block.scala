@@ -31,6 +31,8 @@ object BlockType extends NpoType[Block]{
   val materialJump = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\jump.png")).getTexture())
   val materialTarget = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\target.png")).getTexture()) 
   val materialGreen = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\generic_green_for_janis.png")).getTexture())
+  val materialLava = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\lava.png")).getTexture()) 
+  val materialIce = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\ice.png")).getTexture())
   
   val vertices = MeshUtilities.UNIT_CUBE_TRIANGLES
   val texCoords = Array( 0f, .34f, 0f, .66f, 1f, .66f, 0f, .34f, 1f, .66f, 1f, .34f,      //back

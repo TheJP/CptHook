@@ -96,7 +96,7 @@ object Player {
   val texCoords = Array( 0f, 0f, 1f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, 0f, 1f )
   val vertices = Array( -e, -e, z, e, -e, z, e, e, z, -e, -e, z, e, e, z, -e, e, z )
   
-  val materialPlayer = new ColorMapMaterial(new RGBA(1,1,1,1), Frame.create(getClass.getResource("..\\assets\\player.png")).getTexture())
+  val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\player.png")).getTexture())
   val g = DefaultGeometry.createVM(Primitive.TRIANGLES, vertices, texCoords);
   
   def createMesh(player: Player): I3DObject = {
