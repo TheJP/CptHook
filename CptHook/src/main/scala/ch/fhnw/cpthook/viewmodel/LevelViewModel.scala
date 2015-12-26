@@ -11,6 +11,7 @@ import ch.fhnw.ether.scene.mesh.MeshUtilities
 import ch.fhnw.ether.scene.mesh.material.ShadedMaterial
 import ch.fhnw.util.color.RGB
 import ch.fhnw.cpthook.json.JsonSerializer
+import ch.fhnw.cpthook.model.SkyBox
 
 /**
  * Converts Level objects to 3d objects, which can be added to a Ether-GL IScene.
@@ -25,6 +26,8 @@ trait ILevelViewModel {
   def saveLevel(filename: String): Unit
   def openLevel(filename: String): Unit
   def loadLevel(level: Level): Unit
+  def addSkyBox(skyBox: I3DObject) : Unit
+  def removeSkyBox(skyBox : I3DObject) : Unit
 }
 
 class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILevelViewModel {
@@ -70,5 +73,13 @@ class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILe
     meshes = level.npos.map(npo => (npo, npo.to3DObject))(breakOut)
     scene.add3DObjects(meshes.values.toList:_*)
     scene.add3DObject(player.mesh)
+  }
+  
+  def addSkyBox(skyBox: I3DObject) = {
+    scene.add3DObject(skyBox)    
+  }
+  
+  def removeSkyBox(skyBox : I3DObject) = {
+    scene.remove3DObject(skyBox)
   }
 }

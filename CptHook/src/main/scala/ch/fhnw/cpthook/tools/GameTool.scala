@@ -21,6 +21,7 @@ import org.jbox2d.dynamics.BodyType
 import ch.fhnw.util.math.Vec3
 import org.jbox2d.common.Vec2
 import ch.fhnw.cpthook.CptHookController
+import ch.fhnw.cpthook.model.SkyBox
 
 /**
  * Tool, which handles the game logic.
@@ -31,6 +32,7 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
   val inputManager = controller.asInstanceOf[CptHookController].inputManager
   val world: World = new World(new org.jbox2d.common.Vec2(0.0f, -10.0f))
   var follow = true
+  val skyBox = new SkyBox().createMesh()
   
   override def activate(): Unit = {
     
@@ -41,11 +43,13 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
     }
 
     viewModel.getPlayer.linkBox2D(world)
+    viewModel.addSkyBox(skyBox)
     
     controller.animate(this)
   }
   
   override def deactivate(): Unit = {
+    viewModel.removeSkyBox(skyBox)
     controller.kill(this)
     viewModel.getPlayer.mesh.setPosition(viewModel.getPlayer.position toVec3 1)
   }
@@ -58,6 +62,8 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
     camera.setTarget(viewModel.getPlayer.mesh.getPosition)
     if(follow) {
       camera.setPosition(viewModel.getPlayer.mesh.getPosition.subtract(new Vec3(0, 0, -20)))
+      skyBox.setPosition(new Vec3(viewModel.getPlayer.mesh.getPosition.x, 0, -20)) // der spieler kann über bzw unter die skybox springen.
+                                                                                   // y koordinate auf spieler setzen sieht aber sehr unnatürlich aus...
     }   
     
     inputManager.clearWasPressed()

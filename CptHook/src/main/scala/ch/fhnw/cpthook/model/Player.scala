@@ -19,7 +19,6 @@ import ch.fhnw.ether.scene.mesh.DefaultMesh
 import ch.fhnw.ether.scene.mesh.geometry.DefaultGeometry
 import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
 import ch.fhnw.ether.scene.mesh.IMesh.Queue;
-import ch.fhnw.util.color.RGBA
 
 class Player(var position: Position) {
   
@@ -33,7 +32,7 @@ class Player(var position: Position) {
     bodyDef.fixedRotation = true
     
     val shape: PolygonShape = new PolygonShape
-    shape.setAsBox(0.45f, 0.45f);
+    shape.setAsBox(0.65f, 0.65f);
     
     val fixtureDef: FixtureDef = new FixtureDef
     fixtureDef.shape = shape
@@ -92,7 +91,7 @@ object Player {
   val MoveVelocity: Float = 1.0f
   val JumpVelocity: Float = 7.0f
   val z = 0f;
-  val e = .5f;
+  val e = .7f;
   val texCoords = Array( 0f, 0f, 1f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, 0f, 1f )
   val vertices = Array( -e, -e, z, e, -e, z, e, e, z, -e, -e, z, e, e, z, -e, e, z )
   
