@@ -19,11 +19,19 @@ import ch.fhnw.ether.scene.mesh.DefaultMesh
 import ch.fhnw.ether.scene.mesh.geometry.DefaultGeometry
 import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
 import ch.fhnw.ether.scene.mesh.IMesh.Queue;
+import ch.fhnw.ether.scene.mesh.IMesh
+
 
 class Player(var position: Position) {
   
   var body: Body = null
-  val mesh: I3DObject = Player.createMesh(this)
+  var stepAnimation: Integer = 0
+  val mesh: IMesh = Player.createMesh(this)
+  val materialPlayerStep = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\player_step.png")).getTexture())
+  val materialPlayerStep2 = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\player_step2.png")).getTexture())
+  val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\player.png")).getTexture())
+  val materialPlayerJump = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\player_jump.png")).getTexture())
+  var timeOfAnimation: Double = 0.0
   
   def linkBox2D(world: World): Unit = {
     val bodyDef = new BodyDef
@@ -49,10 +57,33 @@ class Player(var position: Position) {
     body = null
   }
   
-  def update(inputManager: InputManager): Unit = {
+  def update(inputManager: InputManager, time: Double): Unit = {
     
     if (body == null) {
       return
+    }
+    
+    val velocity = body.getLinearVelocity
+    
+    if(time - timeOfAnimation > Math.abs(0.3/velocity.x) || time - timeOfAnimation > 0.5){
+      timeOfAnimation = time
+      println(velocity.y)
+      if(velocity.y > 0.5) {
+        mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerJump.getColorMap())
+      } else if (velocity.y < -0.5) {
+        mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayer.getColorMap())
+      } else {
+        if(stepAnimation == 0){
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayer.getColorMap())
+          stepAnimation = 1;
+        } else if(stepAnimation == 1){
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep.getColorMap())
+          stepAnimation = 2;
+        } else {
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep2.getColorMap())
+          stepAnimation = 0;
+        }
+      }
     }
     
     mesh.setPosition(new Vec3(body.getPosition.x, body.getPosition.y,0.5))
@@ -75,7 +106,7 @@ class Player(var position: Position) {
       
     }
 
-    val velocity = body.getLinearVelocity
+    
     if (Math.abs(velocity.x) > Player.MaxXVelocity) {
       if(velocity.x > 0) {
          body.setLinearVelocity(new org.jbox2d.common.Vec2(Player.MaxXVelocity, velocity.y))
@@ -95,12 +126,13 @@ object Player {
   val texCoords = Array( 0f, 0f, 1f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, 0f, 1f )
   val vertices = Array( -e, -e, z, e, -e, z, e, e, z, -e, -e, z, e, e, z, -e, e, z )
   
-  val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\player.png")).getTexture())
+ 
   val g = DefaultGeometry.createVM(Primitive.TRIANGLES, vertices, texCoords);
   
-  def createMesh(player: Player): I3DObject = {
-
+  def createMesh(player: Player): IMesh = {
+    val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\player.png")).getTexture())
     val mesh = new DefaultMesh(materialPlayer, g, Queue.TRANSPARENCY);
+    
     mesh.setPosition(player.position toVec3 0.5f)
     mesh
   }
