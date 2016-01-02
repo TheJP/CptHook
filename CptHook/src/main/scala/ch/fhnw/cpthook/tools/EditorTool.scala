@@ -40,8 +40,15 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   var editingState = EditingState.Adding
   
   camera.setUp(Defaults.cameraUp)
-  camera.setTarget(new Vec3(offsetX, 0, 1))
-  camera.setPosition(new Vec3(offsetX, 0, offsetY))
+  updateCamera
+
+  /**
+   * Sets the camera position and value to the current offset information.
+   */
+  private def updateCamera : Unit = {
+    camera.setTarget(new Vec3(offsetX, 0, 1))
+    camera.setPosition(new Vec3(offsetX, 0, offsetY))
+  }
 
   /**
    * Remove nearest clicked block. Returns true if a block was removed and false otherwise.
@@ -79,16 +86,14 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   }
   
   override def pointerPressed(event: IPointerEvent): Unit = event.getButton match {
-    case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3=>
+    case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
       startX = event.getX
     case IPointerEvent.BUTTON_1 =>
       implicit val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
       val removed = remove(event)
       if(!removed){ add(event) }
       editingState = if(removed) EditingState.Removing else EditingState.Adding
-    case default =>
-      //TODO: Remove debug log
-      println(s"the mouse key $default is not supported yet")
+    case default => //Unkown key
   }
 
   /**
@@ -98,8 +103,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
       val delta = event.getX - startX
       offsetX += delta * OffsetScale
-      camera.setTarget(new Vec3(offsetX, 0, 1))
-      camera.setPosition(new Vec3(offsetX, 0, offsetY))
+      updateCamera
       startX = event.getX
     case IPointerEvent.BUTTON_1 =>
       implicit val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
@@ -110,7 +114,16 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       }
     case default => //Unknown key
   }
+
+  override def pointerMoved(event: IPointerEvent): Unit = {
+    //TODO: Ghost block
+  }
   
+  override def pointerScrolled(event: IPointerEvent): Unit = {
+    offsetY += event.getScrollY * OffsetScale
+    updateCamera
+  }
+
   override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
     case KeyEvent.VK_M =>
       controller.setCurrentTool(new GameTool(controller, camera, viewModel))
@@ -127,11 +140,6 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
         viewModel.openLevel(fileChooser.getSelectedFile.getAbsolutePath)
       }
     case default => //Unknown key
-  }
-  
-  override def pointerScrolled(event: IPointerEvent): Unit = {
-    offsetY += event.getScrollY * OffsetScale
-    camera.setPosition(new Vec3(offsetX, 0, offsetY))
   }
 
 }
