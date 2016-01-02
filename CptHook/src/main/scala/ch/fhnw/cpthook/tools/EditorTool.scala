@@ -22,12 +22,13 @@ import com.sun.xml.internal.bind.annotation.OverrideAnnotationOf
 import ch.fhnw.cpthook.model.Npo
 import javax.swing.JFileChooser
 import ch.fhnw.cpthook.json.JsonSerializer
+import ch.fhnw.cpthook.ICptHookController
 
 /**
  * Tool, which is used in the editor.
  * Responsible for movement and level changes (e.g. block adding).
  */
-class EditorTool(val controller: IController, val camera: ICamera, val viewModel: ILevelViewModel)
+class EditorTool(val controller: ICptHookController, val camera: ICamera, val viewModel: ILevelViewModel)
   extends AbstractTool(controller) {
 
   val OffsetScale = 0.2f
@@ -107,14 +108,11 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
       } else {
         remove(event)
       }
-    case default =>
-      //TODO: Remove debug log
-      println(s"the mouse key $default is not supported yet")
+    case default => //Unknown key
   }
   
   override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
     case KeyEvent.VK_M =>
-      println("switching to game mode")
       controller.setCurrentTool(new GameTool(controller, camera, viewModel))
     case KeyEvent.VK_S if event.isControlDown =>
       val fileChooser = new JFileChooser
@@ -128,9 +126,7 @@ class EditorTool(val controller: IController, val camera: ICamera, val viewModel
       if(fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
         viewModel.openLevel(fileChooser.getSelectedFile.getAbsolutePath)
       }
-    case default =>
-      //TODO: Remove debug log
-      println(s"the key $default is not supported yet")
+    case default => //Unknown key
   }
   
   override def pointerScrolled(event: IPointerEvent): Unit = {

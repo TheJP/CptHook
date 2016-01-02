@@ -17,7 +17,7 @@ import ch.fhnw.ether.scene.light.PointLight
 import ch.fhnw.cpthook.tools.EditorTool
 
 trait Context {
-  def controller: IController
+  def controller: ICptHookController
   def scene: IScene
   var view: IView
 }
