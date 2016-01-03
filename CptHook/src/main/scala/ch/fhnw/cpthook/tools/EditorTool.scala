@@ -1,13 +1,21 @@
 package ch.fhnw.cpthook.tools
 
 import com.jogamp.newt.event.KeyEvent
+
 import ch.fhnw.cpthook.Defaults
+import ch.fhnw.cpthook.ICptHookController
 import ch.fhnw.cpthook.model.Block
+import ch.fhnw.cpthook.model.Block
+import ch.fhnw.cpthook.model.Ice
+import ch.fhnw.cpthook.model.Lava
+import ch.fhnw.cpthook.model.Npo
+import ch.fhnw.cpthook.model.Position
 import ch.fhnw.cpthook.model.Position
 import ch.fhnw.cpthook.model.Size
 import ch.fhnw.cpthook.model.Vec2.toVec3
 import ch.fhnw.cpthook.viewmodel.ILevelViewModel
 import ch.fhnw.ether.controller.IController
+import ch.fhnw.ether.controller.event.IEventScheduler.IAnimationAction
 import ch.fhnw.ether.controller.event.IKeyEvent
 import ch.fhnw.ether.controller.event.IPointerEvent
 import ch.fhnw.ether.controller.tool.AbstractTool
@@ -15,20 +23,12 @@ import ch.fhnw.ether.controller.tool.PickUtilities
 import ch.fhnw.ether.controller.tool.PickUtilities.PickMode
 import ch.fhnw.ether.scene.I3DObject
 import ch.fhnw.ether.scene.camera.ICamera
-import ch.fhnw.ether.view.ProjectionUtilities
-import ch.fhnw.util.math.Vec3
 import ch.fhnw.ether.scene.camera.IViewCameraState
-import com.sun.xml.internal.bind.annotation.OverrideAnnotationOf
-import ch.fhnw.cpthook.model.Npo
-import javax.swing.JFileChooser
-import ch.fhnw.cpthook.json.JsonSerializer
-import ch.fhnw.cpthook.ICptHookController
-import ch.fhnw.ether.scene.mesh.IMesh
-import ch.fhnw.cpthook.model.Block
-import ch.fhnw.cpthook.model.Position
 import ch.fhnw.ether.scene.mesh.DefaultMesh
+import ch.fhnw.ether.view.ProjectionUtilities
 import ch.fhnw.util.math.Mat4
-import ch.fhnw.ether.controller.event.IEventScheduler.IAnimationAction
+import ch.fhnw.util.math.Vec3
+import javax.swing.JFileChooser
 
 /**
  * Tool, which is used in the editor.
@@ -44,21 +44,26 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   extends AbstractTool(controller) with IAnimationAction {
 
   val OffsetScale = 0.2f
+  val GuiBlockSize = 0.5f
+  val GuiBlockRotationAxis = new Vec3(0, 1, 0)
+
   var offsetX: Float = 0
   var startX: Float = 0
   var offsetZ: Float = 20
 
   //Factories
-  val blockFactory = (position: Position, size: Size) => new Block(position, size);
+  val blockFactory = Block(_, _)
+  val lavaFactory = Lava(_, _)
+  val iceFactory = Ice(_, _)
 
   //Tuples with npo factories and meshes
   //TODO: Remove unsafe cast
   val editorMeshes = List(
       (blockFactory, blockFactory(Position(0, 0),  Size(1, 1)).to3DObject.asInstanceOf[DefaultMesh]),
-      (blockFactory, blockFactory(Position(0, 0),  Size(1, 1)).to3DObject.asInstanceOf[DefaultMesh]),
-      (blockFactory, blockFactory(Position(0, 0),  Size(1, 1)).to3DObject.asInstanceOf[DefaultMesh])
+      (lavaFactory, lavaFactory(Position(0, 0),  Size(1, 1)).to3DObject.asInstanceOf[DefaultMesh]),
+      (iceFactory, iceFactory(Position(0, 0),  Size(1, 1)).to3DObject.asInstanceOf[DefaultMesh])
   );
-  editorMeshes foreach { mesh => mesh._2.setTransform(Mat4 scale 0.5f) }
+  editorMeshes foreach { mesh => mesh._2.setTransform(Mat4 scale GuiBlockSize) }
 
   object EditingState extends Enumeration { val Adding, Removing = Value }
   /** Determines, if the user is currently adding or removing elements. */
@@ -218,8 +223,8 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
    */
   def run(time: Double, interval: Double) : Unit = {
     editorMeshes foreach { mesh => mesh._2.setTransform(
-        (Mat4 scale 0.5f) postMultiply
-            Mat4.rotate((time.toFloat % 6f) * 60f, 0, 1, 0))
+        (Mat4 scale GuiBlockSize) postMultiply
+            Mat4.rotate((time.toFloat % 6f) * 60f, GuiBlockRotationAxis))
     }
   }
 
