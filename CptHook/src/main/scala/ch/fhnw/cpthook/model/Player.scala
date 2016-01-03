@@ -27,10 +27,10 @@ class Player(var position: Position) {
   var body: Body = null
   var stepAnimation: Integer = 0
   val mesh: IMesh = Player.createMesh(this)
-  val materialPlayerStep = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\player_step.png")).getTexture())
-  val materialPlayerStep2 = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\player_step2.png")).getTexture())
-  val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\player.png")).getTexture())
-  val materialPlayerJump = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\player_jump.png")).getTexture())
+  val materialPlayerStep = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player_step.png")).getTexture())
+  val materialPlayerStep2 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player_step2.png")).getTexture())
+  val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player.png")).getTexture())
+  val materialPlayerJump = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player_jump.png")).getTexture())
   var timeOfAnimation: Double = 0.0
   
   def linkBox2D(world: World): Unit = {
@@ -130,7 +130,7 @@ object Player {
   val g = DefaultGeometry.createVM(Primitive.TRIANGLES, vertices, texCoords);
   
   def createMesh(player: Player): IMesh = {
-    val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("..\\assets\\player.png")).getTexture())
+    val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player.png")).getTexture())
     val mesh = new DefaultMesh(materialPlayer, g, Queue.TRANSPARENCY);
     
     mesh.setPosition(player.position toVec3 0.5f)
