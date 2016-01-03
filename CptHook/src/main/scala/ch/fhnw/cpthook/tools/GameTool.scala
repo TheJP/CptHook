@@ -32,18 +32,29 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   
   val inputManager = controller.inputManager
   val world: World = new World(new org.jbox2d.common.Vec2(0.0f, -10.0f))
+  val gameContactListener = new GameContactListener
   var follow = true
 //  val skyBox = new SkyBox().createMesh()
   
   override def activate(): Unit = {
     
+    // create toBox2D models for blocks
     viewModel.npos.keys.map {npo => (npo.toBox2D, npo)} foreach { definition =>
       val body: Body = world.createBody(definition._1._1)
       body.createFixture(definition._1._2)
       body.setUserData(definition._2)
     }
 
+    // link user to box2D
     viewModel.getPlayer.linkBox2D(world)
+    
+    // register contact listener
+    world.setContactListener(gameContactListener)
+    
+    // register player update listener (Small hack here. Be aware that if you add a new fixture to the player
+    // this will no longer work!)
+    gameContactListener.register(viewModel.getPlayer, viewModel.getPlayer.body.getFixtureList)
+    
 //    viewModel.addSkyBox(skyBox)
     
     controller.animate(this)
@@ -56,7 +67,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   }
 
   def run(time: Double, interval: Double) : Unit = {
-    world.step(1f / 60f, GameTool.VelocityIterations, GameTool.PositionIterations)
+    world.step(interval.toFloat, GameTool.VelocityIterations, GameTool.PositionIterations)
     
     viewModel.getPlayer.update(inputManager, time)
     
