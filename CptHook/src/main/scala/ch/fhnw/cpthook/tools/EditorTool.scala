@@ -68,6 +68,10 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   object EditingState extends Enumeration { val Adding, Removing = Value }
   /** Determines, if the user is currently adding or removing elements. */
   var editingState = EditingState.Adding
+  /** Current factory, which is used to add Npos. */
+  var currentFactory: (Position, Size) => Npo = blockFactory
+  /** Current size, which is used when adding Npos. */
+  var currentSize = () => Size(1, 1) //Size is mutable, so it has to be a factory
   
   camera.setUp(Defaults.cameraUp)
 
@@ -118,6 +122,21 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   }
 
   /**
+   * Check if a control was clicked and handle the clicking if this is the case.
+   */
+  private def clickedControl(event: IPointerEvent)(implicit viewCameraState: IViewCameraState): Boolean = {
+    val hitDistance = (mesh: I3DObject) => this.hitDistance(mesh, event.getX, event.getY)
+    val hits = editorMeshes
+      .map(mesh => (hitDistance(mesh._2) -> mesh._1))
+      .filter(_._1 < Float.PositiveInfinity)
+    if(hits.isEmpty) { false }
+    else {
+      currentFactory = hits.minBy(_._1)._2
+      true
+    }
+  }
+
+  /**
    * Remove nearest clicked block. Returns true if a block was removed and false otherwise.
    */
   private def remove(event: IPointerEvent)(implicit viewCameraState: IViewCameraState): Boolean = {
@@ -127,10 +146,16 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   }
 
   /**
+   * Calculates the distance from a click location to a mesh.
+   */
+  private def hitDistance(mesh: I3DObject, x: Int, y: Int)(implicit viewCameraState: IViewCameraState) =
+    PickUtilities.pickObject(PickMode.POINT, x, y, 0, 0, viewCameraState, mesh)
+
+  /**
    * Finds nearest clicked block. If no block was clicked null is returned.
    */
   private def findNearest(event: IPointerEvent)(implicit viewCameraState: IViewCameraState): Npo = {
-    val hitDistance = (mesh: I3DObject) => PickUtilities.pickObject(PickMode.POINT, event.getX, event.getY, 0, 0, viewCameraState, mesh)
+    val hitDistance = (mesh: I3DObject) => this.hitDistance(mesh, event.getX, event.getY)
     val hits = viewModel.npos
       .map(npo => (hitDistance(npo._2) -> npo._1))
       .filter(_._1 < Float.PositiveInfinity)
@@ -147,8 +172,8 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     if(ray.getDirection.z != 0f) {
       val s: Float = -ray.getOrigin.z / ray.getDirection.z
       val p: Vec3 = ray.getOrigin add ray.getDirection.scale(s)
-      val size = new Size(1, 1)
-      viewModel.addNpo(new Block(new Position((p.x - size.x / 2).round.toInt, (p.y - size.y / 2).round.toInt), size))
+      val size = currentSize()
+      viewModel.addNpo(currentFactory(new Position((p.x - size.x / 2).round.toInt, (p.y - size.y / 2).round.toInt), size))
     }
   }
   
@@ -159,9 +184,12 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       editorMeshes.foreach { mesh => controller.getScene.remove3DObject(mesh._2) }
     case IPointerEvent.BUTTON_1 =>
       implicit val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
-      val removed = remove(event)
-      if(!removed){ add(event) }
-      editingState = if(removed) EditingState.Removing else EditingState.Adding
+      val control = clickedControl(event)
+      if(!control){
+        val removed = remove(event)
+        if(!removed){ add(event) }
+        editingState = if(removed) EditingState.Removing else EditingState.Adding
+      }
     case default => //Unknown key
   }
 

@@ -42,6 +42,9 @@ abstract class NpoType[-T <: Npo] {
                          1, .66f, 1f, .34f, 0f, .34f, 1f, .66f, 0f, .34f, 0f, .66f,       //left
                          0f, .34f, 0f, .66f, 1f, .66f, 0f, .34f, 1f, .66f, 1f, .34f )     //right
 
+  val DefaultFriction = 1f
+  val DefaultRestitution = 0.0f
+
   /**
    * Creates a default cube with the given material.
    */
@@ -67,8 +70,8 @@ abstract class NpoType[-T <: Npo] {
 
     val fixtureDef: FixtureDef = new FixtureDef
     fixtureDef.shape = shape
-    fixtureDef.friction = 0.1f;
-    fixtureDef.restitution = 0.5f;
+    fixtureDef.friction = DefaultFriction;
+    fixtureDef.restitution = DefaultRestitution;
 
     (bodyDef, fixtureDef)
   }
