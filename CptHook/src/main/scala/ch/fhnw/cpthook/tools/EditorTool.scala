@@ -27,13 +27,21 @@ import ch.fhnw.ether.scene.mesh.IMesh
 import ch.fhnw.cpthook.model.Block
 import ch.fhnw.cpthook.model.Position
 import ch.fhnw.ether.scene.mesh.DefaultMesh
+import ch.fhnw.util.math.Mat4
+import ch.fhnw.ether.controller.event.IEventScheduler.IAnimationAction
+
+/**
+ * Tool, which is used in the editor.
+ * Responsible for movement and level changes (e.g. block adding).
+ */
+
 
 /**
  * Tool, which is used in the editor.
  * Responsible for movement and level changes (e.g. block adding).
  */
 class EditorTool(val controller: ICptHookController, val camera: ICamera, val viewModel: ILevelViewModel)
-  extends AbstractTool(controller) {
+  extends AbstractTool(controller) with IAnimationAction {
 
   val OffsetScale = 0.2f
   var offsetX: Float = 0
@@ -44,9 +52,13 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   val blockFactory = (position: Position, size: Size) => new Block(position, size);
 
   //Tuples with npo factories and meshes
+  //TODO: Remove unsafe cast
   val editorMeshes = List(
-      (blockFactory, blockFactory(Position(0, 0),  Size(1, 1)).to3DObject)
+      (blockFactory, blockFactory(Position(0, 0),  Size(1, 1)).to3DObject.asInstanceOf[DefaultMesh]),
+      (blockFactory, blockFactory(Position(0, 0),  Size(1, 1)).to3DObject.asInstanceOf[DefaultMesh]),
+      (blockFactory, blockFactory(Position(0, 0),  Size(1, 1)).to3DObject.asInstanceOf[DefaultMesh])
   );
+  editorMeshes foreach { mesh => mesh._2.setTransform(Mat4 scale 0.5f) }
 
   object EditingState extends Enumeration { val Adding, Removing = Value }
   /** Determines, if the user is currently adding or removing elements. */
@@ -55,13 +67,15 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   camera.setUp(Defaults.cameraUp)
 
   override def activate = {
-    editorMeshes.map(_._2).foreach { mesh => controller.getScene.add3DObject(mesh) }
+    editorMeshes.foreach { mesh => controller.getScene.add3DObject(mesh._2) }
     updateCamera
+    controller.animate(this)
   }
 
   override def deactivate = {
-    editorMeshes.map(_._2).foreach { mesh => controller.getScene.remove3DObject(mesh) }
+    editorMeshes.foreach { mesh => controller.getScene.remove3DObject(mesh._2) }
     updateCamera
+    controller.kill(this)
   }
 
   /**
@@ -82,15 +96,18 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     val view = controller.getViews.get(0)
     val viewport = view.getViewport
     val viewCameraState = getController.getRenderManager.getViewCameraState(view)
-    val ray = ProjectionUtilities.getRay(viewCameraState, viewport.w / 2.0f, viewport.h / 2.0f)
+    val ray = ProjectionUtilities.getRay(viewCameraState, viewport.w, viewport.h / 2.0f)
     // check if we can hit the xy plane
     if(ray.getDirection.z != 0f) {
       val s: Float = -ray.getOrigin.z / ray.getDirection.z
       val p: Vec3 = ray.getOrigin add ray.getDirection.scale(s)
+      var i = 0
       editorMeshes.map(_._2).foreach { mesh =>
-        mesh.setPosition(new Vec3(offsetX, 0, offsetZ / 2))
+        //mesh.setPosition(new Vec3(offsetX, 0, offsetZ / 2))
+        mesh.setPosition(new Vec3(p.x - 6.5f, p.y + i * 0.75f, offsetZ / 2))
+        i += 1
       }
-      println(offsetX - p.x)
+      //println(offsetX - p.x)
     }
     //TODO
   }
@@ -133,12 +150,21 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   override def pointerPressed(event: IPointerEvent): Unit = event.getButton match {
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
       startX = event.getX
+      //Hide editor meshes while moving (because they are very jittery)
+      editorMeshes.foreach { mesh => controller.getScene.remove3DObject(mesh._2) }
     case IPointerEvent.BUTTON_1 =>
       implicit val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
       val removed = remove(event)
       if(!removed){ add(event) }
       editingState = if(removed) EditingState.Removing else EditingState.Adding
-    case default => //Unkown key
+    case default => //Unknown key
+  }
+
+  override def pointerReleased(event: IPointerEvent): Unit = event.getButton match {
+    case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
+      //Add editor meshes back after moving
+      editorMeshes.foreach { mesh => controller.getScene.add3DObject(mesh._2) }
+    case default => //Unknown key
   }
 
   /**
@@ -185,6 +211,16 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
         viewModel.openLevel(fileChooser.getSelectedFile.getAbsolutePath)
       }
     case default => //Unknown key
+  }
+
+  /**
+   * Animation of editor controls.
+   */
+  def run(time: Double, interval: Double) : Unit = {
+    editorMeshes foreach { mesh => mesh._2.setTransform(
+        (Mat4 scale 0.5f) postMultiply
+            Mat4.rotate((time.toFloat % 6f) * 60f, 0, 1, 0))
+    }
   }
 
 }
