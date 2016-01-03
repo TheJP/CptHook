@@ -18,13 +18,18 @@ import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
 import ch.fhnw.ether.scene.mesh.DefaultMesh
 import ch.fhnw.ether.scene.mesh.geometry.DefaultGeometry
 import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
-import ch.fhnw.ether.scene.mesh.IMesh.Queue;
+import ch.fhnw.ether.scene.mesh.IMesh.Queue
 import ch.fhnw.ether.scene.mesh.IMesh
+import org.jbox2d.common.Vec2
+import ch.fhnw.cpthook.tools.ContactUpdates
+import org.jbox2d.dynamics.contacts.Contact
+import org.jbox2d.dynamics.Fixture
 
 
-class Player(var position: Position) {
+class Player(var position: Position) extends ContactUpdates {
   
   var body: Body = null
+  var jumpCount: Integer = 0
   var stepAnimation: Integer = 0
   val mesh: IMesh = Player.createMesh(this)
   val materialPlayerStep = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player_step.png")).getTexture())
@@ -40,16 +45,22 @@ class Player(var position: Position) {
     bodyDef.fixedRotation = true
     
     val shape: PolygonShape = new PolygonShape
-    shape.setAsBox(0.65f, 0.65f);
-    
+    shape.setAsBox(0.3f, 0.7f);
     val fixtureDef: FixtureDef = new FixtureDef
     fixtureDef.shape = shape
     fixtureDef.friction = 0.1f;        
     fixtureDef.restitution = 0.1f;
     fixtureDef.density = 1f;
+        
+    val groundSensorShape: PolygonShape = new PolygonShape
+    groundSensorShape.setAsBox(0.2f, 0.1f, new org.jbox2d.common.Vec2(0f, -0.7f), 0f)
+    val groundSensorFixtureDef: FixtureDef = new FixtureDef
+    groundSensorFixtureDef.shape = groundSensorShape
+    groundSensorFixtureDef.isSensor = true
     
     body = world.createBody(bodyDef)
     body.createFixture(fixtureDef)
+    body.createFixture(groundSensorFixtureDef)
     body.setUserData(this)
   }
   
@@ -63,11 +74,10 @@ class Player(var position: Position) {
       return
     }
     
-    val velocity = body.getLinearVelocity
+    var velocity = body.getLinearVelocity
     
     if(time - timeOfAnimation > Math.abs(0.3/velocity.x) || time - timeOfAnimation > 0.5){
       timeOfAnimation = time
-      println(velocity.y)
       if(velocity.y > 0.5) {
         mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerJump.getColorMap())
       } else if (velocity.y < -0.5) {
@@ -89,24 +99,21 @@ class Player(var position: Position) {
     mesh.setPosition(new Vec3(body.getPosition.x, body.getPosition.y,0.5))
     
     if (inputManager.keyPressed(KeyEvent.VK_RIGHT)) {
-      val velocity = body.getLinearVelocity
       body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(Player.MoveVelocity, 0f)))
     }
     if (inputManager.keyPressed(KeyEvent.VK_LEFT)) {
-      val velocity = body.getLinearVelocity
       body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(-Player.MoveVelocity, 0f)))
     }
-    if (inputManager.keyWasPressed(KeyEvent.VK_SPACE)) {
-      val velocity = body.getLinearVelocity
+    if (inputManager.keyWasPressed(KeyEvent.VK_SPACE) && jumpCount > 0) {
       if (body.getWorld.getGravity.y < 0) {
         body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(0f, Player.JumpVelocity)))
       } else {
         body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(0f, -Player.JumpVelocity)))
       }
-      
+      jumpCount = jumpCount - 1
     }
 
-    
+    velocity = body.getLinearVelocity
     if (Math.abs(velocity.x) > Player.MaxXVelocity) {
       if(velocity.x > 0) {
          body.setLinearVelocity(new org.jbox2d.common.Vec2(Player.MaxXVelocity, velocity.y))
@@ -115,6 +122,15 @@ class Player(var position: Position) {
       }
     }
   }
+  
+  def beginContact(otherFixture: Fixture,contact: Contact): Unit = {
+    if(otherFixture.getBody.getUserData.isInstanceOf[Block]) {
+      jumpCount = 2
+    }
+  }
+  
+  def endContact(otherFixture: org.jbox2d.dynamics.Fixture,contact: org.jbox2d.dynamics.contacts.Contact): Unit = {}
+  
 }
 
 object Player {
