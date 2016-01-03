@@ -1,29 +1,26 @@
 package ch.fhnw.cpthook.model
 
-import org.jbox2d.dynamics.FixtureDef
-import org.jbox2d.dynamics.BodyDef
-import ch.fhnw.ether.scene.I3DObject
 import org.jbox2d.collision.shapes.PolygonShape
-import org.jbox2d.dynamics.BodyType
-import com.jogamp.newt.event.KeyEvent
-import ch.fhnw.util.math.Vec3
 import org.jbox2d.dynamics.Body
+import org.jbox2d.dynamics.BodyDef
+import org.jbox2d.dynamics.BodyType
+import org.jbox2d.dynamics.Fixture
+import org.jbox2d.dynamics.FixtureDef
 import org.jbox2d.dynamics.World
-import ch.fhnw.ether.scene.mesh.material.ShadedMaterial
-import ch.fhnw.ether.scene.mesh.MeshUtilities
-import ch.fhnw.util.color.RGB
+import org.jbox2d.dynamics.contacts.Contact
+
+import com.jogamp.newt.event.KeyEvent
+
 import ch.fhnw.cpthook.InputManager
+import ch.fhnw.cpthook.tools.ContactUpdates
 import ch.fhnw.ether.image.Frame
-import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
 import ch.fhnw.ether.scene.mesh.DefaultMesh
+import ch.fhnw.ether.scene.mesh.IMesh
+import ch.fhnw.ether.scene.mesh.IMesh.Queue
 import ch.fhnw.ether.scene.mesh.geometry.DefaultGeometry
 import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
-import ch.fhnw.ether.scene.mesh.IMesh.Queue
-import ch.fhnw.ether.scene.mesh.IMesh
-import org.jbox2d.common.Vec2
-import ch.fhnw.cpthook.tools.ContactUpdates
-import org.jbox2d.dynamics.contacts.Contact
-import org.jbox2d.dynamics.Fixture
+import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
+import ch.fhnw.util.math.Vec3
 
 
 class Player(var position: Position) extends ContactUpdates {

@@ -23,6 +23,10 @@ import ch.fhnw.cpthook.model.Npo
 import javax.swing.JFileChooser
 import ch.fhnw.cpthook.json.JsonSerializer
 import ch.fhnw.cpthook.ICptHookController
+import ch.fhnw.ether.scene.mesh.IMesh
+import ch.fhnw.cpthook.model.Block
+import ch.fhnw.cpthook.model.Position
+import ch.fhnw.ether.scene.mesh.DefaultMesh
 
 /**
  * Tool, which is used in the editor.
@@ -32,22 +36,63 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   extends AbstractTool(controller) {
 
   val OffsetScale = 0.2f
-  var offsetX: Float = 0;
+  var offsetX: Float = 0
   var startX: Float = 0
-  var offsetY: Float = 20
+  var offsetZ: Float = 20
+
+  //Factories
+  val blockFactory = (position: Position, size: Size) => new Block(position, size);
+
+  //Tuples with npo factories and meshes
+  val editorMeshes = List(
+      (blockFactory, blockFactory(Position(0, 0),  Size(1, 1)).to3DObject)
+  );
 
   object EditingState extends Enumeration { val Adding, Removing = Value }
+  /** Determines, if the user is currently adding or removing elements. */
   var editingState = EditingState.Adding
   
   camera.setUp(Defaults.cameraUp)
-  updateCamera
+
+  override def activate = {
+    editorMeshes.map(_._2).foreach { mesh => controller.getScene.add3DObject(mesh) }
+    updateCamera
+  }
+
+  override def deactivate = {
+    editorMeshes.map(_._2).foreach { mesh => controller.getScene.remove3DObject(mesh) }
+    updateCamera
+  }
 
   /**
    * Sets the camera position and value to the current offset information.
    */
   private def updateCamera : Unit = {
     camera.setTarget(new Vec3(offsetX, 0, 1))
-    camera.setPosition(new Vec3(offsetX, 0, offsetY))
+    camera.setPosition(new Vec3(offsetX, 0, offsetZ))
+    updateGuiPositions
+  }
+
+  /**
+   * Update gui component positions.
+   * So they seem fixed relative to the camera.
+   */
+  private def updateGuiPositions : Unit = {
+    if(controller.getViews.isEmpty){ return }
+    val view = controller.getViews.get(0)
+    val viewport = view.getViewport
+    val viewCameraState = getController.getRenderManager.getViewCameraState(view)
+    val ray = ProjectionUtilities.getRay(viewCameraState, viewport.w / 2.0f, viewport.h / 2.0f)
+    // check if we can hit the xy plane
+    if(ray.getDirection.z != 0f) {
+      val s: Float = -ray.getOrigin.z / ray.getDirection.z
+      val p: Vec3 = ray.getOrigin add ray.getDirection.scale(s)
+      editorMeshes.map(_._2).foreach { mesh =>
+        mesh.setPosition(new Vec3(offsetX, 0, offsetZ / 2))
+      }
+      println(offsetX - p.x)
+    }
+    //TODO
   }
 
   /**
@@ -79,7 +124,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     // check if we can hit the xy plane
     if(ray.getDirection.z != 0f) {
       val s: Float = -ray.getOrigin.z / ray.getDirection.z
-      val p: Vec3 = ray.getOrigin.add(ray.getDirection.scale(s))
+      val p: Vec3 = ray.getOrigin add ray.getDirection.scale(s)
       val size = new Size(1, 1)
       viewModel.addNpo(new Block(new Position((p.x - size.x / 2).round.toInt, (p.y - size.y / 2).round.toInt), size))
     }
@@ -120,7 +165,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   }
   
   override def pointerScrolled(event: IPointerEvent): Unit = {
-    offsetY += event.getScrollY * OffsetScale
+    offsetZ += event.getScrollY * OffsetScale
     updateCamera
   }
 
