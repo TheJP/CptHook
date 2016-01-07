@@ -29,7 +29,8 @@ class Player(var position: Position) extends ContactUpdates {
   var onGroundCount = 0
   var stepAnimation: Integer = 0
   val mesh: IMesh = Player.createMesh(this)
-  val walkingAnimation = (1 until 7).map { n => 
+  val walkingAnimation = (1 until 8).map { n => 
+    println(n)
     new ColorMapMaterial(Frame.create(getClass.getResource(s"../assets/step$n.png")).getTexture())
   }.toArray
   
