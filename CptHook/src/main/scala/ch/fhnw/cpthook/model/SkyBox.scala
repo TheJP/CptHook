@@ -11,7 +11,7 @@ import ch.fhnw.ether.scene.mesh.IMesh
 
 class SkyBox {
   val z = 0f;
-  val e = 1f;
+  val e = 90f;
   val texCoords = Array( 0f, 0f, 1f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, 0f, 1f )
   val vertices = Array( -e, -e, z, e, -e, z, e, e, z, -e, -e, z, e, e, z, -e, e, z )
   
