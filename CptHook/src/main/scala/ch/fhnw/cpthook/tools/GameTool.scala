@@ -63,7 +63,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   override def deactivate(): Unit = {
 //    viewModel.removeSkyBox(skyBox)
     controller.kill(this)
-    viewModel.getPlayer.mesh.setPosition(viewModel.getPlayer.position toVec3 1)
+    viewModel.getPlayer.unlinkBox2D(world)
   }
 
   def run(time: Double, interval: Double) : Unit = {

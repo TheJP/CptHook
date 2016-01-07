@@ -65,6 +65,10 @@ class Player(var position: Position) extends ContactUpdates {
   
   def unlinkBox2D(world: World): Unit = {
     body = null
+    mesh.setTransform(Mat4.multiply(Mat4.rotate(-currentRotation.floatValue(), new Vec3(0, 1, 0)), mesh.getTransform))
+    currentRotation = 0
+    currentDirection = 0
+    mesh.setPosition(position)
   }
   
   def update(inputManager: InputManager, time: Double): Unit = {
@@ -72,8 +76,6 @@ class Player(var position: Position) extends ContactUpdates {
     if (body == null) {
       return
     }
-    
-   
     
     var velocity = body.getLinearVelocity
     
