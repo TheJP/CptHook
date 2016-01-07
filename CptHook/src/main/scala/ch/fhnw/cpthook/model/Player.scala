@@ -8,9 +8,7 @@ import org.jbox2d.dynamics.Fixture
 import org.jbox2d.dynamics.FixtureDef
 import org.jbox2d.dynamics.World
 import org.jbox2d.dynamics.contacts.Contact
-
 import com.jogamp.newt.event.KeyEvent
-
 import ch.fhnw.cpthook.InputManager
 import ch.fhnw.cpthook.tools.ContactUpdates
 import ch.fhnw.ether.image.Frame
@@ -21,6 +19,7 @@ import ch.fhnw.ether.scene.mesh.geometry.DefaultGeometry
 import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
 import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
 import ch.fhnw.util.math.Vec3
+import ch.fhnw.util.math.Mat4
 
 
 class Player(var position: Position) extends ContactUpdates {
@@ -35,6 +34,8 @@ class Player(var position: Position) extends ContactUpdates {
   val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player.png")).getTexture())
   val materialPlayerJump = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player_jump.png")).getTexture())
   var timeOfAnimation: Double = 0.0
+  var currentRotation: Double = 0.0
+  var currentDirection: Integer = 0
   
   def linkBox2D(world: World): Unit = {
     val bodyDef = new BodyDef
@@ -72,7 +73,17 @@ class Player(var position: Position) extends ContactUpdates {
       return
     }
     
+   
+    
     var velocity = body.getLinearVelocity
+    
+    if (currentDirection == 0 && currentRotation > 0) {
+      mesh.setTransform(Mat4.multiply(Mat4.rotate(-10, new Vec3(0, 1, 0)), mesh.getTransform))
+      currentRotation -= 10
+    } else if (currentDirection == 1 && currentRotation < 180) {
+      mesh.setTransform(Mat4.multiply(Mat4.rotate(10, new Vec3(0, 1, 0)), mesh.getTransform))
+      currentRotation += 10
+    }
     
     if(time - timeOfAnimation > Math.abs(0.3/velocity.x) || time - timeOfAnimation > 0.5){
       timeOfAnimation = time
@@ -100,9 +111,11 @@ class Player(var position: Position) extends ContactUpdates {
     
     if (inputManager.keyPressed(KeyEvent.VK_RIGHT)) {
       body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(Player.MoveVelocity, 0f)))
+      currentDirection = 0
     }
     if (inputManager.keyPressed(KeyEvent.VK_LEFT)) {
       body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(-Player.MoveVelocity, 0f)))
+      currentDirection = 1
     }
     if (inputManager.keyWasPressed(KeyEvent.VK_SPACE) && jumpCount > 0) {
       if (body.getWorld.getGravity.y < 0) {
@@ -148,7 +161,6 @@ object Player {
   def createMesh(player: Player): IMesh = {
     val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player.png")).getTexture())
     val mesh = new DefaultMesh(materialPlayer, g, Queue.TRANSPARENCY);
-    
     mesh.setPosition(player.position toVec3 0.5f)
     mesh
   }

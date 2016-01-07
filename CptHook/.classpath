@@ -5,6 +5,6 @@
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="org.springsource.ide.eclipse.gradle.classpathcontainer"/>
 	<classpathentry exported="true" kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/EtherGL"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/EtherGL"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
