@@ -91,7 +91,7 @@ class Player(var position: Position) extends ContactUpdates {
     
     if(time - timeOfAnimation > Math.abs(0.7/velocity.x) || time - timeOfAnimation > 0.2){
       timeOfAnimation = time
-      if (Math.abs(velocity.y) > 0.2) {
+      if (!isOnGround()) {
         mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerJump.getColorMap())
       } else {
         if(Math.abs(velocity.x) < 0.5) {
@@ -141,7 +141,7 @@ class Player(var position: Position) extends ContactUpdates {
     onGroundCount -= 1
   }
   
-  def isOnGround(): Boolean = onGroundCount == 0
+  def isOnGround(): Boolean = onGroundCount > 0
 }
 
 object Player {
