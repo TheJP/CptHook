@@ -31,7 +31,7 @@ class GameTool(val controller: IController, val camera: ICamera, val viewModel: 
   extends AbstractTool(controller) with IAnimationAction {
   
   val inputManager = controller.asInstanceOf[CptHookController].inputManager
-  val world: World = new World(new org.jbox2d.common.Vec2(0.0f, -10.0f))
+  val world: World = new World(new org.jbox2d.common.Vec2(0.0f, -40.0f))
   val gameContactListener = new GameContactListener
   var follow = true
 //  val skyBox = new SkyBox().createMesh()

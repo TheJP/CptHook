@@ -45,14 +45,12 @@ class Player(var position: Position) extends ContactUpdates {
     bodyDef.fixedRotation = true
     
     val shape: PolygonShape = new PolygonShape
-    val width = 0.3f
-    val height = 0.7f
     shape.set(Player.createPlayerPolygon(0.3f, 0.7f, 0.1f), 8)
     val fixtureDef: FixtureDef = new FixtureDef
     fixtureDef.shape = shape
     fixtureDef.friction = 0.1f;        
     fixtureDef.restitution = 0.1f;
-    fixtureDef.density = 1f;
+    fixtureDef.density = 200000000000f;
         
     val groundSensorShape: PolygonShape = new PolygonShape
     groundSensorShape.setAsBox(0.2f, 0.1f, new org.jbox2d.common.Vec2(0f, -0.7f), 0f)
@@ -108,9 +106,9 @@ class Player(var position: Position) extends ContactUpdates {
     }
     if (inputManager.keyWasPressed(KeyEvent.VK_SPACE) && jumpCount > 0) {
       if (body.getWorld.getGravity.y < 0) {
-        body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(0f, Player.JumpVelocity)))
+        body.setLinearVelocity(new org.jbox2d.common.Vec2(velocity.x, Player.JumpVelocity))
       } else {
-        body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(0f, -Player.JumpVelocity)))
+        body.setLinearVelocity(new org.jbox2d.common.Vec2(velocity.x, -Player.JumpVelocity))
       }
       jumpCount -= 1
     }
@@ -137,7 +135,7 @@ class Player(var position: Position) extends ContactUpdates {
 object Player {
   val MaxXVelocity: Float = 10.0f
   val MoveVelocity: Float = 1.0f
-  val JumpVelocity: Float = 7.0f
+  val JumpVelocity: Float = 11.0f
   val z = 0f;
   val e = .7f;
   val texCoords = Array( 0f, 0f, 1f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, 0f, 1f )

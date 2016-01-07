@@ -61,7 +61,7 @@ object BlockType extends NpoType[Block]{
     val fixtureDef: FixtureDef = new FixtureDef
     fixtureDef.shape = shape
     fixtureDef.friction = 0.1f;        
-    fixtureDef.restitution = 0.5f;
+    fixtureDef.restitution = 0.1f;
     
     (bodyDef, fixtureDef)
   }
