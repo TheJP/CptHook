@@ -29,10 +29,17 @@ class Player(var position: Position) extends ContactUpdates {
   var onGround = false
   var stepAnimation: Integer = 0
   val mesh: IMesh = Player.createMesh(this)
-  val materialPlayerStep = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player_step.png")).getTexture())
-  val materialPlayerStep2 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player_step2.png")).getTexture())
+  val materialPlayerStep1 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step1.png")).getTexture())
+  val materialPlayerStep2 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step2.png")).getTexture())
+  val materialPlayerStep3 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step3.png")).getTexture())
+  val materialPlayerStep4 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step4.png")).getTexture())
+  val materialPlayerStep5 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step5.png")).getTexture())
+  val materialPlayerStep6 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step6.png")).getTexture())
+  val materialPlayerStep7 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step7.png")).getTexture())
+  val materialPlayerStep8 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step8.png")).getTexture())
+
   val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player.png")).getTexture())
-  val materialPlayerJump = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player_jump.png")).getTexture())
+  val materialPlayerJump = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step5.png")).getTexture())
   var timeOfAnimation: Double = 0.0
   var currentRotation: Double = 0.0
   var currentDirection: Integer = 0
@@ -87,23 +94,36 @@ class Player(var position: Position) extends ContactUpdates {
       currentRotation += 10
     }
     
-    if(time - timeOfAnimation > Math.abs(0.3/velocity.x) || time - timeOfAnimation > 0.5){
+    if(time - timeOfAnimation > Math.abs(0.7/velocity.x) || time - timeOfAnimation > 0.2){
       timeOfAnimation = time
-      if(!onGround) {
-        if (velocity.y > 0.1) {
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerJump.getColorMap())
-        } else {
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayer.getColorMap())
-        }
+      if (Math.abs(velocity.y) > 0.2) {
+        mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerJump.getColorMap())
       } else {
-        if(stepAnimation == 0){
+        if(Math.abs(velocity.x) < 0.5) {
           mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayer.getColorMap())
+        } else if(stepAnimation == 0){
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep1.getColorMap())
           stepAnimation = 1;
         } else if(stepAnimation == 1){
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep.getColorMap())
-          stepAnimation = 2;
-        } else {
           mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep2.getColorMap())
+          stepAnimation = 2;
+        } else if(stepAnimation == 2){
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep3.getColorMap())
+          stepAnimation = 3;
+        } else if(stepAnimation == 3){
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep4.getColorMap())
+          stepAnimation = 4;
+        } else if(stepAnimation == 4){
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep5.getColorMap())
+          stepAnimation = 5;
+        } else if(stepAnimation == 5){
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep6.getColorMap())
+          stepAnimation = 6;
+        } else if(stepAnimation == 6){
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep7.getColorMap())
+          stepAnimation = 7;
+        } else if(stepAnimation == 7){
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep8.getColorMap())
           stepAnimation = 0;
         }
       }
