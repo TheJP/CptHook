@@ -10,7 +10,7 @@ import ch.fhnw.ether.scene.I3DObject
 
 class SkyBox {
   val z = 0f;
-  val e = 40f;
+  val e = 90f;
   val texCoords = Array( 0f, 0f, 1f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, 0f, 1f )
   val vertices = Array( -e, -e, z, e, -e, z, e, e, z, -e, -e, z, e, e, z, -e, e, z )
   

@@ -34,7 +34,11 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   val world: World = new World(new org.jbox2d.common.Vec2(0.0f, -40.0f))
   val gameContactListener = new GameContactListener
   var follow = true
-//  val skyBox = new SkyBox().createMesh()
+  val skyBox = new SkyBox().createMesh()
+  var skyBoxOffsetX = 0.0
+  var skyBoxOffsetY = 0.0
+  var lastX = 0.0
+  var lastY = 0.0
   
   override def activate(): Unit = {
     
@@ -55,13 +59,15 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     // this will no longer work!)
     gameContactListener.register(viewModel.getPlayer, viewModel.getPlayer.body.getFixtureList)
     
-//    viewModel.addSkyBox(skyBox)
+    viewModel.addSkyBox(skyBox)
+    lastX = viewModel.getPlayer.mesh.getPosition.x
+    lastY = viewModel.getPlayer.mesh.getPosition.y
     
     controller.animate(this)
   }
   
   override def deactivate(): Unit = {
-//    viewModel.removeSkyBox(skyBox)
+    viewModel.removeSkyBox(skyBox)
     controller.kill(this)
     viewModel.getPlayer.unlinkBox2D(world)
   }
@@ -74,8 +80,17 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     camera.setTarget(viewModel.getPlayer.mesh.getPosition)
     if(follow) {
       camera.setPosition(viewModel.getPlayer.mesh.getPosition.subtract(new Vec3(0, 0, -20)))
-//      skyBox.setPosition(new Vec3(viewModel.getPlayer.mesh.getPosition.x, 0, -20)) // der spieler kann über bzw unter die skybox springen.
-                                                                                   // y koordinate auf spieler setzen sieht aber sehr unnatürlich aus...
+      
+      skyBoxOffsetX += ((viewModel.getPlayer.mesh.getPosition.x - lastX) * 0.5)
+      skyBoxOffsetY += ((viewModel.getPlayer.mesh.getPosition.y - lastY) * 0.5)
+      lastX = viewModel.getPlayer.mesh.getPosition.x
+      lastY = viewModel.getPlayer.mesh.getPosition.y
+      skyBox.setPosition(viewModel.getPlayer.mesh.getPosition.subtract(new Vec3(skyBoxOffsetX, skyBoxOffsetY, 20)))  
+      if(skyBoxOffsetX > 60) skyBoxOffsetX = -60
+      if(skyBoxOffsetX < -60) skyBoxOffsetX = 60  
+      if(skyBoxOffsetY > 60) skyBoxOffsetY = -60
+      if(skyBoxOffsetY < -60) skyBoxOffsetY = 60 
+      println(skyBoxOffsetX)
     }   
    
     inputManager.clearWasPressed()
