@@ -30,6 +30,7 @@ class Player(var position: Position) extends ContactUpdates {
   
   var body: Body = null
   var jumpCount: Integer = 0
+  var onGround = false
   var stepAnimation: Integer = 0
   val mesh: IMesh = Player.createMesh(this)
   val materialPlayerStep = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player_step.png")).getTexture())
@@ -78,10 +79,12 @@ class Player(var position: Position) extends ContactUpdates {
     
     if(time - timeOfAnimation > Math.abs(0.3/velocity.x) || time - timeOfAnimation > 0.5){
       timeOfAnimation = time
-      if(velocity.y > 0.5) {
-        mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerJump.getColorMap())
-      } else if (velocity.y < -0.5) {
-        mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayer.getColorMap())
+      if(!onGround) {
+        if (velocity.y > 0.1) {
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerJump.getColorMap())
+        } else {
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayer.getColorMap())
+        }
       } else {
         if(stepAnimation == 0){
           mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayer.getColorMap())
@@ -126,10 +129,15 @@ class Player(var position: Position) extends ContactUpdates {
   def beginContact(otherFixture: Fixture,contact: Contact): Unit = {
     if(otherFixture.getBody.getUserData.isInstanceOf[Block]) {
       jumpCount = 2
+      onGround = true
     }
   }
   
-  def endContact(otherFixture: org.jbox2d.dynamics.Fixture,contact: org.jbox2d.dynamics.contacts.Contact): Unit = {}
+  def endContact(otherFixture: org.jbox2d.dynamics.Fixture,contact: org.jbox2d.dynamics.contacts.Contact): Unit = {
+    if(otherFixture.getBody.getUserData.isInstanceOf[Block]) {
+      onGround = false
+    }
+  }
 }
 
 object Player {
