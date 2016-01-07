@@ -23,6 +23,7 @@ import org.jbox2d.common.Vec2
 import ch.fhnw.cpthook.model.SkyBox
 import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
 import ch.fhnw.cpthook.ICptHookController
+import ch.fhnw.util.math.Mat4
 
 /**
  * Tool, which handles the game logic.
@@ -35,10 +36,6 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   val gameContactListener = new GameContactListener
   var follow = true
   val skyBox = new SkyBox().createMesh()
-  var skyBoxOffsetX = 0.0
-  var skyBoxOffsetY = 0.0
-  var lastX = 0.0
-  var lastY = 0.0
   
   override def activate(): Unit = {
     
@@ -59,11 +56,40 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     // this will no longer work!)
     gameContactListener.register(viewModel.getPlayer, viewModel.getPlayer.body.getFixtureList)
     
+    
+    //Skybox
+    updateSkyBox()
     viewModel.addSkyBox(skyBox)
-    lastX = viewModel.getPlayer.mesh.getPosition.x
-    lastY = viewModel.getPlayer.mesh.getPosition.y
     
     controller.animate(this)
+  }
+  
+  def updateSkyBox(): Unit = {
+    var minX = 0f;
+    var maxX = 0f;
+    var minY = 0f;
+    var maxY = 0f;
+    viewModel.npos.map {_._2} foreach { mesh => 
+      if (mesh.getPosition.x < minX) {
+        minX = mesh.getPosition.x
+      }
+      if (mesh.getPosition.x > maxX) {
+        maxX = mesh.getPosition.x
+      }
+      if (mesh.getPosition.y < minX) {
+        minY = mesh.getPosition.y
+      }
+      if (mesh.getPosition.y > maxY) {
+        maxY = mesh.getPosition.y
+      }
+    }
+    var skyBoxScale = Math.max(maxX - minX, maxY - minY)
+    skyBoxScale *= 1.2f
+    if (skyBoxScale < 10f) {
+      skyBoxScale = 10f
+    }
+    skyBox.setPosition(new Vec3((maxX - minX / 2f), (maxY - minY) / 2f, -20))
+    skyBox.setTransform(Mat4.scale(skyBoxScale))
   }
   
   override def deactivate(): Unit = {
@@ -79,18 +105,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     
     camera.setTarget(viewModel.getPlayer.mesh.getPosition)
     if(follow) {
-      camera.setPosition(viewModel.getPlayer.mesh.getPosition.subtract(new Vec3(0, 0, -20)))
-      
-      skyBoxOffsetX += ((viewModel.getPlayer.mesh.getPosition.x - lastX) * 0.5)
-      skyBoxOffsetY += ((viewModel.getPlayer.mesh.getPosition.y - lastY) * 0.5)
-      lastX = viewModel.getPlayer.mesh.getPosition.x
-      lastY = viewModel.getPlayer.mesh.getPosition.y
-      skyBox.setPosition(viewModel.getPlayer.mesh.getPosition.subtract(new Vec3(skyBoxOffsetX, skyBoxOffsetY, 20)))  
-      if(skyBoxOffsetX > 60) skyBoxOffsetX = -60
-      if(skyBoxOffsetX < -60) skyBoxOffsetX = 60  
-      if(skyBoxOffsetY > 60) skyBoxOffsetY = -60
-      if(skyBoxOffsetY < -60) skyBoxOffsetY = 60 
-      println(skyBoxOffsetX)
+      camera.setPosition(viewModel.getPlayer.mesh.getPosition.add(new Vec3(0, 0, 20)))
     }   
    
     inputManager.clearWasPressed()
