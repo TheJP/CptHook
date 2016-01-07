@@ -26,18 +26,13 @@ class Player(var position: Position) extends ContactUpdates {
   
   var body: Body = null
   var jumpCount: Integer = 0
-  var onGround = false
+  var onGroundCount = 0
   var stepAnimation: Integer = 0
   val mesh: IMesh = Player.createMesh(this)
-  val materialPlayerStep1 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step1.png")).getTexture())
-  val materialPlayerStep2 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step2.png")).getTexture())
-  val materialPlayerStep3 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step3.png")).getTexture())
-  val materialPlayerStep4 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step4.png")).getTexture())
-  val materialPlayerStep5 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step5.png")).getTexture())
-  val materialPlayerStep6 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step6.png")).getTexture())
-  val materialPlayerStep7 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step7.png")).getTexture())
-  val materialPlayerStep8 = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step8.png")).getTexture())
-
+  val walkingAnimation = (1 until 7).map { n => 
+    new ColorMapMaterial(Frame.create(getClass.getResource(s"../assets/step$n.png")).getTexture())
+  }.toArray
+  
   val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player.png")).getTexture())
   val materialPlayerJump = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step5.png")).getTexture())
   var timeOfAnimation: Double = 0.0
@@ -101,31 +96,10 @@ class Player(var position: Position) extends ContactUpdates {
       } else {
         if(Math.abs(velocity.x) < 0.5) {
           mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayer.getColorMap())
-        } else if(stepAnimation == 0){
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep1.getColorMap())
-          stepAnimation = 1;
-        } else if(stepAnimation == 1){
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep2.getColorMap())
-          stepAnimation = 2;
-        } else if(stepAnimation == 2){
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep3.getColorMap())
-          stepAnimation = 3;
-        } else if(stepAnimation == 3){
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep4.getColorMap())
-          stepAnimation = 4;
-        } else if(stepAnimation == 4){
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep5.getColorMap())
-          stepAnimation = 5;
-        } else if(stepAnimation == 5){
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep6.getColorMap())
-          stepAnimation = 6;
-        } else if(stepAnimation == 6){
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep7.getColorMap())
-          stepAnimation = 7;
-        } else if(stepAnimation == 7){
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerStep8.getColorMap())
-          stepAnimation = 0;
-        }
+        } else {
+          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(walkingAnimation(stepAnimation).getColorMap)
+          stepAnimation = (stepAnimation + 1) % walkingAnimation.length;
+        } 
       }
     }
     
@@ -160,12 +134,14 @@ class Player(var position: Position) extends ContactUpdates {
   
   def beginContact(otherFixture: Fixture,contact: Contact): Unit = {
     jumpCount = 2
-    onGround = true
+    onGroundCount += 1
   }
   
   def endContact(otherFixture: org.jbox2d.dynamics.Fixture,contact: org.jbox2d.dynamics.contacts.Contact): Unit = {
-    onGround = false
+    onGroundCount -= 1
   }
+  
+  def isOnGround(): Boolean = onGroundCount == 0
 }
 
 object Player {

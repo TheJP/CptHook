@@ -85,8 +85,8 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     }
     var skyBoxScale = Math.max(maxX - minX, maxY - minY)
     skyBoxScale *= 1.2f
-    if (skyBoxScale < 10f) {
-      skyBoxScale = 10f
+    if (skyBoxScale < 40f) {
+      skyBoxScale = 40f
     }
     skyBox.setPosition(new Vec3((maxX - minX) / 2f, (maxY - minY) / 2f, -20))
     skyBox.setTransform(Mat4.scale(skyBoxScale))
