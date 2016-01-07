@@ -20,17 +20,17 @@ import org.jbox2d.dynamics.BodyDef
 import org.jbox2d.dynamics.BodyType
 import ch.fhnw.util.math.Vec3
 import org.jbox2d.common.Vec2
-import ch.fhnw.cpthook.CptHookController
 import ch.fhnw.cpthook.model.SkyBox
 import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
+import ch.fhnw.cpthook.ICptHookController
 
 /**
  * Tool, which handles the game logic.
  */
-class GameTool(val controller: IController, val camera: ICamera, val viewModel: ILevelViewModel)
+class GameTool(val controller: ICptHookController, val camera: ICamera, val viewModel: ILevelViewModel)
   extends AbstractTool(controller) with IAnimationAction {
   
-  val inputManager = controller.asInstanceOf[CptHookController].inputManager
+  val inputManager = controller.inputManager
   val world: World = new World(new org.jbox2d.common.Vec2(0.0f, -40.0f))
   val gameContactListener = new GameContactListener
   var follow = true

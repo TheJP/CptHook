@@ -9,9 +9,9 @@ import ch.fhnw.ether.controller.event.IKeyEvent
  * Custom controller, which disables navigation tool.
  * The rest of the code is mostly equivalent to the DefaultController.
  */
-class CptHookController extends DefaultController {
+class CptHookController extends DefaultController with ICptHookController {
   
-  val inputManager: InputManager = new InputManager
+  override val inputManager: InputManager = new InputManager
 
   override def pointerPressed(event: IPointerEvent): Unit = {
     if(getUI != null && getUI.pointerPressed(event)){ return; }
