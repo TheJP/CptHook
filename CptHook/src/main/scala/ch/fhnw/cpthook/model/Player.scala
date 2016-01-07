@@ -45,7 +45,9 @@ class Player(var position: Position) extends ContactUpdates {
     bodyDef.fixedRotation = true
     
     val shape: PolygonShape = new PolygonShape
-    shape.setAsBox(0.3f, 0.7f);
+    val width = 0.3f
+    val height = 0.7f
+    shape.set(Player.createPlayerPolygon(0.3f, 0.7f, 0.1f), 8)
     val fixtureDef: FixtureDef = new FixtureDef
     fixtureDef.shape = shape
     fixtureDef.friction = 0.1f;        
@@ -110,7 +112,7 @@ class Player(var position: Position) extends ContactUpdates {
       } else {
         body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(0f, -Player.JumpVelocity)))
       }
-      jumpCount = jumpCount - 1
+      jumpCount -= 1
     }
 
     velocity = body.getLinearVelocity
@@ -130,7 +132,6 @@ class Player(var position: Position) extends ContactUpdates {
   }
   
   def endContact(otherFixture: org.jbox2d.dynamics.Fixture,contact: org.jbox2d.dynamics.contacts.Contact): Unit = {}
-  
 }
 
 object Player {
@@ -151,5 +152,17 @@ object Player {
     
     mesh.setPosition(player.position toVec3 0.5f)
     mesh
+  }
+  
+  def createPlayerPolygon(hw: Float, hh: Float, cornerSize: Float): Array[org.jbox2d.common.Vec2] = {
+    Array(
+      new org.jbox2d.common.Vec2(-hw + cornerSize, hh),
+      new org.jbox2d.common.Vec2(-hw, hh - cornerSize),
+      new org.jbox2d.common.Vec2(-hw + cornerSize, -hh),
+      new org.jbox2d.common.Vec2(-hw, -hh + cornerSize),
+      new org.jbox2d.common.Vec2(hw - cornerSize, -hh),
+      new org.jbox2d.common.Vec2(hw, -hh + cornerSize),
+      new org.jbox2d.common.Vec2(hw, hh - cornerSize),
+      new org.jbox2d.common.Vec2(hw - cornerSize, hh))
   }
 }
