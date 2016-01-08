@@ -63,6 +63,9 @@ class Player(var position: Position) extends ContactUpdates {
     body.createFixture(fixtureDef)
     body.createFixture(groundSensorFixtureDef)
     body.setUserData(this)
+    
+    jumpCount = 0
+    onGroundCount = 0
   }
   
   def unlinkBox2D(world: World): Unit = {
