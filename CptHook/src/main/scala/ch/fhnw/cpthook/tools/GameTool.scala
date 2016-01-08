@@ -69,18 +69,6 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     controller.animate(this)
   }
   
-  def updateSkyBox(): Unit = {
-    skyBoxOffsetX += ((viewModel.getPlayer.mesh.getPosition.x - lastX) * 0.5)
-    skyBoxOffsetY += ((viewModel.getPlayer.mesh.getPosition.y - lastY) * 0.5)
-    lastX = viewModel.getPlayer.mesh.getPosition.x
-    lastY = viewModel.getPlayer.mesh.getPosition.y
-    skyBox.setPosition(viewModel.getPlayer.mesh.getPosition.subtract(new Vec3(skyBoxOffsetX, skyBoxOffsetY, 20)))  
-    if(skyBoxOffsetX > 60) skyBoxOffsetX = -60
-    else if(skyBoxOffsetX < -60) skyBoxOffsetX = 60  
-    if(skyBoxOffsetY > 60) skyBoxOffsetY = -60
-    else if(skyBoxOffsetY < -60) skyBoxOffsetY = 60 
-  }
-  
   override def deactivate(): Unit = {
     viewModel.removeSkyBox(skyBox)
     controller.kill(this)
@@ -92,13 +80,31 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     
     viewModel.getPlayer.update(inputManager, time)
     
+    updateCamera()
+    updateSkyBox()
+   
+    inputManager.clearWasPressed()
+  }
+  
+  def updateCamera(): Unit = {
     camera.setTarget(viewModel.getPlayer.mesh.getPosition)
     if(follow) {
       camera.setPosition(viewModel.getPlayer.mesh.getPosition.add(new Vec3(0, 0, 20)))
-      updateSkyBox()
     }   
-   
-    inputManager.clearWasPressed()
+  }
+  
+  def updateSkyBox(): Unit = {
+    if (follow) {
+      skyBoxOffsetX += ((viewModel.getPlayer.mesh.getPosition.x - lastX) * 0.5)
+      skyBoxOffsetY += ((viewModel.getPlayer.mesh.getPosition.y - lastY) * 0.5)
+      lastX = viewModel.getPlayer.mesh.getPosition.x
+      lastY = viewModel.getPlayer.mesh.getPosition.y
+      skyBox.setPosition(viewModel.getPlayer.mesh.getPosition.subtract(new Vec3(skyBoxOffsetX, skyBoxOffsetY, 20)))  
+      if(skyBoxOffsetX > 60) skyBoxOffsetX = -60
+      else if(skyBoxOffsetX < -60) skyBoxOffsetX = 60  
+      if(skyBoxOffsetY > 60) skyBoxOffsetY = -60
+      else if(skyBoxOffsetY < -60) skyBoxOffsetY = 60 
+    }
   }
  
   override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
