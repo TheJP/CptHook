@@ -52,6 +52,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   var offsetZ: Float = 20
   var currentBlockRotation: Float = 0
   var currentBlockScale: Float = 1f
+  @volatile var cameraNeedsUpdate: Boolean = true
 
   //Factories
   val blockFactory = Block(_, _)
@@ -79,13 +80,13 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
 
   override def activate = {
     editorMeshes.foreach { mesh => controller.getScene.add3DObject(mesh._2) }
-    updateCamera
+    cameraNeedsUpdate = true
     controller.animate(this)
   }
 
   override def deactivate = {
     editorMeshes.foreach { mesh => controller.getScene.remove3DObject(mesh._2) }
-    updateCamera
+    cameraNeedsUpdate = true
     controller.kill(this)
   }
 
@@ -95,7 +96,6 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   private def updateCamera : Unit = {
     camera.setTarget(new Vec3(offsetX, 0, 1))
     camera.setPosition(new Vec3(offsetX, 0, offsetZ))
-    updateGuiPositions
   }
 
   /**
@@ -216,7 +216,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
       val delta = event.getX - startX
       offsetX += delta * OffsetScale
-      updateCamera
+      cameraNeedsUpdate = true
       startX = event.getX
     case IPointerEvent.BUTTON_1 =>
       implicit val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
@@ -239,7 +239,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     } else if (offsetZ > 120) {
       offsetZ = 120
     }
-    updateCamera
+    cameraNeedsUpdate = true
   }
 
   override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
@@ -265,6 +265,12 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
    */
   def run(time: Double, interval: Double) : Unit = {
     currentBlockRotation = (currentBlockRotation + 1) % 360
+    
+    if (cameraNeedsUpdate) {
+      updateCamera
+      updateGuiPositions
+    }
+    
     editorMeshes map {_._2} foreach { mesh =>
       mesh.setTransform(Mat4.multiply(Mat4.rotate(currentBlockRotation, 0, 1, 0), Mat4.scale(currentBlockScale)))
     }
