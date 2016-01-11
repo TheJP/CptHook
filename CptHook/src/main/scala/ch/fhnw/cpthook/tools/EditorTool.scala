@@ -1,7 +1,6 @@
 package ch.fhnw.cpthook.tools
 
 import com.jogamp.newt.event.KeyEvent
-
 import ch.fhnw.cpthook.Defaults
 import ch.fhnw.cpthook.ICptHookController
 import ch.fhnw.cpthook.model.Block
@@ -29,6 +28,7 @@ import ch.fhnw.ether.view.ProjectionUtilities
 import ch.fhnw.util.math.Mat4
 import ch.fhnw.util.math.Vec3
 import javax.swing.JFileChooser
+import ch.fhnw.cpthook.SoundManager
 
 /**
  * Tool, which is used in the editor.
@@ -79,12 +79,18 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   camera.setUp(Defaults.cameraUp)
 
   override def activate = {
+
+    //Switch sounds
+    //TODO: To slow loading.. has to be fixed
+    //SoundManager.playSong(SoundManager.Ambient)
+
     editorMeshes.foreach { mesh => controller.getScene.add3DObject(mesh._2) }
     cameraNeedsUpdate = true
     controller.animate(this)
   }
 
   override def deactivate = {
+    SoundManager.stopSong
     editorMeshes.foreach { mesh => controller.getScene.remove3DObject(mesh._2) }
     cameraNeedsUpdate = true
     controller.kill(this)

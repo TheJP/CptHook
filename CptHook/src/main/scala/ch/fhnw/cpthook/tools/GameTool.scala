@@ -24,6 +24,7 @@ import ch.fhnw.cpthook.model.SkyBox
 import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
 import ch.fhnw.cpthook.ICptHookController
 import ch.fhnw.util.math.Mat4
+import ch.fhnw.cpthook.SoundManager
 
 /**
  * Tool, which handles the game logic.
@@ -42,7 +43,10 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   var lastY = 0.0
 
   override def activate(): Unit = {
-    
+
+    //Switch sounds
+    SoundManager.playSong(SoundManager.Level)
+
     // create toBox2D models for blocks
     viewModel.npos.keys.map {npo => (npo.toBox2D, npo)} foreach { definition =>
       val body: Body = world.createBody(definition._1._1)
@@ -59,8 +63,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     // register player update listener (Small hack here. Be aware that if you add a new fixture to the player
     // this will no longer work!)
     gameContactListener.register(viewModel.getPlayer, viewModel.getPlayer.body.getFixtureList)
-    
-    
+
     //Skybox
     viewModel.addSkyBox(skyBox)
     lastX = viewModel.getPlayer.mesh.getPosition.x
@@ -70,6 +73,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   }
   
   override def deactivate(): Unit = {
+    SoundManager.stopSong
     viewModel.removeSkyBox(skyBox)
     controller.kill(this)
     viewModel.getPlayer.unlinkBox2D(world)
