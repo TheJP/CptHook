@@ -23,6 +23,7 @@ import org.jbox2d.common.Vec2
 import ch.fhnw.cpthook.model.SkyBox
 import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
 import ch.fhnw.cpthook.ICptHookController
+import ch.fhnw.util.math.Mat4
 
 /**
  * Tool, which handles the game logic.
@@ -31,11 +32,15 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   extends AbstractTool(controller) with IAnimationAction {
   
   val inputManager = controller.inputManager
-  val world: World = new World(new org.jbox2d.common.Vec2(0.0f, -10.0f))
+  val world: World = new World(new org.jbox2d.common.Vec2(0.0f, -40.0f))
   val gameContactListener = new GameContactListener
   var follow = true
-//  val skyBox = new SkyBox().createMesh()
-  
+  val skyBox = new SkyBox().createMesh()
+  var skyBoxOffsetX = 0.0
+  var skyBoxOffsetY = 0.0
+  var lastX = 0.0
+  var lastY = 0.0
+
   override def activate(): Unit = {
     
     // create toBox2D models for blocks
@@ -55,15 +60,19 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     // this will no longer work!)
     gameContactListener.register(viewModel.getPlayer, viewModel.getPlayer.body.getFixtureList)
     
-//    viewModel.addSkyBox(skyBox)
+    
+    //Skybox
+    viewModel.addSkyBox(skyBox)
+    lastX = viewModel.getPlayer.mesh.getPosition.x
+    lastY = viewModel.getPlayer.mesh.getPosition.y
     
     controller.animate(this)
   }
   
   override def deactivate(): Unit = {
-//    viewModel.removeSkyBox(skyBox)
+    viewModel.removeSkyBox(skyBox)
     controller.kill(this)
-    viewModel.getPlayer.mesh.setPosition(viewModel.getPlayer.position toVec3 1)
+    viewModel.getPlayer.unlinkBox2D(world)
   }
 
   def run(time: Double, interval: Double) : Unit = {
@@ -71,14 +80,31 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     
     viewModel.getPlayer.update(inputManager, time)
     
-    camera.setTarget(viewModel.getPlayer.mesh.getPosition)
-    if(follow) {
-      camera.setPosition(viewModel.getPlayer.mesh.getPosition.subtract(new Vec3(0, 0, -20)))
-//      skyBox.setPosition(new Vec3(viewModel.getPlayer.mesh.getPosition.x, 0, -20)) // der spieler kann über bzw unter die skybox springen.
-                                                                                   // y koordinate auf spieler setzen sieht aber sehr unnatürlich aus...
-    }   
+    updateCamera()
+    updateSkyBox()
    
     inputManager.clearWasPressed()
+  }
+  
+  def updateCamera(): Unit = {
+    camera.setTarget(viewModel.getPlayer.mesh.getPosition)
+    if(follow) {
+      camera.setPosition(viewModel.getPlayer.mesh.getPosition.add(new Vec3(0, 0, 20)))
+    }   
+  }
+  
+  def updateSkyBox(): Unit = {
+    if (follow) {
+      skyBoxOffsetX += ((viewModel.getPlayer.mesh.getPosition.x - lastX) * 0.5)
+      skyBoxOffsetY += ((viewModel.getPlayer.mesh.getPosition.y - lastY) * 0.5)
+      lastX = viewModel.getPlayer.mesh.getPosition.x
+      lastY = viewModel.getPlayer.mesh.getPosition.y
+      skyBox.setPosition(viewModel.getPlayer.mesh.getPosition.subtract(new Vec3(skyBoxOffsetX, skyBoxOffsetY, 20)))  
+      if(skyBoxOffsetX > 60) skyBoxOffsetX = -60
+      else if(skyBoxOffsetX < -60) skyBoxOffsetX = 60  
+      if(skyBoxOffsetY > 60) skyBoxOffsetY = -60
+      else if(skyBoxOffsetY < -60) skyBoxOffsetY = 60 
+    }
   }
  
   override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {

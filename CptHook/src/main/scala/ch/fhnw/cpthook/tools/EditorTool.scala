@@ -50,6 +50,9 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   var offsetX: Float = 0
   var startX: Float = 0
   var offsetZ: Float = 20
+  var currentBlockRotation: Float = 0
+  var currentBlockScale: Float = 1f
+  @volatile var cameraNeedsUpdate: Boolean = true
 
   //Factories
   val blockFactory = Block(_, _)
@@ -77,13 +80,13 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
 
   override def activate = {
     editorMeshes.foreach { mesh => controller.getScene.add3DObject(mesh._2) }
-    updateCamera
+    cameraNeedsUpdate = true
     controller.animate(this)
   }
 
   override def deactivate = {
     editorMeshes.foreach { mesh => controller.getScene.remove3DObject(mesh._2) }
-    updateCamera
+    cameraNeedsUpdate = true
     controller.kill(this)
   }
 
@@ -93,7 +96,6 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   private def updateCamera : Unit = {
     camera.setTarget(new Vec3(offsetX, 0, 1))
     camera.setPosition(new Vec3(offsetX, 0, offsetZ))
-    updateGuiPositions
   }
 
   /**
@@ -102,23 +104,35 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
    */
   private def updateGuiPositions : Unit = {
     if(controller.getViews.isEmpty){ return }
+    
     val view = controller.getViews.get(0)
     val viewport = view.getViewport
-    val viewCameraState = getController.getRenderManager.getViewCameraState(view)
-    val ray = ProjectionUtilities.getRay(viewCameraState, viewport.w, viewport.h / 2.0f)
-    // check if we can hit the xy plane
-    if(ray.getDirection.z != 0f) {
-      val s: Float = -ray.getOrigin.z / ray.getDirection.z
-      val p: Vec3 = ray.getOrigin add ray.getDirection.scale(s)
-      var i = 0
-      editorMeshes.map(_._2).foreach { mesh =>
-        //mesh.setPosition(new Vec3(offsetX, 0, offsetZ / 2))
-        mesh.setPosition(new Vec3(p.x - 6.5f, p.y + i * 0.75f, offsetZ / 2))
-        i += 1
-      }
-      //println(offsetX - p.x)
+    val left = rayToXYPlane(0, viewport.h / 2, 10);
+    val right = rayToXYPlane(viewport.w, viewport.h / 2, 10);
+    
+    val xFactor = (right.x - left.x) / viewport.w
+    
+    currentBlockScale = 70 * xFactor
+
+    var i = 0
+    editorMeshes.map(_._2).foreach { mesh =>
+      mesh.setTransform(Mat4.multiply(Mat4.rotate(currentBlockRotation, 0, 1, 0), Mat4.scale(currentBlockScale)))
+      mesh.setPosition(right.add(new Vec3(-100 * xFactor, i * 100 * xFactor, 0)))
+      i += 1
     }
-    //TODO
+  }
+  
+  private def rayToXYPlane(xScreen: Float, yScreen: Float, zOffset: Float): Vec3 = {
+    val view = controller.getViews.get(0)
+    val viewCameraState = getController.getRenderManager.getViewCameraState(view)
+    val ray = ProjectionUtilities.getRay(viewCameraState, xScreen, yScreen)
+     // check if we can hit the xy plane
+    if(ray.getDirection.z != 0f) {
+      val s: Float = (-ray.getOrigin.z + zOffset) / ray.getDirection.z
+      val p: Vec3 = ray.getOrigin add ray.getDirection.scale(s)
+      return p
+    }
+    return Vec3.ZERO
   }
 
   /**
@@ -167,14 +181,9 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
    * Adds a block at the pointer position if possible.
    */
   private def add(event: IPointerEvent)(implicit viewCameraState: IViewCameraState): Unit = {
-    val ray = ProjectionUtilities.getRay(viewCameraState, event.getX, event.getY)
-    // check if we can hit the xy plane
-    if(ray.getDirection.z != 0f) {
-      val s: Float = -ray.getOrigin.z / ray.getDirection.z
-      val p: Vec3 = ray.getOrigin add ray.getDirection.scale(s)
+      val p: Vec3 = rayToXYPlane(event.getX, event.getY, 0)
       val size = currentSize()
       viewModel.addNpo(currentFactory(new Position((p.x - size.x / 2).round.toInt, (p.y - size.y / 2).round.toInt), size))
-    }
   }
   
   override def pointerPressed(event: IPointerEvent): Unit = event.getButton match {
@@ -207,7 +216,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
       val delta = event.getX - startX
       offsetX += delta * OffsetScale
-      updateCamera
+      cameraNeedsUpdate = true
       startX = event.getX
     case IPointerEvent.BUTTON_1 =>
       implicit val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
@@ -225,7 +234,12 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   
   override def pointerScrolled(event: IPointerEvent): Unit = {
     offsetZ += event.getScrollY * OffsetScale
-    updateCamera
+    if (offsetZ < 13) {
+      offsetZ = 13
+    } else if (offsetZ > 120) {
+      offsetZ = 120
+    }
+    cameraNeedsUpdate = true
   }
 
   override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
@@ -250,9 +264,15 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
    * Animation of editor controls.
    */
   def run(time: Double, interval: Double) : Unit = {
-    editorMeshes foreach { mesh => mesh._2.setTransform(
-        (Mat4 scale GuiBlockSize) postMultiply
-            Mat4.rotate((time.toFloat % 6f) * 60f, GuiBlockRotationAxis))
+    currentBlockRotation = (currentBlockRotation + 1) % 360
+    
+    if (cameraNeedsUpdate) {
+      updateCamera
+      updateGuiPositions
+    }
+    
+    editorMeshes map {_._2} foreach { mesh =>
+      mesh.setTransform(Mat4.multiply(Mat4.rotate(currentBlockRotation, 0, 1, 0), Mat4.scale(currentBlockScale)))
     }
   }
 
