@@ -43,7 +43,7 @@ abstract class NpoType[-T <: Npo] {
                          0f, .34f, 0f, .66f, 1f, .66f, 0f, .34f, 1f, .66f, 1f, .34f )     //right
 
   val DefaultFriction = 1f
-  val DefaultRestitution = 0.0f
+  val DefaultRestitution = 0.5f
 
   /**
    * Creates a default cube with the given material.

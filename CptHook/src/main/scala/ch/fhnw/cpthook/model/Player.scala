@@ -121,11 +121,11 @@ class Player(var position: Position) extends ContactUpdates {
   }
   
   def beginContact(otherFixture: Fixture,contact: Contact): Unit = {
-    if(otherFixture.getBody.getUserData.isInstanceOf[Block]) {
+    if(otherFixture.getBody.getUserData.isInstanceOf[Npo]) {
       jumpCount = 2
     }
   }
-  
+
   def endContact(otherFixture: org.jbox2d.dynamics.Fixture,contact: org.jbox2d.dynamics.contacts.Contact): Unit = {}
   
 }
