@@ -133,12 +133,14 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     
     val xFactor = (right.x - left.x) / viewport.w
     
-    currentBlockScale = 70 * xFactor
+    currentBlockScale = viewport.h * 0.05f * xFactor
+    
+    var offset = editorMeshes.size * currentBlockScale / 2f
 
     var i = 0
     editorMeshes.map(_._1).foreach { mesh =>
       mesh.setTransform(Mat4.multiply(Mat4.rotate(currentBlockRotation, 0, 1, 0), Mat4.scale(currentBlockScale)))
-      mesh.setPosition(right.add(new Vec3(-100 * xFactor, i * 100 * xFactor, 0)))
+      mesh.setPosition(right.add(new Vec3(-1.5 * currentBlockScale, i * 1.5 * currentBlockScale - offset, 0)))
       i += 1
     }
   }
