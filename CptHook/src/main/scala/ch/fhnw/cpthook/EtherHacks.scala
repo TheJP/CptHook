@@ -6,7 +6,7 @@ import java.util.List
 import ch.fhnw.ether.ui.IWidget
 import java.util.Arrays
 
-object EtherHacks extends App {
+object EtherHacks {
   
   def removeWidgets(controller: IController): Unit = {
    

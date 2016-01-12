@@ -92,7 +92,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     //Switch sounds
     //TODO: To slow loading.. has to be fixed
     //SoundManager.playSong(SoundManager.Ambient)
-    SoundManager.playSound(SoundManager.AmbientSound, 0.8f, true, false)
+    SoundManager.playSound(SoundManager.AmbientSound, 0.8f, true, true)
     
     addEditorMeshes
     cameraNeedsUpdate = true
@@ -109,15 +109,21 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   }
   
   def setupUI(): Unit = {
-    
-    var switchModeButton = new Button(0, 0, "Play", "Switches to play mode", KeyEvent.VK_M, new IButtonAction() {
+
+    val exitButton = new Button(0, 0, "Exit", "Closes the game",  KeyEvent.VK_Q, new IButtonAction() {
+      def execute(button: Button, view: IView) = {
+        System.exit(0) //TODO: Ask to save (also when pressing esc) and graceful shutdown
+      }
+    })
+
+    val switchModeButton = new Button(0, 1, "Play", "(M) Switches to play mode", KeyEvent.VK_M, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         EtherHacks.removeWidgets(controller)
         controller.setCurrentTool(new GameTool(controller, camera, viewModel))   
       }
     })
-    
-    var loadLevelButton = new Button(0, 1, "Load", "Load level from file", KeyEvent.VK_O, new IButtonAction() {
+
+    val loadLevelButton = new Button(0, 2, "Open...", "(O) Open level from file", KeyEvent.VK_O, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         var level = LevelLoader.loadFromFile()
         if (level != null) {
@@ -126,11 +132,11 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       }
     })
     
-    var saveLevelButton = new Button(0, 2, "Save", "Save level to file", KeyEvent.VK_S, new IButtonAction() {
+    val saveLevelButton = new Button(0, 3, "Save...", "(S) Save level to file", KeyEvent.VK_S, new IButtonAction() {
       def execute(button: Button, view: IView) = { LevelLoader.saveToFile(viewModel.getLevel) }
     })
     
-    var browseLevelButton = new Button(0, 3, "Browse", "Browse levels from server", KeyEvent.VK_B, new IButtonAction() {
+    val browseLevelButton = new Button(0, 3, "Browse", "(B) Browse levels from server", KeyEvent.VK_B, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         var level = LevelLoader.loadFromServer()
         if (level != null) {
@@ -139,10 +145,11 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       }
     })
     
-    var uploadLevelButton = new Button(0, 4, "Upload", "Upload level to server", KeyEvent.VK_U, new IButtonAction() {
+    val uploadLevelButton = new Button(0, 4, "Upload", "(U) Upload level to server", KeyEvent.VK_U, new IButtonAction() {
       def execute(button: Button, view: IView) = { LevelLoader.pushToServer(viewModel.getLevel) }
-    })
-    
+    })  
+
+    controller.getUI.addWidget(exitButton)
     controller.getUI.addWidget(switchModeButton)
     controller.getUI.addWidget(loadLevelButton)
     controller.getUI.addWidget(saveLevelButton)
@@ -325,12 +332,12 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
    */
   def run(time: Double, interval: Double) : Unit = {
     currentBlockRotation = (currentBlockRotation + 1) % 360
-    
+
     if (cameraNeedsUpdate) {
       updateCamera
       updateGuiPositions
     }
-    
+
     editorMeshes map {_._1} foreach { mesh =>
       mesh.setTransform(Mat4.multiply(Mat4.rotate(currentBlockRotation, 0, 1, 0), Mat4.scale(currentBlockScale)))
     }
