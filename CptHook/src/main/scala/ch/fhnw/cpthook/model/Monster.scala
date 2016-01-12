@@ -19,6 +19,7 @@ import ch.fhnw.cpthook.tools.ContactUpdates
 import org.jbox2d.dynamics.contacts.Contact
 import org.jbox2d.dynamics.Body
 import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
+import ch.fhnw.util.math.Mat4
 
 class Monster(var position: Position) extends Entity with EntitiyUpdatable with EntityActivatable with ContactUpdates {
   
@@ -29,14 +30,17 @@ class Monster(var position: Position) extends Entity with EntitiyUpdatable with 
   
   var velocity: Float = -Monster.Speed
   
+  
+  // animation
   var animationStep = 0
   var lastTimeOfAnimation: Double = 0.0
-  val animationStepTime: Double = 0.2f
+  var currentRotation: Double = 0.0
   
   def toMesh(): IMesh = Monster.toMesh(this)
   def linkBox2D(world: World): Unit = Monster.linkBox2d(this, world)
   
   def activate(gameContactListener: GameContactListener): Unit = {
+    currentRotation = 0
     animationStep = 0
     lastTimeOfAnimation = 0
     velocity = -Monster.Speed
@@ -47,16 +51,27 @@ class Monster(var position: Position) extends Entity with EntitiyUpdatable with 
   
   def deactivate(): Unit = {
     mesh.setPosition(position.add(new Vec3(Monster.Width / 2f, Monster.Height / 2f, -0.5f)))
+    mesh.setTransform(Mat4.multiply(Mat4.rotate(-currentRotation.floatValue(), new Vec3(0, 1, 0)), mesh.getTransform))
   }
   
   def update(inputManager: InputManager, time: Double): Unit = {
     
     val delta = time - lastTimeOfAnimation
     
-    if (delta > animationStepTime) {
+    // animation
+    if (delta > Monster.AnimationStepTime) {
       lastTimeOfAnimation = time
       animationStep = (animationStep + 1) % Monster.AnimationFrames.length
       mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(Monster.AnimationFrames(animationStep))
+    }
+    
+    // paper mario effect
+    if (velocity == -Monster.Speed && currentRotation > 0) {
+      mesh.setTransform(Mat4.multiply(Mat4.rotate(Monster.RotationStep, new Vec3(0, 1, 0)), mesh.getTransform))
+      currentRotation -= Monster.RotationStep
+    } else if (velocity == Monster.Speed && currentRotation < 180) {
+      mesh.setTransform(Mat4.multiply(Mat4.rotate(Monster.RotationStep, new Vec3(0, 1, 0)), mesh.getTransform))
+      currentRotation += Monster.RotationStep
     }
     
     val v = body.getLinearVelocity
@@ -66,11 +81,9 @@ class Monster(var position: Position) extends Entity with EntitiyUpdatable with 
   }
   
   def beginContact(self: Fixture, other: Fixture,contact: Contact): Unit = {
-    if (self == leftSensor && other.getUserData.isInstanceOf[Block]) {
-      println("hit left")
+    if (self == leftSensor && other.getBody.getUserData.isInstanceOf[Block]) {
       velocity = Monster.Speed
-    } else if (self == rightSensor&& other.getUserData.isInstanceOf[Block] ) {
-      println("hit right")
+    } else if (self == rightSensor && other.getBody.getUserData.isInstanceOf[Block] ) {
       velocity = -Monster.Speed
     } else {}
   }
@@ -83,11 +96,12 @@ class Monster(var position: Position) extends Entity with EntitiyUpdatable with 
 
 object Monster {
   
-
-  val Speed = 1f
+  val Speed = 2f
   val Width = 1f
   val Height = 1f
   val AnimationFrames = (1 to 11).map { n => Entity.loadTexture(s"../assets/monster_step$n.png") }.toArray
+  val AnimationStepTime = 0.3f
+  val RotationStep = 10
   
   val Vertices = Entity.twoDimensionalPlane(Width, Height, 0f)
   val Geometry = DefaultGeometry.createVM(Primitive.TRIANGLES, Vertices, Entity.defaultTextureCoordinates)
@@ -121,13 +135,13 @@ object Monster {
     val rightSensor: PolygonShape = new PolygonShape
     rightSensor.setAsBox(0.1f, Height / 2f - 0.1f, new org.jbox2d.common.Vec2(Width / 2f, 0f), 0f)
     val rightSensorFixtureDef: FixtureDef = new FixtureDef
-    rightSensorFixtureDef.shape = leftSensor
+    rightSensorFixtureDef.shape = rightSensor
     rightSensorFixtureDef.isSensor = true
     
     monster.body = world.createBody(bodyDef)
     monster.body.createFixture(fixtureDef)
     monster.leftSensor = monster.body.createFixture(leftSensorFixtureDef)
     monster.rightSensor = monster.body.createFixture(rightSensorFixtureDef)
-    monster.body.setUserData(this)
+    monster.body.setUserData(monster)
   }
 }
