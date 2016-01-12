@@ -59,8 +59,8 @@ class LavaBlock(position: Position, size: Size) extends Block(position, size, Bl
   def activate(gameContactListener: GameContactListener): Unit =
       if(body != null) { gameContactListener.register(this, body.getFixtureList) }
   //Kill when collision is detected
-  def beginContact(otherFixture: Fixture, contact: Contact): Unit = println("Player / Monster should die now")
-  def endContact(otherFixture: Fixture, contact: Contact): Unit = {}
+  def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = println("Player / Monster should die now")
+  def endContact(self: Fixture, other: Fixture, contact: Contact): Unit = {}
 }
 
 /**
@@ -77,10 +77,10 @@ class TargetBlock(position: Position, size: Size) extends Block(position, size, 
     if(body != null) { gameContactListener.register(this, body.getFixtureList) }
   def deactivate(): Unit = { body = null }
   //Win game detection
-  def beginContact(otherFixture: Fixture, contact: Contact): Unit = {
+  def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = {
     println("Win?") //TODO
   }
-  def endContact(otherFixture: Fixture, contact: Contact): Unit = {}
+  def endContact(self: Fixture, other: Fixture, contact: Contact): Unit = {}
 }
 
 /**
@@ -96,9 +96,9 @@ class TrampolineBlock(position: Position, size: Size) extends Block(position, si
   def activate(gameContactListener: GameContactListener): Unit =
 		  if(body != null) { gameContactListener.register(this, body.getFixtureList) }
   //Apply jump effect when collision is detected
-  def beginContact(otherFixture: Fixture, contact: Contact): Unit =
-    otherFixture.getBody.setLinearVelocity(new org.jbox2d.common.Vec2(0, 20))
-  def endContact(otherFixture: Fixture, contact: Contact): Unit = {}
+  def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit =
+    other.getBody.setLinearVelocity(new org.jbox2d.common.Vec2(0, 20))
+  def endContact(self: Fixture, other: Fixture, contact: Contact): Unit = {}
 }
 
 object Block {
