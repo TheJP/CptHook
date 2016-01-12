@@ -97,8 +97,8 @@ class Monster(var position: Position) extends Entity with EntitiyUpdatable with 
 object Monster {
   
   val Speed = 2f
-  val Width = 1f
-  val Height = 1f
+  val Width = 0.9f
+  val Height = 0.9f
   val AnimationFrames = (1 to 11).map { n => Entity.loadTexture(s"../assets/monster_step$n.png") }.toArray
   val AnimationStepTime = 0.3f
   val RotationStep = 10
