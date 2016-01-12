@@ -148,17 +148,16 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
       }
     }
   }
-  
-  def beginContact(otherFixture: Fixture, contact: Contact): Unit = {
-    println("begin")
+
+  def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = {
     jumpCount = 2
     onGroundCount += 1
   }
-  
-  def endContact(otherFixture: Fixture, contact: Contact): Unit = {
+
+  def endContact(self: Fixture, other: Fixture, contact: Contact): Unit = {
     onGroundCount -= 1
   }
-  
+
   def isOnGround(): Boolean = onGroundCount > 0
 }
 

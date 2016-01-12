@@ -21,26 +21,27 @@ import ch.fhnw.cpthook.tools.GameContactListener
 import ch.fhnw.cpthook.tools.ContactUpdates
 import org.jbox2d.dynamics.Fixture
 import org.jbox2d.dynamics.contacts.Contact
+import ch.fhnw.ether.scene.mesh.material.Texture
 
-abstract class Block(var position: Position, var size: Size, var material: ColorMapMaterial) extends Entity {
+abstract class Block(var position: Position, var size: Size, var texture: Texture) extends Entity {
   def getFriction: Float
   def getRestitution: Float
 
   def linkBox2D(world: World): Unit = Block.createDefaultBox2D(world, this)
-  def toMesh(): ch.fhnw.ether.scene.mesh.IMesh = Block.createDefaultCube(material, position, size)
+  def toMesh(): ch.fhnw.ether.scene.mesh.IMesh = Block.createDefaultCube(texture, position, size)
 }
 
-class GrassBlock(position: Position, size: Size) extends Block(position, size, Block.GrassMaterial) {
+class GrassBlock(position: Position, size: Size) extends Block(position, size, Block.GrassTexture) {
   def getFriction = 0.2f
   def getRestitution = 0.1f
 }
 
-class DirtBlock(position: Position, size: Size) extends Block(position, size, Block.DirtMaterial) {
+class DirtBlock(position: Position, size: Size) extends Block(position, size, Block.DirtTexture) {
   def getFriction = 0.2f
   def getRestitution = 0.1f
 }
 
-class IceBlock(position: Position, size: Size) extends Block(position, size, Block.IceMaterial) {
+class IceBlock(position: Position, size: Size) extends Block(position, size, Block.IceTexture) {
   def getFriction = 0.2f
   def getRestitution = 0.1f
 }
@@ -48,7 +49,7 @@ class IceBlock(position: Position, size: Size) extends Block(position, size, Blo
 /**
  * Block, which kills cpthook if he touches it.
  */
-class LavaBlock(position: Position, size: Size) extends Block(position, size, Block.LavaMaterial) with EntityActivatable with ContactUpdates {
+class LavaBlock(position: Position, size: Size) extends Block(position, size, Block.LavaTexture) with EntityActivatable with ContactUpdates {
   def getFriction = 0.2f
   def getRestitution = 0.1f
   //Store body, when available
@@ -66,7 +67,7 @@ class LavaBlock(position: Position, size: Size) extends Block(position, size, Bl
  * Block that describes one (of potentially many) targets in the containing level.
  * If cpthook touches this block ingame the player wins.
  */
-class TargetBlock(position: Position, size: Size) extends Block(position, size, Block.TargetMaterial) with EntityActivatable with ContactUpdates {
+class TargetBlock(position: Position, size: Size) extends Block(position, size, Block.TargetTexture) with EntityActivatable with ContactUpdates {
   def getFriction = 0.2f
   def getRestitution = 0.1f
   //Store body, when available
@@ -85,7 +86,7 @@ class TargetBlock(position: Position, size: Size) extends Block(position, size, 
 /**
  * Trampoline block for better jumping action.
  */
-class TrampolineBlock(position: Position, size: Size) extends Block(position, size, Block.TrampolineMaterial) with EntityActivatable with ContactUpdates {
+class TrampolineBlock(position: Position, size: Size) extends Block(position, size, Block.TrampolineTexture) with EntityActivatable with ContactUpdates {
   def getFriction = 0.2f
   def getRestitution = 0.1f
   //Store body, when available
@@ -101,13 +102,13 @@ class TrampolineBlock(position: Position, size: Size) extends Block(position, si
 }
 
 object Block {
-
-  val GrassMaterial = Entity.loadMaterial("../assets/grass.png")
-  val DirtMaterial = Entity.loadMaterial("../assets/dirt.png")
-  val IceMaterial = Entity.loadMaterial("../assets/ice.png")
-  val LavaMaterial = Entity.loadMaterial("../assets/lava.png")
-  val TargetMaterial = Entity.loadMaterial("../assets/target.png")
-  val TrampolineMaterial = Entity.loadMaterial("../assets/jump.png")
+  
+  val GrassTexture = Entity.loadTexture("../assets/grass.png")
+  val DirtTexture = Entity.loadTexture("../assets/dirt.png")
+  val IceTexture = Entity.loadTexture("../assets/ice.png")
+  val LavaTexture = Entity.loadTexture("../assets/lava.png")
+  val TargetTexture = Entity.loadTexture("../assets/target.png")
+  val TrampolineTexture = Entity.loadTexture("../assets/jump.png")
 
   /**
    * Texture coordinates for default cube
@@ -122,9 +123,9 @@ object Block {
   /**
    * Creates a default cube with the given material.
    */
-  def createDefaultCube(material: ColorMapMaterial, position: Vec3, size: Vec3) : IMesh = {
+  def createDefaultCube(texture: Texture, position: Vec3, size: Vec3) : IMesh = {
     val geometry = DefaultGeometry.createVM(Primitive.TRIANGLES, MeshUtilities.UNIT_CUBE_TRIANGLES, textureCoordinates);
-    val mesh = new DefaultMesh(material, geometry, Queue.DEPTH)
+    val mesh = new DefaultMesh(new ColorMapMaterial(texture), geometry, Queue.DEPTH)
     mesh.setPosition(position add (size scale 0.5f))
     mesh.setTransform(Mat4 scale size)
     mesh

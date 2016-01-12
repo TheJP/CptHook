@@ -19,6 +19,7 @@ import ch.fhnw.ether.scene.mesh.IMesh
 import ch.fhnw.cpthook.InputManager
 import org.jbox2d.dynamics.World
 import ch.fhnw.cpthook.tools.GameContactListener
+import ch.fhnw.ether.scene.mesh.material.Texture
 
 abstract class Entity {
   def toMesh(): IMesh
@@ -38,8 +39,8 @@ object Entity {
   /**
    * loads a color map material
    */
-  def loadMaterial(path: String): ColorMapMaterial = {
-    new ColorMapMaterial(Frame.create(getClass.getResource(path)).getTexture())
+  def loadTexture(path: String): Texture = {
+    Frame.create(getClass.getResource(path)).getTexture()
   }
   
   val defaultTextureCoordinates = Array( 0f, 0f, 1f, 0f, 1f, 1f, 0f, 0f, 0f, 1f, 1f, 1f )
