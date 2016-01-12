@@ -110,7 +110,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   
   def setupUI(): Unit = {
 
-    val exitButton = new Button(0, 0, "Exit", "Closes the game",  KeyEvent.VK_Q, new IButtonAction() {
+    val exitButton = new Button(0, 0, "Exit", "(Q) loses the game",  KeyEvent.VK_Q, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         System.exit(0) //TODO: Ask to save (also when pressing esc) and graceful shutdown
       }
@@ -123,7 +123,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       }
     })
 
-    val loadLevelButton = new Button(0, 2, "Open...", "(O) Open level from file", KeyEvent.VK_O, new IButtonAction() {
+    val loadLevelButton = new Button(0, 2, "Open", "(O) Open level from file", KeyEvent.VK_O, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         var level = LevelLoader.loadFromFile()
         if (level != null) {
@@ -132,7 +132,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       }
     })
     
-    val saveLevelButton = new Button(0, 3, "Save...", "(S) Save level to file", KeyEvent.VK_S, new IButtonAction() {
+    val saveLevelButton = new Button(0, 3, "Save", "(S) Save level to file", KeyEvent.VK_S, new IButtonAction() {
       def execute(button: Button, view: IView) = { LevelLoader.saveToFile(viewModel.getLevel) }
     })
     
