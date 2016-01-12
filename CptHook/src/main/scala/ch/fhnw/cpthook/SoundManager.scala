@@ -5,44 +5,95 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
 import net.java.truecommons.io.Loan.loan
+import java.io.File
+import java.io.DataInputStream
+import java.io.FileInputStream
+import javax.sound.sampled.LineEvent
+import javax.sound.sampled.LineListener
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
+import scala.collection.mutable.MutableList
+import scala.collection.mutable.Map
 
 /**
  * Object that manages, which sounds are currently played.
  */
 object SoundManager {
-
-  //Sounds constants
-//  val Ambient = getClass.getResource("./sounds/ambient.mp3")
-  val Level = getClass.getResource("./sounds/level.wav")
-
-  //Song, which is currently playing (null otherwise)
-  private var currentSong: Clip = null
-
-  /**
-   * Plays the song with the given url.
-   */
-  def playSong(url: URL): Unit = {
-    try {
-      val byteStream = new ByteArrayInputStream(Files.readAllBytes(Paths.get(url.toURI())))
-      val audioIn = AudioSystem.getAudioInputStream(byteStream)
-      if(currentSong != null) { currentSong.stop }
-      currentSong = AudioSystem.getClip
-      currentSong.open(audioIn)
-      currentSong.loop(Clip.LOOP_CONTINUOUSLY)
-      currentSong.start
-    } catch{ case _ : Exception => }
+  
+  private var sounds = Map(
+    "level" -> loadSound("./sounds/level.wav"),
+    "jump" -> loadSound("./sounds/jump.wav")
+  )
+  
+  private var clipsLock = new ReentrantLock()
+  private var clips: Map[String, MutableList[Clip]] = Map()
+  
+  private def loadSound(path: String): Array[Byte] = {
+     try {
+       println("loading: " + path)
+       return Files.readAllBytes(Paths.get(getClass.getResource(path).toURI()))
+    } catch {
+      case e: Exception => {
+        e.printStackTrace()
+      }
+    }
+    return null
   }
-
-  /**
-   * Stops the currently playing song.
-   */
-  def stopSong: Unit = {
-    if(currentSong != null) { currentSong.stop }
-    currentSong = null
+  
+  def playSound(sound: String, loop: Boolean, stopOthers: Boolean): Unit = {
+    
+    if (!sounds.contains(sound)) {
+      return
+    }
+    
+    if (!clips.contains(sound)) {
+      clipsLock.lock()
+      clips += (sound -> MutableList[Clip]())
+      clipsLock.unlock()
+    }
+    
+    if (stopOthers) {
+      stopSound(sound)
+    }
+    
+    var in = new ByteArrayInputStream(sounds(sound))
+    var audioIn = AudioSystem.getAudioInputStream(in)
+    var clip = AudioSystem.getClip
+    clip.open(audioIn)
+    if (loop) {
+      clip.loop(Clip.LOOP_CONTINUOUSLY)
+    }
+    clip.start
+    
+    clipsLock.lock()
+    clips(sound) += clip
+    clipsLock.unlock()
+    
+    clip.addLineListener(new LineListener() {
+      def update(event: LineEvent): Unit = {
+        if (event.getType == LineEvent.Type.STOP) {
+          println("removing: " + sound)
+          clipsLock.lock()
+          clips(sound) = clips(sound).filter { c => c != clip }
+          clipsLock.unlock()
+        }
+      }
+    })
+  }
+  
+  def stopSound(sound: String): Unit = {
+    clipsLock.lock()
+    clips(sound).foreach { _.stop() }
+    clipsLock.unlock()
+  }
+  
+  def stopAll(): Unit = {
+    clipsLock.lock()
+    clips.values.foreach { c => c.foreach { _.stop() } }
+    clipsLock.unlock()
   }
 }

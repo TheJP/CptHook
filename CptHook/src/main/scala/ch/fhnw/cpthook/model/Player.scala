@@ -20,6 +20,7 @@ import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
 import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
 import ch.fhnw.util.math.Vec3
 import ch.fhnw.util.math.Mat4
+import ch.fhnw.cpthook.SoundManager
 
 
 class Player(var position: Position) extends ContactUpdates {
@@ -117,6 +118,7 @@ class Player(var position: Position) extends ContactUpdates {
       currentDirection = 1
     }
     if (inputManager.keyWasPressed(KeyEvent.VK_SPACE) && jumpCount > 0) {
+      SoundManager.playSound("jump", false, false)
       if (body.getWorld.getGravity.y < 0) {
         body.setLinearVelocity(new org.jbox2d.common.Vec2(velocity.x, Player.JumpVelocity))
       } else {

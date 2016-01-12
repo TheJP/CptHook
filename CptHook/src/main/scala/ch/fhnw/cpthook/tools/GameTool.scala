@@ -45,7 +45,8 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   override def activate(): Unit = {
 
     //Switch sounds
-    SoundManager.playSong(SoundManager.Level)
+    SoundManager.playSound("level", true, false)
+    //SoundManager.playSong(SoundManager.Level)
 
     // create toBox2D models for blocks
     viewModel.npos.keys.map {npo => (npo.toBox2D, npo)} foreach { definition =>
@@ -73,7 +74,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   }
   
   override def deactivate(): Unit = {
-    SoundManager.stopSong
+    SoundManager.stopAll()
     viewModel.removeSkyBox(skyBox)
     controller.kill(this)
     viewModel.getPlayer.unlinkBox2D(world)

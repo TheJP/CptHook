@@ -90,7 +90,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   }
 
   override def deactivate = {
-    SoundManager.stopSong
+    SoundManager.stopAll()
     editorMeshes.foreach { mesh => controller.getScene.remove3DObject(mesh._2) }
     cameraNeedsUpdate = true
     controller.kill(this)
