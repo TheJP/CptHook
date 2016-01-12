@@ -117,7 +117,7 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
       }
     }
     
-    mesh.setPosition(new Vec3(body.getPosition.x, body.getPosition.y,0.5))
+    mesh.setPosition(new Vec3(body.getPosition.x, body.getPosition.y, 0.5))
     
     if (inputManager.keyPressed(KeyEvent.VK_RIGHT)) {
       body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(Player.MoveVelocity, 0f)))
