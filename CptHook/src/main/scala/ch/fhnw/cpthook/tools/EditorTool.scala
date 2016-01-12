@@ -38,6 +38,7 @@ import ch.fhnw.ether.scene.mesh.IMesh
 import ch.fhnw.cpthook.model.DirtBlock
 import ch.fhnw.cpthook.model.IceBlock
 import ch.fhnw.cpthook.model.LavaBlock
+import ch.fhnw.cpthook.model.Monster
 
 /**
  * Tool, which is used in the editor.
@@ -71,7 +72,8 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       new GrassBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new GrassBlock(p, s)),
       new DirtBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new DirtBlock(p, s)),
       new IceBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new IceBlock(p, s)),
-      new LavaBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new LavaBlock(p, s))
+      new LavaBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new LavaBlock(p, s)),
+      new Monster(Position(0, 0)).toMesh() -> ((p, s) => new Monster(p))
   )
   
   /*
