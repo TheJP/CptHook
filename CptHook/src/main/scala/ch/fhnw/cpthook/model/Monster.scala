@@ -30,15 +30,15 @@ class Monster(var position: Position) extends Entity with EntitiyUpdatable with 
   var velocity: Float = -Monster.Speed
   
   var animationStep = 0
-  var timeOfAnimation: Double = 0.0
-  val animationStepTime: Double = 0.4
+  var lastTimeOfAnimation: Double = 0.0
+  val animationStepTime: Double = 0.2f
   
   def toMesh(): IMesh = Monster.toMesh(this)
   def linkBox2D(world: World): Unit = Monster.linkBox2d(this, world)
   
   def activate(gameContactListener: GameContactListener): Unit = {
     animationStep = 0
-    timeOfAnimation = 0
+    lastTimeOfAnimation = 0
     velocity = -Monster.Speed
     gameContactListener.register(this, leftSensor)
     gameContactListener.register(this, rightSensor)
@@ -51,17 +51,17 @@ class Monster(var position: Position) extends Entity with EntitiyUpdatable with 
   
   def update(inputManager: InputManager, time: Double): Unit = {
     
-    timeOfAnimation += time
+    val delta = time - lastTimeOfAnimation
     
-    if (timeOfAnimation > animationStepTime) {
-      timeOfAnimation = 0
+    if (delta > animationStepTime) {
+      lastTimeOfAnimation = time
       animationStep = (animationStep + 1) % Monster.AnimationFrames.length
       mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(Monster.AnimationFrames(animationStep))
     }
     
     val v = body.getLinearVelocity
     body.setLinearVelocity(new org.jbox2d.common.Vec2(velocity, v.y))
-    val newPosition = new Vec3(body.getPosition.x, body.getPosition.y, -0.5f)
+    val newPosition = new Vec3(body.getPosition.x, body.getPosition.y, 2f)
     mesh.setPosition(newPosition)
   }
   
