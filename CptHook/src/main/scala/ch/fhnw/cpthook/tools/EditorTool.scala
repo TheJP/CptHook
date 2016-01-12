@@ -33,6 +33,11 @@ import ch.fhnw.cpthook.model._
 import javafx.scene.media.AudioClip
 import javafx.scene.media.MediaPlayer
 import javafx.scene.media.Media
+import ch.fhnw.ether.ui.Button
+import ch.fhnw.ether.ui.Button.IButtonAction
+import ch.fhnw.ether.view.IView
+import ch.fhnw.cpthook.LevelLoader
+import ch.fhnw.cpthook.EtherHacks
 
 /**
  * Tool, which is used in the editor.
@@ -92,6 +97,8 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     addEditorMeshes
     cameraNeedsUpdate = true
     controller.animate(this)
+    
+    setupUI()
   }
 
   override def deactivate = {
@@ -99,6 +106,33 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     removeEditorMeshes
     cameraNeedsUpdate = true
     controller.kill(this)
+  }
+  
+  def setupUI(): Unit = {
+    
+    var switchModeButton = new Button(0, 0, "Play...", "Switches to play mode", KeyEvent.VK_M, new IButtonAction() {
+      def execute(button: Button, view: IView) = {
+        EtherHacks.removeWidgets(controller)
+        controller.setCurrentTool(new GameTool(controller, camera, viewModel))   
+      }
+    })
+    
+    var loadLevelButton = new Button(0, 1, "Load...", "Load level from file", KeyEvent.VK_O, new IButtonAction() {
+      def execute(button: Button, view: IView) = {
+        var level = LevelLoader.loadFromFile()
+        if (level != null) {
+          viewModel.loadLevel(level)
+        }
+      }
+    })
+    
+    var saveLevelButton = new Button(0, 2, "Save...", "Save level to file", KeyEvent.VK_S, new IButtonAction() {
+      def execute(button: Button, view: IView) = { LevelLoader.saveToFile(viewModel.getLevel) }
+    })
+    
+    controller.getUI.addWidget(switchModeButton)
+    controller.getUI.addWidget(loadLevelButton)
+    controller.getUI.addWidget(saveLevelButton)
   }
 
   /**
@@ -269,35 +303,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     cameraNeedsUpdate = true
   }
 
-  override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
-    case KeyEvent.VK_M =>
-      controller.setCurrentTool(new GameTool(controller, camera, viewModel))
-    case KeyEvent.VK_S if event.isControlDown =>
-      SwingUtilities.invokeLater(new Runnable() {
-    		def run(): Unit = {
-    			val fileChooser = new JFileChooser
-          fileChooser.setDialogTitle("Save Level")
-          if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
-            viewModel.saveLevel(fileChooser.getSelectedFile.getAbsolutePath)
-          }
-    		}
-    	})
-      
-    case KeyEvent.VK_O if event.isControlDown =>
-      SwingUtilities.invokeLater(new Runnable() {
-    		def run(): Unit = {
-    		  val fileChooser = new JFileChooser
-          fileChooser.setDialogTitle("Open Level")
-          if(fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
-            controller.run(new IAction() {
-              def run(t: Double): Unit = viewModel.openLevel(fileChooser.getSelectedFile.getAbsolutePath)
-            })
-          }
-    		}
-      })
-      
-    case default => //Unknown key
-  }
+  override def keyPressed(event: IKeyEvent): Unit = {}
 
   /**
    * Animation of editor controls.
