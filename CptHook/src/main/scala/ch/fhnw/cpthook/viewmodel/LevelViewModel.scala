@@ -25,6 +25,7 @@ trait ILevelViewModel {
   def removeNpo(entity: Entity): Unit
   def addNpo(entity: Entity): Unit
   def getPlayer: Player
+  def getLevel: Level
   def saveLevel(filename: String): Unit
   def openLevel(filename: String): Unit
   def loadLevel(level: Level): Unit
@@ -43,6 +44,7 @@ class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILe
 
   //Player indicator: map += ???
   def getMeshes = meshes.values
+  def getLevel = level
   def entities = meshes
 
   def removeNpo(entity: Entity): Unit = {

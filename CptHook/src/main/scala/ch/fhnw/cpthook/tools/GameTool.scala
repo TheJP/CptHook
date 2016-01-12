@@ -29,6 +29,10 @@ import ch.fhnw.cpthook.model.EntitiyUpdatable
 import ch.fhnw.cpthook.model.EntityActivatable
 import ch.fhnw.cpthook.model.IGameStateChanger
 import ch.fhnw.cpthook.model.IGameStateController
+import ch.fhnw.ether.ui.Button
+import ch.fhnw.ether.ui.Button.IButtonAction
+import ch.fhnw.ether.view.IView
+import ch.fhnw.cpthook.EtherHacks
 
 /**
  * Tool, which handles the game logic.
@@ -86,6 +90,20 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     lastY = viewModel.getPlayer.mesh.getPosition.y
     
     controller.animate(this)
+    
+    setupUI()
+  }
+  
+  def setupUI(): Unit = {
+    
+    var switchModeButton = new Button(0, 0, "Edit...", "Switches to edit mode", KeyEvent.VK_M, new IButtonAction() {
+      def execute(button: Button, view: IView) = {
+        EtherHacks.removeWidgets(controller)
+        controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) 
+      }
+    })
+    
+    controller.getUI.addWidget(switchModeButton)
   }
   
   override def deactivate(): Unit = {
@@ -128,9 +146,6 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   }
  
   override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
-
-    case KeyEvent.VK_M if isActive =>
-      controller.setCurrentTool(new EditorTool(controller, camera, viewModel))
       
     case KeyEvent.VK_G =>
       world.setGravity(world.getGravity.mul(-1f))
