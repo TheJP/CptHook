@@ -25,7 +25,7 @@ import javax.sound.sampled.FloatControl
  */
 object SoundManager {
   
-  private var sounds = Map(
+  private val sounds = Map(
     "level" -> loadSound("./sounds/level.wav"),
     "jump" -> loadSound("./sounds/jump.wav")
   )
@@ -36,6 +36,7 @@ object SoundManager {
   private def loadSound(path: String): Array[Byte] = {
      try {
        println("loading: " + path)
+       // TODO(daMupfel): toURI doesn't work if exported as jar
        return Files.readAllBytes(Paths.get(getClass.getResource(path).toURI()))
     } catch {
       case e: Exception => {

@@ -42,4 +42,12 @@ object Entity {
     new ColorMapMaterial(Frame.create(getClass.getResource(path)).getTexture())
   }
   
+  val defaultTextureCoordinates = Array( 0f, 0f, 1f, 0f, 1f, 1f, 0f, 0f, 1f, 1f, 0f, 1f )
+  def twoDimensionalPlane(width: Float, height: Float, depth: Float): Array[Float] = {
+    val halfWidth = width / 2f
+    val halfHeight = height / 2f
+    Array(-halfWidth, -halfHeight, depth, -halfWidth, halfHeight, depth, halfWidth, halfHeight, depth,
+        halfWidth, halfHeight, depth, halfWidth, -halfHeight, depth, -halfWidth, -halfHeight, depth)
+  }
+  
 }
