@@ -3,8 +3,7 @@ package ch.fhnw.cpthook.tools
 import com.jogamp.newt.event.KeyEvent
 import ch.fhnw.cpthook.Defaults
 import ch.fhnw.cpthook.ICptHookController
-import ch.fhnw.cpthook.model.Block
-import ch.fhnw.cpthook.model.Block
+import ch.fhnw.cpthook.model.GrassBlock
 import ch.fhnw.cpthook.model.Ice
 import ch.fhnw.cpthook.model.Lava
 import ch.fhnw.cpthook.model.Npo
@@ -57,7 +56,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   @volatile var cameraNeedsUpdate: Boolean = true
 
   //Factories
-  val blockFactory = Block(_, _)
+  val blockFactory = GrassBlock(_, _)
   val lavaFactory = Lava(_, _)
   val iceFactory = Ice(_, _)
 
