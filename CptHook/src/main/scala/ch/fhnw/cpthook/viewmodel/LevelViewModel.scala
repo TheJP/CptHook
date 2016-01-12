@@ -13,6 +13,7 @@ import ch.fhnw.util.color.RGB
 import ch.fhnw.cpthook.json.JsonSerializer
 import ch.fhnw.cpthook.model.SkyBox
 import ch.fhnw.ether.scene.mesh.IMesh
+import ch.fhnw.cpthook.SoundManager
 
 /**
  * Converts Level objects to 3d objects, which can be added to a Ether-GL IScene.
@@ -48,12 +49,16 @@ class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILe
     scene.remove3DObject(meshes(entity))
     meshes -= entity
     level.entities = level.entities filter { _ != entity } //TODO: Improve model => no linear search
+    //TODO: Find better place for this
+    SoundManager.playEffect(SoundManager.BlockRemoveSound)
   }
 
   def addNpo(entity: Entity): Unit = {
     meshes += (entity -> entity.toMesh())
     level.entities ::= entity
     scene.add3DObject(meshes(entity))
+    //TODO: Find better place for this
+    SoundManager.playEffect(SoundManager.BlockPlaceSound)
   }
 
   def getPlayer = player

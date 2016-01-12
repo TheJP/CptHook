@@ -22,6 +22,7 @@ import ch.fhnw.cpthook.tools.ContactUpdates
 import org.jbox2d.dynamics.Fixture
 import org.jbox2d.dynamics.contacts.Contact
 import ch.fhnw.ether.scene.mesh.material.Texture
+import ch.fhnw.cpthook.SoundManager
 
 abstract class Block(var position: Position, var size: Size, var texture: Texture) extends Entity {
   def getFriction: Float
@@ -111,8 +112,10 @@ class TrampolineBlock(position: Position, size: Size) extends Block(position, si
   def activate(gameContactListener: GameContactListener): Unit =
     if(body != null){ gameContactListener.register(this, body.getFixtureList) }
   //Apply jump effect when collision is detected
-  def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit =
+  def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = {
     other.getBody.setLinearVelocity(new org.jbox2d.common.Vec2(0, 20))
+    SoundManager.playSound(SoundManager.BumpSound, false, false)
+  }
   def endContact(self: Fixture, other: Fixture, contact: Contact): Unit = {}
 }
 

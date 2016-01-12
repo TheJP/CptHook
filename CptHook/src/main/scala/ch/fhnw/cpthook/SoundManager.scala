@@ -30,18 +30,28 @@ import javafx.scene.media.MediaPlayer
 object SoundManager {
   
   val AmbientSound = "ambient"
-  val LevelSound = "level"
+  val BlockPlaceSound = "place"
+  val BlockRemoveSound = "remove"
+  val BumpSound = "bump"
+  val BumpLoopSound = "bumploop"
   val JumpSound = "jump"
+  val LevelSound = "level"
   
   private val sounds = Map(
     AmbientSound -> "./sounds/ambient.mp3",
-    LevelSound -> "./sounds/level.mp3",
-    JumpSound -> "./sounds/jump.mp3"
+    BlockPlaceSound -> "./sounds/blockplace.mp3",
+    BlockRemoveSound -> "./sounds/blockremove.mp3",
+    BumpSound -> "./sounds/bump.mp3",
+    BumpLoopSound -> "./sounds/bumploop.mp3",
+    JumpSound -> "./sounds/jump.mp3",
+    LevelSound -> "./sounds/level.mp3"
   )
   
   private var clipsLock = new ReentrantLock()
   private var clips: Map[String, MutableList[AudioClip]] = Map()
-  
+
+  def playEffect(sound: String) = playSound(sound, 1.0f, false, false)
+
   def playSound(sound: String, loop: Boolean, stopOthers: Boolean): Unit = playSound(sound, 1.0f, loop, stopOthers)
   
   def playSound(sound: String, gain: Float, loop: Boolean, stopOthers: Boolean): Unit = {
@@ -49,7 +59,7 @@ object SoundManager {
     if (!sounds.contains(sound)) {
       return
     }
-    
+
     if (!clips.contains(sound)) {
       clipsLock.lock()
       clips += (sound -> MutableList())
