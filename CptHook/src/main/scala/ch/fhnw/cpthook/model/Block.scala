@@ -46,6 +46,11 @@ class LavaBlock(position: Position, size: Size) extends Block(position, size, ".
   def getRestitution = 0.1f
 }
 
+class TargetBlock(position: Position, size: Size) extends Block(position, size, "../assets/target.png") {
+  def getFriction = 0.2f
+  def getRestitution = 0.1f
+}
+
 object Block {
   
   /**

@@ -38,6 +38,7 @@ import ch.fhnw.ether.scene.mesh.IMesh
 import ch.fhnw.cpthook.model.DirtBlock
 import ch.fhnw.cpthook.model.IceBlock
 import ch.fhnw.cpthook.model.LavaBlock
+import ch.fhnw.cpthook.model.TargetBlock
 
 /**
  * Tool, which is used in the editor.
@@ -67,19 +68,13 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   type EntityFactory = (Position, Size) => Entity
   
   // Tuples with entities that can be added
-  val editorMeshes: Map[IMesh, EntityFactory] = Map(
-      new GrassBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new GrassBlock(p, s)),
-      new DirtBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new DirtBlock(p, s)),
-      new IceBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new IceBlock(p, s)),
-      new LavaBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new LavaBlock(p, s))
-  )
-  
-  /*
-   * ,
-      new DirtBlock(Position(0, 0), Size(1, 1)).toMesh(),
-      new LavaBlock(Position(0, 0), Size(1, 1)).toMesh(),
-      new IceBlock(Position(0, 0), Size(1, 1)).toMesh()
-   */
+  val editorMeshes = List(
+    (p, s) => new GrassBlock(p, s),
+    (p, s) => new DirtBlock(p, s),
+    (p, s) => new IceBlock(p, s),
+    (p, s) => new LavaBlock(p, s),
+    (p, s) => new TargetBlock(p, s)
+  ) map { npo => (npo(Position(0, 0), Size(1, 1)).toMesh(), npo) }
 
   object EditingState extends Enumeration { val Adding, Removing = Value }
   /** Determines, if the user is currently adding or removing elements. */
