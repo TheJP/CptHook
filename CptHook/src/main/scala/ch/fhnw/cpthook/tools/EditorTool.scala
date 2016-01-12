@@ -65,6 +65,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     (p, s) => new IceBlock(p, s),
     (p, s) => new LavaBlock(p, s),
     (p, s) => new TargetBlock(p, s),
+    (p, s) => new TrampolineBlock(p, s),
     (p: Position, s: Size) => new Monster(p)
   ) map { npo => (npo(Position(0, 0), Size(1, 1)).toMesh(), npo) }
 

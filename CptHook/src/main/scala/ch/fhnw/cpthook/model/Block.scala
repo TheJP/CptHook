@@ -17,11 +17,15 @@ import org.jbox2d.collision.shapes.PolygonShape
 import org.jbox2d.dynamics.BodyType
 import org.jbox2d.dynamics.World
 import org.jbox2d.dynamics.Body
+import ch.fhnw.cpthook.tools.GameContactListener
+import ch.fhnw.cpthook.tools.ContactUpdates
+import org.jbox2d.dynamics.Fixture
+import org.jbox2d.dynamics.contacts.Contact
 
 abstract class Block(var position: Position, var size: Size, var material: ColorMapMaterial) extends Entity {
   def getFriction: Float
   def getRestitution: Float
-  
+
   def linkBox2D(world: World): Unit = Block.createDefaultBox2D(world, this)
   def toMesh(): ch.fhnw.ether.scene.mesh.IMesh = Block.createDefaultCube(material, position, size)
 }
@@ -41,23 +45,69 @@ class IceBlock(position: Position, size: Size) extends Block(position, size, Blo
   def getRestitution = 0.1f
 }
 
-class LavaBlock(position: Position, size: Size) extends Block(position, size, Block.LavaMaterial) {
+/**
+ * Block, which kills cpthook if he touches it.
+ */
+class LavaBlock(position: Position, size: Size) extends Block(position, size, Block.LavaMaterial) with EntityActivatable with ContactUpdates {
   def getFriction = 0.2f
   def getRestitution = 0.1f
+  //Store body, when available
+  var body: Body = null
+  override def linkBox2D(world: World): Unit = { body = Block.createDefaultBox2D(world, this) }
+  def deactivate(): Unit = { body = null }
+  def activate(gameContactListener: GameContactListener): Unit =
+      if(body != null) { gameContactListener.register(this, body.getFixtureList) }
+  //Kill when collision is detected
+  def beginContact(otherFixture: Fixture, contact: Contact): Unit = println("Player / Monster should die now")
+  def endContact(otherFixture: Fixture, contact: Contact): Unit = {}
 }
 
-class TargetBlock(position: Position, size: Size) extends Block(position, size, Block.TargetMaterial) {
+/**
+ * Block that describes one (of potentially many) targets in the containing level.
+ * If cpthook touches this block ingame the player wins.
+ */
+class TargetBlock(position: Position, size: Size) extends Block(position, size, Block.TargetMaterial) with EntityActivatable with ContactUpdates {
   def getFriction = 0.2f
   def getRestitution = 0.1f
+  //Store body, when available
+  var body: Body = null
+  override def linkBox2D(world: World): Unit = { body = Block.createDefaultBox2D(world, this) }
+  def activate(gameContactListener: GameContactListener): Unit =
+    if(body != null) { gameContactListener.register(this, body.getFixtureList) }
+  def deactivate(): Unit = { body = null }
+  //Win game detection
+  def beginContact(otherFixture: Fixture, contact: Contact): Unit = {
+    println("Win?") //TODO
+  }
+  def endContact(otherFixture: Fixture, contact: Contact): Unit = {}
+}
+
+/**
+ * Trampoline block for better jumping action.
+ */
+class TrampolineBlock(position: Position, size: Size) extends Block(position, size, Block.TrampolineMaterial) with EntityActivatable with ContactUpdates {
+  def getFriction = 0.2f
+  def getRestitution = 0.1f
+  //Store body, when available
+  var body: Body = null
+  override def linkBox2D(world: World): Unit = { body = Block.createDefaultBox2D(world, this) }
+  def deactivate(): Unit = { body = null }
+  def activate(gameContactListener: GameContactListener): Unit =
+		  if(body != null) { gameContactListener.register(this, body.getFixtureList) }
+  //Apply jump effect when collision is detected
+  def beginContact(otherFixture: Fixture, contact: Contact): Unit =
+    otherFixture.getBody.setLinearVelocity(new org.jbox2d.common.Vec2(0, 20))
+  def endContact(otherFixture: Fixture, contact: Contact): Unit = {}
 }
 
 object Block {
-  
+
   val GrassMaterial = Entity.loadMaterial("../assets/grass.png")
   val DirtMaterial = Entity.loadMaterial("../assets/dirt.png")
   val IceMaterial = Entity.loadMaterial("../assets/ice.png")
   val LavaMaterial = Entity.loadMaterial("../assets/lava.png")
   val TargetMaterial = Entity.loadMaterial("../assets/target.png")
+  val TrampolineMaterial = Entity.loadMaterial("../assets/jump.png")
 
   /**
    * Texture coordinates for default cube
@@ -73,8 +123,8 @@ object Block {
    * Creates a default cube with the given material.
    */
   def createDefaultCube(material: ColorMapMaterial, position: Vec3, size: Vec3) : IMesh = {
-    val g = DefaultGeometry.createVM(Primitive.TRIANGLES, MeshUtilities.UNIT_CUBE_TRIANGLES, textureCoordinates);
-    val mesh = new DefaultMesh(material, g, Queue.DEPTH)
+    val geometry = DefaultGeometry.createVM(Primitive.TRIANGLES, MeshUtilities.UNIT_CUBE_TRIANGLES, textureCoordinates);
+    val mesh = new DefaultMesh(material, geometry, Queue.DEPTH)
     mesh.setPosition(position add (size scale 0.5f))
     mesh.setTransform(Mat4 scale size)
     mesh
@@ -84,7 +134,7 @@ object Block {
    * Create a default Box2D model.
    * Square form and default values.
    */
-  def createDefaultBox2D(world: World, block: Block): Unit = {
+  def createDefaultBox2D(world: World, block: Block): Body = {
     val bodyDef: BodyDef = new BodyDef
     bodyDef.position.set(block.position.x + block.size.width / 2f, block.position.y + block.size.height / 2f)
     bodyDef.`type` = BodyType.STATIC
@@ -100,6 +150,7 @@ object Block {
     val body: Body = world.createBody(bodyDef)
     body.createFixture(fixtureDef)
     body.setUserData(block)
+    body
   }
   
 }

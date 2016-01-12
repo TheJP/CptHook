@@ -23,7 +23,9 @@ import ch.fhnw.util.math.Mat4
 import ch.fhnw.cpthook.SoundManager
 import ch.fhnw.cpthook.tools.GameContactListener
 
-
+/**
+ * TODO: Comment this shizzle
+ */
 class Player(var position: Position) extends Entity with EntitiyUpdatable
                                                     with EntityActivatable
                                                     with ContactUpdates {
@@ -86,7 +88,7 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
     currentDirection = 0
     mesh.setPosition(position)
   }
-  
+
   def update(inputManager: InputManager, time: Double): Unit = {
     
     if (body == null) {
@@ -103,21 +105,21 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
       currentRotation += 10
     }
     
-    if(time - timeOfAnimation > Math.abs(0.7/velocity.x) || time - timeOfAnimation > 0.2){
+    if(time - timeOfAnimation > Math.abs(0.7 / velocity.x) || time - timeOfAnimation > 0.2){
       timeOfAnimation = time
-      if (!isOnGround()) {
-        mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerJump.getColorMap())
+      if (!isOnGround) {
+        mesh.getMaterial.asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerJump.getColorMap)
       } else {
         if(Math.abs(velocity.x) < 0.5) {
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(materialPlayer.getColorMap())
+          mesh.getMaterial.asInstanceOf[ColorMapMaterial].setColorMap(materialPlayer.getColorMap)
         } else {
-          mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(walkingAnimation(stepAnimation).getColorMap)
+          mesh.getMaterial.asInstanceOf[ColorMapMaterial].setColorMap(walkingAnimation(stepAnimation).getColorMap)
           stepAnimation = (stepAnimation + 1) % walkingAnimation.length;
         } 
       }
     }
     
-    mesh.setPosition(new Vec3(body.getPosition.x, body.getPosition.y,0.5))
+    mesh.setPosition(new Vec3(body.getPosition.x, body.getPosition.y, 0.5))
     
     if (inputManager.keyPressed(KeyEvent.VK_RIGHT)) {
       body.setLinearVelocity(velocity.add(new org.jbox2d.common.Vec2(Player.MoveVelocity, 0f)))
@@ -147,13 +149,13 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
     }
   }
   
-  def beginContact(otherFixture: Fixture,contact: Contact): Unit = {
+  def beginContact(otherFixture: Fixture, contact: Contact): Unit = {
     println("begin")
     jumpCount = 2
     onGroundCount += 1
   }
   
-  def endContact(otherFixture: org.jbox2d.dynamics.Fixture,contact: org.jbox2d.dynamics.contacts.Contact): Unit = {
+  def endContact(otherFixture: Fixture, contact: Contact): Unit = {
     onGroundCount -= 1
   }
   
