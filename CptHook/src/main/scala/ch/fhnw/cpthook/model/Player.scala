@@ -147,13 +147,13 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
     }
   }
   
-  def beginContact(otherFixture: Fixture,contact: Contact): Unit = {
+  def beginContact(self: Fixture, other: Fixture,contact: Contact): Unit = {
     println("begin")
     jumpCount = 2
     onGroundCount += 1
   }
   
-  def endContact(otherFixture: org.jbox2d.dynamics.Fixture,contact: org.jbox2d.dynamics.contacts.Contact): Unit = {
+  def endContact(self: Fixture, other: Fixture,contact: Contact): Unit = {
     onGroundCount -= 1
   }
   

@@ -17,22 +17,22 @@ class GameContactListener extends ContactListener {
   def beginContact(contact: Contact): Unit = {
     var optionalListener = listeners.get(contact.getFixtureA)
     if(optionalListener.isDefined) {
-      optionalListener.get.beginContact(contact.getFixtureB, contact)
+      optionalListener.get.beginContact(contact.getFixtureA, contact.getFixtureB, contact)
     }
     optionalListener = listeners.get(contact.getFixtureB)
     if(optionalListener.isDefined) {
-      optionalListener.get.beginContact(contact.getFixtureA, contact)
+      optionalListener.get.beginContact(contact.getFixtureB, contact.getFixtureA, contact)
     }
   }
   
   def endContact(contact: Contact): Unit = {
     var optionalListener = listeners.get(contact.getFixtureA)
     if(optionalListener.isDefined) {
-      optionalListener.get.endContact(contact.getFixtureB, contact)
+      optionalListener.get.endContact(contact.getFixtureA, contact.getFixtureB, contact)
     }
     optionalListener = listeners.get(contact.getFixtureB)
     if(optionalListener.isDefined) {
-      optionalListener.get.endContact(contact.getFixtureA, contact)
+      optionalListener.get.endContact(contact.getFixtureB, contact.getFixtureA, contact)
     }
   }
   
@@ -43,6 +43,6 @@ class GameContactListener extends ContactListener {
 }
 
 trait ContactUpdates {
-  def beginContact(otherFixture: Fixture, contact: Contact): Unit
-  def endContact(otherFixture: Fixture, contact: Contact): Unit
+  def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit
+  def endContact(self: Fixture, other: Fixture, contact: Contact): Unit
 }
