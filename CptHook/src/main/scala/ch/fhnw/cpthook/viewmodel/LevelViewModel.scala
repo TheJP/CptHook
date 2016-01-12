@@ -2,7 +2,7 @@ package ch.fhnw.cpthook.viewmodel
 
 import scala.collection.breakOut
 import ch.fhnw.cpthook.model.Level
-import ch.fhnw.cpthook.model.Npo
+import ch.fhnw.cpthook.model.Entity
 import ch.fhnw.cpthook.model.Player
 import ch.fhnw.cpthook.model.Position
 import ch.fhnw.ether.scene.I3DObject
@@ -12,16 +12,17 @@ import ch.fhnw.ether.scene.mesh.material.ShadedMaterial
 import ch.fhnw.util.color.RGB
 import ch.fhnw.cpthook.json.JsonSerializer
 import ch.fhnw.cpthook.model.SkyBox
+import ch.fhnw.ether.scene.mesh.IMesh
 
 /**
  * Converts Level objects to 3d objects, which can be added to a Ether-GL IScene.
  * It also defines actions, which can be executed from the view.
  */
 trait ILevelViewModel {
-  def get3DObjects: Iterable[I3DObject]
-  def npos: Map[Npo, I3DObject]
-  def removeNpo(npo: Npo): Unit
-  def addNpo(npo: Npo): Unit
+  def getMeshes: Iterable[IMesh]
+  def entities: Map[Entity, IMesh]
+  def removeNpo(entity: Entity): Unit
+  def addNpo(entity: Entity): Unit
   def getPlayer: Player
   def saveLevel(filename: String): Unit
   def openLevel(filename: String): Unit
@@ -35,24 +36,24 @@ class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILe
   // special player handling for now
   private var player: Player = null
   private var level: Level = null
-  private var meshes: Map[Npo, I3DObject] = Map()
+  private var meshes: Map[Entity, IMesh] = Map()
 
   loadLevel(initialLevel)
 
   //Player indicator: map += ???
-  def get3DObjects = meshes.values
-  def npos = meshes
+  def getMeshes = meshes.values
+  def entities = meshes
 
-  def removeNpo(npo: Npo): Unit = {
-    scene.remove3DObject(meshes(npo))
-    meshes -= npo
-    level.npos = level.npos filter { _ != npo } //TODO: Improve model => no linear search
+  def removeNpo(entity: Entity): Unit = {
+    scene.remove3DObject(meshes(entity))
+    meshes -= entity
+    level.entities = level.entities filter { _ != entity } //TODO: Improve model => no linear search
   }
 
-  def addNpo(npo: Npo): Unit = {
-    meshes += (npo -> npo.to3DObject)
-    level.npos ::= npo
-    scene.add3DObject(meshes(npo))
+  def addNpo(entity: Entity): Unit = {
+    meshes += (entity -> entity.toMesh())
+    level.entities ::= entity
+    scene.add3DObject(meshes(entity))
   }
 
   def getPlayer = player
@@ -70,7 +71,7 @@ class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILe
     //Load new ones
     this.level = level
     player = new Player(level.start)
-    meshes = level.npos.map(npo => (npo, npo.to3DObject))(breakOut)
+    meshes = level.entities.map(entity => (entity, entity.toMesh()))(breakOut)
     scene.add3DObjects(meshes.values.toList:_*)
     scene.add3DObject(player.mesh)
   }

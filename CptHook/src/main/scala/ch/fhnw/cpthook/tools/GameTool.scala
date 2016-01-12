@@ -8,7 +8,7 @@ import ch.fhnw.ether.controller.tool.PickUtilities
 import ch.fhnw.ether.controller.tool.PickUtilities.PickMode
 import ch.fhnw.ether.scene.camera.ICamera
 import ch.fhnw.ether.scene.I3DObject
-import ch.fhnw.cpthook.model.Npo
+import ch.fhnw.cpthook.model.Entity
 import ch.fhnw.ether.controller.event.IKeyEvent
 import com.jogamp.newt.event.KeyEvent
 import ch.fhnw.ether.controller.event.IEventScheduler.IAnimationAction
@@ -49,7 +49,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     //SoundManager.playSong(SoundManager.Level)
 
     // create toBox2D models for blocks
-    viewModel.npos.keys.map {npo => (npo.toBox2D, npo)} foreach { definition =>
+    viewModel.entities.keys.map {npo => (npo.toBox2D, npo)} foreach { definition =>
       val body: Body = world.createBody(definition._1._1)
       body.createFixture(definition._1._2)
       body.setUserData(definition._2)

@@ -4,9 +4,7 @@ import com.jogamp.newt.event.KeyEvent
 import ch.fhnw.cpthook.Defaults
 import ch.fhnw.cpthook.ICptHookController
 import ch.fhnw.cpthook.model.GrassBlock
-import ch.fhnw.cpthook.model.Ice
-import ch.fhnw.cpthook.model.Lava
-import ch.fhnw.cpthook.model.Npo
+import ch.fhnw.cpthook.model.Entity
 import ch.fhnw.cpthook.model.Position
 import ch.fhnw.cpthook.model.Position
 import ch.fhnw.cpthook.model.Size
@@ -30,6 +28,16 @@ import javax.swing.JFileChooser
 import ch.fhnw.cpthook.SoundManager
 import javax.swing.SwingUtilities
 import ch.fhnw.ether.controller.event.IEventScheduler.IAction
+import ch.fhnw.cpthook.model.GrassBlock
+import ch.fhnw.cpthook.model.LavaBlock
+import ch.fhnw.cpthook.model.IceBlock
+import ch.fhnw.cpthook.model.GrassBlock
+import ch.fhnw.cpthook.model.DirtBlock
+import ch.fhnw.cpthook.model.Block
+import ch.fhnw.ether.scene.mesh.IMesh
+import ch.fhnw.cpthook.model.DirtBlock
+import ch.fhnw.cpthook.model.IceBlock
+import ch.fhnw.cpthook.model.LavaBlock
 
 /**
  * Tool, which is used in the editor.
@@ -55,25 +63,29 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   var currentBlockScale: Float = 1f
   @volatile var cameraNeedsUpdate: Boolean = true
 
-  //Factories
-  val blockFactory = GrassBlock(_, _)
-  val lavaFactory = Lava(_, _)
-  val iceFactory = Ice(_, _)
 
-  //Tuples with npo factories and meshes
-  //TODO: Remove unsafe cast
-  val editorMeshes = List(
-      (blockFactory, blockFactory(Position(0, 0),  Size(1, 1)).to3DObject.asInstanceOf[DefaultMesh]),
-      (lavaFactory, lavaFactory(Position(0, 0),  Size(1, 1)).to3DObject.asInstanceOf[DefaultMesh]),
-      (iceFactory, iceFactory(Position(0, 0),  Size(1, 1)).to3DObject.asInstanceOf[DefaultMesh])
-  );
-  editorMeshes foreach { mesh => mesh._2.setTransform(Mat4 scale GuiBlockSize) }
+  type EntityFactory = (Position, Size) => Entity
+  
+  // Tuples with entities that can be added
+  val editorMeshes: Map[IMesh, EntityFactory] = Map(
+      new GrassBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new GrassBlock(p, s)),
+      new DirtBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new DirtBlock(p, s)),
+      new IceBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new IceBlock(p, s)),
+      new LavaBlock(Position(0, 0), Size(1, 1)).toMesh() -> ((p, s) => new LavaBlock(p, s))
+  )
+  
+  /*
+   * ,
+      new DirtBlock(Position(0, 0), Size(1, 1)).toMesh(),
+      new LavaBlock(Position(0, 0), Size(1, 1)).toMesh(),
+      new IceBlock(Position(0, 0), Size(1, 1)).toMesh()
+   */
 
   object EditingState extends Enumeration { val Adding, Removing = Value }
   /** Determines, if the user is currently adding or removing elements. */
   var editingState = EditingState.Adding
   /** Current factory, which is used to add Npos. */
-  var currentFactory: (Position, Size) => Npo = blockFactory
+  var currentFactory: EntityFactory = editorMeshes.head._2
   /** Current size, which is used when adding Npos. */
   var currentSize = () => Size(1, 1) //Size is mutable, so it has to be a factory
   
@@ -85,14 +97,14 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     //TODO: To slow loading.. has to be fixed
     //SoundManager.playSong(SoundManager.Ambient)
 
-    editorMeshes.foreach { mesh => controller.getScene.add3DObject(mesh._2) }
+    addEditorMeshes
     cameraNeedsUpdate = true
     controller.animate(this)
   }
 
   override def deactivate = {
     SoundManager.stopAll()
-    editorMeshes.foreach { mesh => controller.getScene.remove3DObject(mesh._2) }
+    removeEditorMeshes
     cameraNeedsUpdate = true
     controller.kill(this)
   }
@@ -103,6 +115,20 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   private def updateCamera : Unit = {
     camera.setTarget(new Vec3(offsetX, 0, 1))
     camera.setPosition(new Vec3(offsetX, 0, offsetZ))
+  }
+  
+  /**
+   * Adds all editor meshes
+   */
+  private def addEditorMeshes: Unit =  {
+     editorMeshes.foreach { editorMesh => controller.getScene.add3DObject(editorMesh._1) }
+  }
+  
+  /**
+   * Removes all editor meshes
+   */
+  private def removeEditorMeshes: Unit =  {
+     editorMeshes.foreach { editorMesh => controller.getScene.remove3DObject(editorMesh._1) }
   }
 
   /**
@@ -122,7 +148,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     currentBlockScale = 70 * xFactor
 
     var i = 0
-    editorMeshes.map(_._2).foreach { mesh =>
+    editorMeshes.map(_._1).foreach { mesh =>
       mesh.setTransform(Mat4.multiply(Mat4.rotate(currentBlockRotation, 0, 1, 0), Mat4.scale(currentBlockScale)))
       mesh.setPosition(right.add(new Vec3(-100 * xFactor, i * 100 * xFactor, 0)))
       i += 1
@@ -148,7 +174,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   private def clickedControl(event: IPointerEvent)(implicit viewCameraState: IViewCameraState): Boolean = {
     val hitDistance = (mesh: I3DObject) => this.hitDistance(mesh, event.getX, event.getY)
     val hits = editorMeshes
-      .map(mesh => (hitDistance(mesh._2) -> mesh._1))
+      .map(mesh => (hitDistance(mesh._1) -> mesh._2))
       .filter(_._1 < Float.PositiveInfinity)
     if(hits.isEmpty) { false }
     else {
@@ -175,9 +201,9 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   /**
    * Finds nearest clicked block. If no block was clicked null is returned.
    */
-  private def findNearest(event: IPointerEvent)(implicit viewCameraState: IViewCameraState): Npo = {
+  private def findNearest(event: IPointerEvent)(implicit viewCameraState: IViewCameraState): Entity = {
     val hitDistance = (mesh: I3DObject) => this.hitDistance(mesh, event.getX, event.getY)
-    val hits = viewModel.npos
+    val hits = viewModel.entities
       .map(npo => (hitDistance(npo._2) -> npo._1))
       .filter(_._1 < Float.PositiveInfinity)
     if(!hits.isEmpty) { return hits.minBy(_._1)._2 }
@@ -197,7 +223,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
       startX = event.getX
       //Hide editor meshes while moving (because they are very jittery)
-      editorMeshes.foreach { mesh => controller.getScene.remove3DObject(mesh._2) }
+      removeEditorMeshes
     case IPointerEvent.BUTTON_1 =>
       implicit val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
       val control = clickedControl(event)
@@ -212,7 +238,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   override def pointerReleased(event: IPointerEvent): Unit = event.getButton match {
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
       //Add editor meshes back after moving
-      editorMeshes.foreach { mesh => controller.getScene.add3DObject(mesh._2) }
+      addEditorMeshes
     case default => //Unknown key
   }
 
@@ -290,7 +316,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       updateGuiPositions
     }
     
-    editorMeshes map {_._2} foreach { mesh =>
+    editorMeshes map {_._1} foreach { mesh =>
       mesh.setTransform(Mat4.multiply(Mat4.rotate(currentBlockRotation, 0, 1, 0), Mat4.scale(currentBlockScale)))
     }
   }
