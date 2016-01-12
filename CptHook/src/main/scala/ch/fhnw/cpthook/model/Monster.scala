@@ -21,7 +21,11 @@ import org.jbox2d.dynamics.Body
 import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
 import ch.fhnw.util.math.Mat4
 
-class Monster(var position: Position) extends Entity with EntitiyUpdatable with EntityActivatable with ContactUpdates {
+class Monster(var position: Position) extends Entity
+  with EntitiyUpdatable
+  with EntityActivatable
+  with ContactUpdates
+  with IGameStateChanger {
   
   var mesh: IMesh = null
   var body: Body = null
@@ -29,13 +33,15 @@ class Monster(var position: Position) extends Entity with EntitiyUpdatable with 
   var rightSensor: Fixture = null
   
   var velocity: Float = -Monster.Speed
-  
-  
+
   // animation
   var animationStep = 0
   var lastTimeOfAnimation: Double = 0.0
   var currentRotation: Double = 0.0
-  
+
+  private var controller: IGameStateController = null;
+  def init(controller: IGameStateController): Unit = { this.controller = controller }
+
   def toMesh(): IMesh = Monster.toMesh(this)
   def linkBox2D(world: World): Unit = Monster.linkBox2d(this, world)
   
@@ -86,6 +92,10 @@ class Monster(var position: Position) extends Entity with EntitiyUpdatable with 
     } else if (self == rightSensor && other.getBody.getUserData.isInstanceOf[Block] ) {
       velocity = -Monster.Speed
     } else {}
+
+    if(other.getBody.getUserData.isInstanceOf[Player] && controller != null){
+      controller.gameOver
+    }
   }
   
   def endContact(self: Fixture, other: Fixture,contact: Contact): Unit = {
