@@ -45,8 +45,8 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   var lastX = 0.0
   var lastY = 0.0
   
-  var updateableEntites: List[EntitiyUpdatable] = List() 
-  var activatableEntites: List[EntityActivatable] = List()
+  var updateableEntites = List[EntitiyUpdatable]()
+  var activatableEntites = List[EntityActivatable]()
 
   override def activate(): Unit = {
 
@@ -59,19 +59,19 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     viewModel.entities.foreach(_._1.linkBox2D(world));
     viewModel.entities.keys.foreach { entity => 
       if (entity.isInstanceOf[EntitiyUpdatable]) {
-        updateableEntites = updateableEntites :+ entity.asInstanceOf[EntitiyUpdatable]
+        updateableEntites ::= entity.asInstanceOf[EntitiyUpdatable]
       }
       if (entity.isInstanceOf[EntityActivatable]) {
-        activatableEntites = activatableEntites :+ entity.asInstanceOf[EntityActivatable]
+        activatableEntites ::= entity.asInstanceOf[EntityActivatable]
       }
     }
     // link player to box2D
     viewModel.getPlayer.linkBox2D(world)
     if (viewModel.getPlayer.isInstanceOf[EntitiyUpdatable]) {
-      updateableEntites = updateableEntites :+ viewModel.getPlayer.asInstanceOf[EntitiyUpdatable]
+      updateableEntites ::= viewModel.getPlayer.asInstanceOf[EntitiyUpdatable]
     }
     if (viewModel.getPlayer.isInstanceOf[EntityActivatable]) {
-      activatableEntites = activatableEntites :+ viewModel.getPlayer.asInstanceOf[EntityActivatable]
+      activatableEntites ::= viewModel.getPlayer.asInstanceOf[EntityActivatable]
     }
     
     world.setContactListener(gameContactListener)
