@@ -29,6 +29,8 @@ import ch.fhnw.util.math.Mat4
 import ch.fhnw.util.math.Vec3
 import javax.swing.JFileChooser
 import ch.fhnw.cpthook.SoundManager
+import javax.swing.SwingUtilities
+import ch.fhnw.ether.controller.event.IEventScheduler.IAction
 
 /**
  * Tool, which is used in the editor.
@@ -252,17 +254,29 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     case KeyEvent.VK_M =>
       controller.setCurrentTool(new GameTool(controller, camera, viewModel))
     case KeyEvent.VK_S if event.isControlDown =>
-      val fileChooser = new JFileChooser
-      fileChooser.setDialogTitle("Save Level")
-      if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
-        viewModel.saveLevel(fileChooser.getSelectedFile.getAbsolutePath)
-      }
+      SwingUtilities.invokeLater(new Runnable() {
+    		def run(): Unit = {
+    			val fileChooser = new JFileChooser
+          fileChooser.setDialogTitle("Save Level")
+          if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
+            viewModel.saveLevel(fileChooser.getSelectedFile.getAbsolutePath)
+          }
+    		}
+    	})
+      
     case KeyEvent.VK_O if event.isControlDown =>
-      val fileChooser = new JFileChooser
-      fileChooser.setDialogTitle("Open Level")
-      if(fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
-        viewModel.openLevel(fileChooser.getSelectedFile.getAbsolutePath)
-      }
+      SwingUtilities.invokeLater(new Runnable() {
+    		def run(): Unit = {
+    		  val fileChooser = new JFileChooser
+          fileChooser.setDialogTitle("Open Level")
+          if(fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
+            controller.run(new IAction() {
+              def run(t: Double): Unit = viewModel.openLevel(fileChooser.getSelectedFile.getAbsolutePath)
+            })
+          }
+    		}
+      })
+      
     case default => //Unknown key
   }
 
