@@ -20,6 +20,7 @@ import ch.fhnw.cpthook.InputManager
 import org.jbox2d.dynamics.World
 import ch.fhnw.cpthook.tools.GameContactListener
 import ch.fhnw.ether.scene.mesh.material.Texture
+import org.jbox2d.dynamics.Body
 
 abstract class Entity {
   def toMesh(): IMesh
@@ -33,6 +34,23 @@ trait EntitiyUpdatable {
 trait EntityActivatable {
   def activate(gameContactListener: GameContactListener): Unit
   def deactivate(): Unit
+}
+
+/**
+ * Trait that allows an entity to change the game state.
+ * (This includes transitions like GameOver or Win.)
+ */
+trait IGameStateChanger {
+  def init(controller: IGameStateController)
+}
+
+/**
+ * Trait that defines functions to change the game state.
+ */
+trait IGameStateController {
+  def gameOver
+  def win
+  def killMonser(body: Body)
 }
 
 object Entity {

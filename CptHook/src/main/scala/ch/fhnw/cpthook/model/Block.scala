@@ -31,6 +31,16 @@ abstract class Block(var position: Position, var size: Size, var texture: Textur
   def toMesh(): ch.fhnw.ether.scene.mesh.IMesh = Block.createDefaultCube(texture, position, size)
 }
 
+/**
+ * Block, which allows access to a game state controller.
+ */
+abstract class GameStateBlock(position: Position, size: Size, texture: Texture) extends Block(position, size, texture) with IGameStateChanger {
+  private var controller: IGameStateController = null;
+  /** Returns the controller. Can be null! */
+  def getController = controller
+  def init(controller: IGameStateController): Unit = { this.controller = controller }
+}
+
 class GrassBlock(position: Position, size: Size) extends Block(position, size, Block.GrassTexture) {
   def getFriction = 0.2f
   def getRestitution = 0.1f
@@ -49,7 +59,7 @@ class IceBlock(position: Position, size: Size) extends Block(position, size, Blo
 /**
  * Block, which kills cpthook if he touches it.
  */
-class LavaBlock(position: Position, size: Size) extends Block(position, size, Block.LavaTexture) with EntityActivatable with ContactUpdates {
+class LavaBlock(position: Position, size: Size) extends GameStateBlock(position, size, Block.LavaTexture) with EntityActivatable with ContactUpdates {
   def getFriction = 0.2f
   def getRestitution = 0.1f
   //Store body, when available
@@ -59,7 +69,11 @@ class LavaBlock(position: Position, size: Size) extends Block(position, size, Bl
   def activate(gameContactListener: GameContactListener): Unit =
       if(body != null) { gameContactListener.register(this, body.getFixtureList) }
   //Kill when collision is detected
-  def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = println("Player / Monster should die now")
+  def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = other.getBody.getUserData match {
+    case player: Player => if(getController != null){ getController.gameOver }
+    case monster: Monster => if(getController != null){ getController.killMonser(other.getBody) }
+    case _ =>
+  }
   def endContact(self: Fixture, other: Fixture, contact: Contact): Unit = {}
 }
 
@@ -67,18 +81,19 @@ class LavaBlock(position: Position, size: Size) extends Block(position, size, Bl
  * Block that describes one (of potentially many) targets in the containing level.
  * If cpthook touches this block ingame the player wins.
  */
-class TargetBlock(position: Position, size: Size) extends Block(position, size, Block.TargetTexture) with EntityActivatable with ContactUpdates {
+class TargetBlock(position: Position, size: Size) extends GameStateBlock(position, size, Block.TargetTexture) with EntityActivatable with ContactUpdates {
   def getFriction = 0.2f
   def getRestitution = 0.1f
   //Store body, when available
   var body: Body = null
   override def linkBox2D(world: World): Unit = { body = Block.createDefaultBox2D(world, this) }
   def activate(gameContactListener: GameContactListener): Unit =
-    if(body != null) { gameContactListener.register(this, body.getFixtureList) }
+    if(body != null){ gameContactListener.register(this, body.getFixtureList) }
   def deactivate(): Unit = { body = null }
   //Win game detection
-  def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = {
-    println("Win?") //TODO
+  def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = other.getBody.getUserData match {
+    case player: Player => if(getController != null){ getController.win }
+    case _ =>
   }
   def endContact(self: Fixture, other: Fixture, contact: Contact): Unit = {}
 }
@@ -94,7 +109,7 @@ class TrampolineBlock(position: Position, size: Size) extends Block(position, si
   override def linkBox2D(world: World): Unit = { body = Block.createDefaultBox2D(world, this) }
   def deactivate(): Unit = { body = null }
   def activate(gameContactListener: GameContactListener): Unit =
-		  if(body != null) { gameContactListener.register(this, body.getFixtureList) }
+    if(body != null){ gameContactListener.register(this, body.getFixtureList) }
   //Apply jump effect when collision is detected
   def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit =
     other.getBody.setLinearVelocity(new org.jbox2d.common.Vec2(0, 20))
