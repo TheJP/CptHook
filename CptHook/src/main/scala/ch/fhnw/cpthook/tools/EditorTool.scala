@@ -310,12 +310,12 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
    */
   def run(time: Double, interval: Double) : Unit = {
     currentBlockRotation = (currentBlockRotation + 1) % 360
-    
+
     if (cameraNeedsUpdate) {
       updateCamera
       updateGuiPositions
     }
-    
+
     editorMeshes map {_._1} foreach { mesh =>
       mesh.setTransform(Mat4.multiply(Mat4.rotate(currentBlockRotation, 0, 1, 0), Mat4.scale(currentBlockScale)))
     }
