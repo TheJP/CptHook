@@ -18,6 +18,7 @@ import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import scala.collection.mutable.MutableList
 import scala.collection.mutable.Map
+import javax.sound.sampled.FloatControl
 
 /**
  * Object that manages, which sounds are currently played.
@@ -44,7 +45,9 @@ object SoundManager {
     return null
   }
   
-  def playSound(sound: String, loop: Boolean, stopOthers: Boolean): Unit = {
+  def playSound(sound: String, loop: Boolean, stopOthers: Boolean): Unit = playSound(sound, 1.0f, loop, stopOthers)
+  
+  def playSound(sound: String, gain: Float, loop: Boolean, stopOthers: Boolean): Unit = {
     
     if (!sounds.contains(sound)) {
       return
@@ -67,6 +70,9 @@ object SoundManager {
     if (loop) {
       clip.loop(Clip.LOOP_CONTINUOUSLY)
     }
+    val gainControl = clip.getControl(FloatControl.Type.MASTER_GAIN).asInstanceOf[FloatControl];
+    val dB = (Math.log(gain)/Math.log(10.0)*20.0).toFloat;
+    gainControl.setValue(dB)
     clip.start
     
     clipsLock.lock()
