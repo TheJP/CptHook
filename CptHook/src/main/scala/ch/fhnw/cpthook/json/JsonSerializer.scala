@@ -19,10 +19,14 @@ object JsonSerializer extends LevelSerializer {
       stream => read[Level](StreamInput(stream))
     }
   }
+  
+  def readLevelFromString(data: String): Level = { read[Level](data) }
 
   def writeLevel(filename: String, level: Level): Unit = {
     loan(new PrintWriter(filename, "UTF-8")) to {
       writer => writePretty[Level, PrintWriter](level, writer)
     }
   }
+  
+  def writeLevelToString(level: Level): String = { writePretty[Level](level) }
 }

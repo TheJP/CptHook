@@ -45,7 +45,6 @@ object SoundManager {
   def playSound(sound: String, loop: Boolean, stopOthers: Boolean): Unit = playSound(sound, 1.0f, loop, stopOthers)
   
   def playSound(sound: String, gain: Float, loop: Boolean, stopOthers: Boolean): Unit = {
-    
     if (!sounds.contains(sound)) {
       return
     }
@@ -64,7 +63,7 @@ object SoundManager {
     if (loop) {
       audioClip.setCycleCount(MediaPlayer.INDEFINITE)
     }
-    audioClip.setVolume(gain)
+    audioClip.setBalance(gain)
     audioClip.play()
     
 

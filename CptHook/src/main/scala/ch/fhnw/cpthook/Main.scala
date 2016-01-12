@@ -15,6 +15,10 @@ import ch.fhnw.cpthook.viewmodel.LevelViewModel
 import ch.fhnw.util.math.Vec3
 import ch.fhnw.ether.scene.light.PointLight
 import ch.fhnw.cpthook.tools.EditorTool
+import ch.fhnw.cpthook.server.ServerApi
+import java.util.function.Consumer
+import java.util.concurrent.CountDownLatch
+import ch.fhnw.cpthook.server.LevelBrowser
 
 trait Context {
   def controller: ICptHookController

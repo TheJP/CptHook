@@ -110,14 +110,14 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   
   def setupUI(): Unit = {
     
-    var switchModeButton = new Button(0, 0, "Play...", "Switches to play mode", KeyEvent.VK_M, new IButtonAction() {
+    var switchModeButton = new Button(0, 0, "Play", "Switches to play mode", KeyEvent.VK_M, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         EtherHacks.removeWidgets(controller)
         controller.setCurrentTool(new GameTool(controller, camera, viewModel))   
       }
     })
     
-    var loadLevelButton = new Button(0, 1, "Load...", "Load level from file", KeyEvent.VK_O, new IButtonAction() {
+    var loadLevelButton = new Button(0, 1, "Load", "Load level from file", KeyEvent.VK_O, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         var level = LevelLoader.loadFromFile()
         if (level != null) {
@@ -126,13 +126,28 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       }
     })
     
-    var saveLevelButton = new Button(0, 2, "Save...", "Save level to file", KeyEvent.VK_S, new IButtonAction() {
+    var saveLevelButton = new Button(0, 2, "Save", "Save level to file", KeyEvent.VK_S, new IButtonAction() {
       def execute(button: Button, view: IView) = { LevelLoader.saveToFile(viewModel.getLevel) }
+    })
+    
+    var browseLevelButton = new Button(0, 3, "Browse", "Browse levels from server", KeyEvent.VK_B, new IButtonAction() {
+      def execute(button: Button, view: IView) = {
+        var level = LevelLoader.loadFromServer()
+        if (level != null) {
+          viewModel.loadLevel(level)
+        }
+      }
+    })
+    
+    var uploadLevelButton = new Button(0, 4, "Upload", "Upload level to server", KeyEvent.VK_U, new IButtonAction() {
+      def execute(button: Button, view: IView) = { LevelLoader.pushToServer(viewModel.getLevel) }
     })
     
     controller.getUI.addWidget(switchModeButton)
     controller.getUI.addWidget(loadLevelButton)
     controller.getUI.addWidget(saveLevelButton)
+    controller.getUI.addWidget(browseLevelButton)
+    controller.getUI.addWidget(uploadLevelButton)
   }
 
   /**

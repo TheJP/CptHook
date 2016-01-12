@@ -6,6 +6,8 @@ import javax.swing.SwingUtilities
 import ch.fhnw.ether.controller.event.IEventScheduler.IAction
 import java.util.concurrent.CountDownLatch
 import ch.fhnw.cpthook.json.JsonSerializer
+import ch.fhnw.cpthook.server.LevelBrowser
+import ch.fhnw.cpthook.server.LevelUploader
 
 object LevelLoader {
 
@@ -44,6 +46,23 @@ object LevelLoader {
       }
     })
 
+    countDownLatch.await()
+  }
+
+  def loadFromServer(): Level = {
+    val countDownLatch = new CountDownLatch(1)
+    val levelBrowser = new LevelBrowser(countDownLatch)
+    countDownLatch.await()
+    if (levelBrowser.getResult == null) {
+      return null
+    } else {
+      return JsonSerializer.readLevelFromString(levelBrowser.getResult)
+    }
+  }
+  
+  def pushToServer(level: Level): Unit = {
+    val countDownLatch = new CountDownLatch(1)
+    val levelBrowser = new LevelUploader(JsonSerializer.writeLevelToString(level), countDownLatch)
     countDownLatch.await()
   }
 
