@@ -17,19 +17,21 @@ import org.jbox2d.collision.shapes.PolygonShape
 import org.jbox2d.dynamics.BodyType
 import ch.fhnw.ether.scene.mesh.IMesh
 import ch.fhnw.cpthook.InputManager
+import org.jbox2d.dynamics.World
+import ch.fhnw.cpthook.tools.GameContactListener
 
 abstract class Entity {
   def toMesh(): IMesh
-  def toBox2D(): (BodyDef, FixtureDef)
+  def linkBox2D(world: World): Unit
 }
 
 trait EntitiyUpdatable {
   def update(inputManager: InputManager, time: Double): Unit
 }
 
-trait EntitySubscribable {
-  def subscribe(): Unit
-  def unsubscribe(): Unit
+trait EntityActivatable {
+  def activate(gameContactListener: GameContactListener): Unit
+  def deactivate(): Unit
 }
 
 object Entity {

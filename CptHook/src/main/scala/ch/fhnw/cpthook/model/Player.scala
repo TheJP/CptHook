@@ -21,9 +21,12 @@ import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
 import ch.fhnw.util.math.Vec3
 import ch.fhnw.util.math.Mat4
 import ch.fhnw.cpthook.SoundManager
+import ch.fhnw.cpthook.tools.GameContactListener
 
 
-class Player(var position: Position) extends ContactUpdates {
+class Player(var position: Position) extends Entity with EntitiyUpdatable
+                                                    with EntityActivatable
+                                                    with ContactUpdates {
   
   var body: Body = null
   var jumpCount: Integer = 0
@@ -39,6 +42,8 @@ class Player(var position: Position) extends ContactUpdates {
   var timeOfAnimation: Double = 0.0
   var currentRotation: Double = 0.0
   var currentDirection: Integer = 0
+  
+  def toMesh(): IMesh = Player.createMesh(this)
   
   def linkBox2D(world: World): Unit = {
     val bodyDef = new BodyDef
@@ -64,12 +69,17 @@ class Player(var position: Position) extends ContactUpdates {
     body.createFixture(fixtureDef)
     body.createFixture(groundSensorFixtureDef)
     body.setUserData(this)
-    
-    jumpCount = 0
-    onGroundCount = 0
   }
   
-  def unlinkBox2D(world: World): Unit = {
+  def activate(gameContactListener: GameContactListener): Unit = {
+    jumpCount = 0
+    onGroundCount = 0
+    // register player update listener (Small hack here. Be aware that if you add a new fixture to the player
+    // this will no longer work!)
+    gameContactListener.register(this, body.getFixtureList)
+  }
+  
+  def deactivate(): Unit =  {
     body = null
     mesh.setTransform(Mat4.multiply(Mat4.rotate(-currentRotation.floatValue(), new Vec3(0, 1, 0)), mesh.getTransform))
     currentRotation = 0
@@ -138,6 +148,7 @@ class Player(var position: Position) extends ContactUpdates {
   }
   
   def beginContact(otherFixture: Fixture,contact: Contact): Unit = {
+    println("begin")
     jumpCount = 2
     onGroundCount += 1
   }

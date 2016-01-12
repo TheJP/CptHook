@@ -15,12 +15,14 @@ import ch.fhnw.ether.scene.mesh.IMesh.Queue
 import ch.fhnw.util.math.Mat4
 import org.jbox2d.collision.shapes.PolygonShape
 import org.jbox2d.dynamics.BodyType
+import org.jbox2d.dynamics.World
+import org.jbox2d.dynamics.Body
 
 abstract class Block(var position: Position, var size: Size, var materialPath: String) extends Entity {
   def getFriction: Float
   def getRestitution: Float
   
-  def toBox2D(): (org.jbox2d.dynamics.BodyDef, org.jbox2d.dynamics.FixtureDef) = Block.createDefaultBox2D(this)
+  def linkBox2D(world: World): Unit = Block.createDefaultBox2D(world, this)
   def toMesh(): ch.fhnw.ether.scene.mesh.IMesh = Block.createDefaultCube(materialPath, position, size)
 }
 
@@ -73,7 +75,7 @@ object Block {
    * Create a default Box2D model.
    * Square form and default values.
    */
-  def createDefaultBox2D(block: Block): (BodyDef, FixtureDef) = {
+  def createDefaultBox2D(world: World, block: Block): Unit = {
     val bodyDef: BodyDef = new BodyDef
     bodyDef.position.set(block.position.x + block.size.width / 2f, block.position.y + block.size.height / 2f)
     bodyDef.`type` = BodyType.STATIC
@@ -86,7 +88,9 @@ object Block {
     fixtureDef.friction = block.getFriction;
     fixtureDef.restitution = block.getRestitution;
 
-    (bodyDef, fixtureDef)
+    val body: Body = world.createBody(bodyDef)
+    body.createFixture(fixtureDef)
+    body.setUserData(block)
   }
   
 }
