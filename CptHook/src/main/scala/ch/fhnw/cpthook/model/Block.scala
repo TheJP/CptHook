@@ -26,33 +26,39 @@ abstract class Block(var position: Position, var size: Size, var material: Color
   def toMesh(): ch.fhnw.ether.scene.mesh.IMesh = Block.createDefaultCube(material, position, size)
 }
 
-class GrassBlock(position: Position, size: Size) extends Block(position, size, Block.grassMaterial) {
+class GrassBlock(position: Position, size: Size) extends Block(position, size, Block.GrassMaterial) {
   def getFriction = 0.2f
   def getRestitution = 0.1f
 }
 
-class DirtBlock(position: Position, size: Size) extends Block(position, size, Block.dirtMaterial) {
+class DirtBlock(position: Position, size: Size) extends Block(position, size, Block.DirtMaterial) {
   def getFriction = 0.2f
   def getRestitution = 0.1f
 }
 
-class IceBlock(position: Position, size: Size) extends Block(position, size, Block.iceMaterial) {
+class IceBlock(position: Position, size: Size) extends Block(position, size, Block.IceMaterial) {
   def getFriction = 0.2f
   def getRestitution = 0.1f
 }
 
-class LavaBlock(position: Position, size: Size) extends Block(position, size, Block.lavaMaterial) {
+class LavaBlock(position: Position, size: Size) extends Block(position, size, Block.LavaMaterial) {
+  def getFriction = 0.2f
+  def getRestitution = 0.1f
+}
+
+class TargetBlock(position: Position, size: Size) extends Block(position, size, Block.TargetMaterial) {
   def getFriction = 0.2f
   def getRestitution = 0.1f
 }
 
 object Block {
   
-  val grassMaterial = Entity.loadMaterial("../assets/grass.png")
-  val dirtMaterial = Entity.loadMaterial("../assets/dirt.png")
-  val iceMaterial = Entity.loadMaterial("../assets/ice.png")
-  val lavaMaterial = Entity.loadMaterial("../assets/lava.png")
-  
+  val GrassMaterial = Entity.loadMaterial("../assets/grass.png")
+  val DirtMaterial = Entity.loadMaterial("../assets/dirt.png")
+  val IceMaterial = Entity.loadMaterial("../assets/ice.png")
+  val LavaMaterial = Entity.loadMaterial("../assets/lava.png")
+  val TargetMaterial = Entity.loadMaterial("../assets/target.png")
+
   /**
    * Texture coordinates for default cube
    */
@@ -73,8 +79,6 @@ object Block {
     mesh.setTransform(Mat4 scale size)
     mesh
   }
-  
-  
 
   /**
    * Create a default Box2D model.

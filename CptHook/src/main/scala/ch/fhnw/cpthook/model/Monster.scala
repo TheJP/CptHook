@@ -67,17 +67,17 @@ class Monster(var position: Position) extends Entity with EntitiyUpdatable with 
 
 object Monster {
   
+
   val Speed = 1f
   val Width = 1f
   val Height = 1f
-  
   val AnimationFrames = (1 to 11).map { n => Entity.loadMaterial(s"../assets/monster_step$n.png") }.toArray
   
-  val vertices = Entity.twoDimensionalPlane(Width, Height, 0f)
-  val geometry = DefaultGeometry.createVM(Primitive.TRIANGLES, vertices, Entity.defaultTextureCoordinates)
+  val Vertices = Entity.twoDimensionalPlane(Width, Height, 0f)
+  val Geometry = DefaultGeometry.createVM(Primitive.TRIANGLES, Vertices, Entity.defaultTextureCoordinates)
   
   def toMesh(monster: Monster): IMesh = {
-    monster.mesh = new DefaultMesh(AnimationFrames(0), geometry, Queue.TRANSPARENCY);
+    monster.mesh = new DefaultMesh(AnimationFrames(0), Geometry, Queue.TRANSPARENCY);
     monster.mesh.setPosition(monster.position.add(new Vec3(Width / 2f, Height / 2f, -0.5f)))
     monster.mesh
   }
