@@ -51,7 +51,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   override def activate(): Unit = {
 
     //Switch sounds
-    SoundManager.playSound("level", 0.2f, true, false)
+    SoundManager.playSound(SoundManager.LevelSound, 0.2f, true, false)
 
     //SoundManager.playSong(SoundManager.Level)
 

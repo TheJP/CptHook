@@ -19,32 +19,28 @@ import java.util.concurrent.locks.ReentrantLock
 import scala.collection.mutable.MutableList
 import scala.collection.mutable.Map
 import javax.sound.sampled.FloatControl
+import javafx.scene.media.AudioClip
+import com.sun.media.jfxmediaimpl.AudioClipProvider
+import javafx.scene.media.Media
+import javafx.scene.media.MediaPlayer
 
 /**
  * Object that manages, which sounds are currently played.
  */
 object SoundManager {
   
+  val AmbientSound = "ambient"
+  val LevelSound = "level"
+  val JumpSound = "jump"
+  
   private val sounds = Map(
-    "level" -> loadSound("./sounds/level.wav"),
-    "jump" -> loadSound("./sounds/jump.wav")
+    AmbientSound -> "./sounds/ambient.mp3",
+    LevelSound -> "./sounds/level.mp3",
+    JumpSound -> "./sounds/jump.mp3"
   )
   
   private var clipsLock = new ReentrantLock()
-  private var clips: Map[String, MutableList[Clip]] = Map()
-  
-  private def loadSound(path: String): Array[Byte] = {
-     try {
-       println("loading: " + path)
-       // TODO(daMupfel): toURI doesn't work if exported as jar
-       return Files.readAllBytes(Paths.get(getClass.getResource(path).toURI()))
-    } catch {
-      case e: Exception => {
-        e.printStackTrace()
-      }
-    }
-    return null
-  }
+  private var clips: Map[String, MutableList[AudioClip]] = Map()
   
   def playSound(sound: String, loop: Boolean, stopOthers: Boolean): Unit = playSound(sound, 1.0f, loop, stopOthers)
   
@@ -56,7 +52,7 @@ object SoundManager {
     
     if (!clips.contains(sound)) {
       clipsLock.lock()
-      clips += (sound -> MutableList[Clip]())
+      clips += (sound -> MutableList())
       clipsLock.unlock()
     }
     
@@ -64,32 +60,23 @@ object SoundManager {
       stopSound(sound)
     }
     
-    var in = new ByteArrayInputStream(sounds(sound))
-    var audioIn = AudioSystem.getAudioInputStream(in)
-    var clip = AudioSystem.getClip
-    clip.open(audioIn)
+    val audioClip =  new AudioClip(getClass.getResource(sounds(sound)).toString())
     if (loop) {
-      clip.loop(Clip.LOOP_CONTINUOUSLY)
+      audioClip.setCycleCount(MediaPlayer.INDEFINITE)
     }
-    val gainControl = clip.getControl(FloatControl.Type.MASTER_GAIN).asInstanceOf[FloatControl];
-    val dB = (Math.log(gain)/Math.log(10.0)*20.0).toFloat;
-    gainControl.setValue(dB)
-    clip.start
+    audioClip.setVolume(gain)
+    audioClip.play()
     
+
     clipsLock.lock()
-    clips(sound) += clip
+    clips(sound) += audioClip
+    // cleanup old
+    clips.keys.foreach { sound =>
+      clips(sound) = clips(sound).filter(_.isPlaying())
+    }
     clipsLock.unlock()
     
-    clip.addLineListener(new LineListener() {
-      def update(event: LineEvent): Unit = {
-        if (event.getType == LineEvent.Type.STOP) {
-          println("removing: " + sound)
-          clipsLock.lock()
-          clips(sound) = clips(sound).filter { c => c != clip }
-          clipsLock.unlock()
-        }
-      }
-    })
+
   }
   
   def stopSound(sound: String): Unit = {

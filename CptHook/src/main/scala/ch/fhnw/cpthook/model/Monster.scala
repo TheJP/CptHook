@@ -72,7 +72,7 @@ class Monster(var position: Position) extends Entity with EntitiyUpdatable with 
     } else if (velocity == Monster.Speed && currentRotation < 180) {
       mesh.setTransform(Mat4.multiply(Mat4.rotate(Monster.RotationStep, new Vec3(0, 1, 0)), mesh.getTransform))
       currentRotation += Monster.RotationStep
-    }
+    }  
     
     val v = body.getLinearVelocity
     body.setLinearVelocity(new org.jbox2d.common.Vec2(velocity, v.y))

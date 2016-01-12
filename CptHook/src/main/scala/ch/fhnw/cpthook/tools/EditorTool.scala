@@ -30,6 +30,9 @@ import javax.swing.SwingUtilities
 import ch.fhnw.ether.controller.event.IEventScheduler.IAction
 import ch.fhnw.ether.scene.mesh.IMesh
 import ch.fhnw.cpthook.model._
+import javafx.scene.media.AudioClip
+import javafx.scene.media.MediaPlayer
+import javafx.scene.media.Media
 
 /**
  * Tool, which is used in the editor.
@@ -84,7 +87,8 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     //Switch sounds
     //TODO: To slow loading.. has to be fixed
     //SoundManager.playSong(SoundManager.Ambient)
-
+    SoundManager.playSound(SoundManager.AmbientSound, 0.8f, true, false)
+    
     addEditorMeshes
     cameraNeedsUpdate = true
     controller.animate(this)

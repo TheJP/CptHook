@@ -130,7 +130,7 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
       currentDirection = 1
     }
     if (inputManager.keyWasPressed(KeyEvent.VK_SPACE) && jumpCount > 0) {
-      SoundManager.playSound("jump", false, false)
+      SoundManager.playSound(SoundManager.JumpSound, false, false)
       if (body.getWorld.getGravity.y < 0) {
         body.setLinearVelocity(new org.jbox2d.common.Vec2(velocity.x, Player.JumpVelocity))
       } else {
