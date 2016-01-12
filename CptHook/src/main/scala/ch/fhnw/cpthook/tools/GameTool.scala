@@ -51,7 +51,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   override def activate(): Unit = {
 
     //Switch sounds
-    SoundManager.playSound("level", true, false)
+    SoundManager.playSound("level", 0.1f, true, false)
     //SoundManager.playSong(SoundManager.Level)
 
     // link all entities to box2D
