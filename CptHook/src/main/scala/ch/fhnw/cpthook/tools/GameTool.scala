@@ -96,7 +96,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   
   def setupUI(): Unit = {
     
-    var switchModeButton = new Button(0, 0, "Edit...", "Switches to edit mode", KeyEvent.VK_M, new IButtonAction() {
+    var switchModeButton = new Button(0, 0, "Edit", "(M) Switches to edit mode", KeyEvent.VK_M, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         EtherHacks.removeWidgets(controller)
         controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) 
