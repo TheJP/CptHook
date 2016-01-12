@@ -27,13 +27,14 @@ import ch.fhnw.util.math.Mat4
 import ch.fhnw.cpthook.SoundManager
 import ch.fhnw.cpthook.model.EntitiyUpdatable
 import ch.fhnw.cpthook.model.EntityActivatable
-import ch.fhnw.cpthook.model.EntityActivatable
+import ch.fhnw.cpthook.model.IGameStateChanger
+import ch.fhnw.cpthook.model.IGameStateController
 
 /**
  * Tool, which handles the game logic.
  */
 class GameTool(val controller: ICptHookController, val camera: ICamera, val viewModel: ILevelViewModel)
-  extends AbstractTool(controller) with IAnimationAction {
+  extends AbstractTool(controller) with IAnimationAction with IGameStateController {
   
   val inputManager = controller.inputManager
   val world: World = new World(new org.jbox2d.common.Vec2(0.0f, -40.0f))
@@ -47,6 +48,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   
   var updateableEntites = List[EntitiyUpdatable]()
   var activatableEntites = List[EntityActivatable]()
+  var stateChangerEntities = List[IGameStateChanger]()
 
   override def activate(): Unit = {
 
@@ -57,26 +59,26 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
 
     // link all entities to box2D
     viewModel.entities.foreach(_._1.linkBox2D(world));
-    viewModel.entities.keys.foreach { entity => 
+
+    // link player to box2D
+    viewModel.getPlayer.linkBox2D(world)
+
+    (viewModel.entities.keys ++ Iterable(viewModel.getPlayer)) foreach { entity =>
       if (entity.isInstanceOf[EntitiyUpdatable]) {
         updateableEntites ::= entity.asInstanceOf[EntitiyUpdatable]
       }
       if (entity.isInstanceOf[EntityActivatable]) {
         activatableEntites ::= entity.asInstanceOf[EntityActivatable]
       }
-    }
-    // link player to box2D
-    viewModel.getPlayer.linkBox2D(world)
-    if (viewModel.getPlayer.isInstanceOf[EntitiyUpdatable]) {
-      updateableEntites ::= viewModel.getPlayer.asInstanceOf[EntitiyUpdatable]
-    }
-    if (viewModel.getPlayer.isInstanceOf[EntityActivatable]) {
-      activatableEntites ::= viewModel.getPlayer.asInstanceOf[EntityActivatable]
+      if (entity.isInstanceOf[IGameStateChanger]) {
+        stateChangerEntities ::= entity.asInstanceOf[IGameStateChanger]
+      }
     }
     
     world.setContactListener(gameContactListener)
-    
-    activatableEntites.foreach { _.activate(gameContactListener) }
+
+    stateChangerEntities foreach { _.init(this) }
+    activatableEntites foreach { _.activate(gameContactListener) }
 
     //Skybox
     viewModel.addSkyBox(skyBox)
@@ -127,23 +129,25 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
  
   override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
 
-    case KeyEvent.VK_M =>
-       println("switching to editor mode")
-        controller.setCurrentTool(new EditorTool(controller, camera, viewModel))
+    case KeyEvent.VK_M if isActive =>
+      controller.setCurrentTool(new EditorTool(controller, camera, viewModel))
       
     case KeyEvent.VK_G =>
       world.setGravity(world.getGravity.mul(-1f))
       
     case KeyEvent.VK_F =>
       follow = !follow
-      if(!follow) {
-        camera.setPosition(new Vec3(0, 0, 20))
-      }
+      if(!follow) { camera.setPosition(new Vec3(0, 0, 20)) }
       
     case _ =>
 
   }
-  
+
+  def isActive = controller.getCurrentTool == this
+  def gameOver: Unit = if(isActive){ controller.setCurrentTool(new GameTool(controller, camera, viewModel)) }
+  def killMonser(body: Body): Unit = println("Kill monster")
+  def win: Unit = if(isActive){ controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) }
+
 }
 
 object GameTool {
