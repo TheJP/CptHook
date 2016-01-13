@@ -56,7 +56,7 @@ class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILe
   }
 
   def addNpo(entity: Entity): Unit = {
-    meshes += (entity -> entity.toMesh())
+    meshes += (entity -> entity.toMesh)
     level.entities ::= entity
     scene.add3DObject(meshes(entity))
     //TODO: Find better place for this
@@ -78,7 +78,7 @@ class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILe
     //Load new ones
     this.level = level
     player = new Player(level.start)
-    meshes = level.entities.map(entity => (entity, entity.toMesh()))(breakOut)
+    meshes = level.entities.map(entity => (entity, entity.toMesh))(breakOut)
     scene.add3DObjects(meshes.values.toList:_*)
     scene.add3DObject(player.mesh)
   }

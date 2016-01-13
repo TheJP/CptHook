@@ -21,7 +21,7 @@ import org.jbox2d.dynamics.Body
 import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
 import ch.fhnw.util.math.Mat4
 
-class Monster(position: Position) extends Entity(position)
+class Monster(var position: Position) extends Entity
   with EntitiyUpdatable
   with EntityActivatable
   with ContactUpdates
