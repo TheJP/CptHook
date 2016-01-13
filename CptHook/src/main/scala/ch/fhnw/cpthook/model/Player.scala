@@ -150,7 +150,6 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
   }
 
   def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = {
-    println("contact")
     jumpCount = 2
     onGroundCount += 1
   }
