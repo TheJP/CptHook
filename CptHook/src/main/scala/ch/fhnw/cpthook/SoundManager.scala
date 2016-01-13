@@ -21,11 +21,11 @@ import scala.collection.immutable.Queue
 case class PlaySound(val sound: String, val gain: Float, val loop: Boolean, val stopOthers: Boolean)
 case class StopSound(val sound: String)
 case class StopAll()
-
+case class VolumeAdjust(val gain: Float)
 /**
  * MappedClip is used to save the currently playing clips and keep a mapping to what sound it was
  */
-case class MappedClip(val sound: String, val clip: Clip)
+case class MappedClip(val sound: String, val gain: Float, val clip: Clip)
 
 /**
  * Object that manages, which sounds are currently played.
@@ -55,6 +55,8 @@ object SoundManager {
   private var cache: Map[String, Stack[Clip]] = sounds.map { case (key, value) => (key, Stack[Clip]()) }
   private var queue: Queue[AnyRef] = Queue()
 
+  private var volumeAdjustment = 1.0f;
+  
   private def loadSound(path: String): Array[Byte] = {
     try {
       return Files.readAllBytes(Paths.get(getClass.getResource(path).toURI()))
@@ -71,6 +73,8 @@ object SoundManager {
     clip.open(audio)
     clip
   }
+  
+  def getVolumeAdjustment(): Float = volumeAdjustment
 
   def playEffect(sound: String) = playSound(sound, 1.0f, false, false)
 
@@ -95,6 +99,12 @@ object SoundManager {
       queue = queue.enqueue(StopAll())
     }
   }
+  
+  def volumeAdjust(gain: Float): Unit = {
+    this.synchronized {
+      queue = queue.enqueue(VolumeAdjust(gain))
+    }
+  }
 
   private def playSound(c: PlaySound): Unit = {
     
@@ -117,9 +127,9 @@ object SoundManager {
     }
     
     val gainControl = clip.getControl(FloatControl.Type.MASTER_GAIN).asInstanceOf[FloatControl];
-    gainControl.setValue(toDb(c.gain))
+    gainControl.setValue(toDb(c.gain * volumeAdjustment))
     
-    playing ::= MappedClip(c.sound, clip)
+    playing ::= MappedClip(c.sound, c.gain, clip)
     
     clip.start()
   }
@@ -132,8 +142,16 @@ object SoundManager {
     playing.foreach(_.clip.stop())
   }
   
-  def toDb(gain: Float) = {
+  private def toDb(gain: Float) = {
     (Math.log(gain) / Math.log(10.0) * 20.0).toFloat;
+  }
+  
+  private def volumeAdjust(c: VolumeAdjust): Unit = {
+    volumeAdjustment = c.gain
+    playing.foreach { m => 
+      val gainControl = m.clip.getControl(FloatControl.Type.MASTER_GAIN).asInstanceOf[FloatControl];
+      gainControl.setValue(toDb(m.gain * volumeAdjustment))
+    }
   }
 
   private val thread = new Thread(new Runnable() {
@@ -155,6 +173,7 @@ object SoundManager {
             case c: PlaySound if playing.length < MaxSounds => playSound(c)
             case c: StopSound => stopSound(c)
             case c: StopAll => stopAll(c)
+            case c: VolumeAdjust => volumeAdjust(c)
             case _ => println("overloaded")
           }
         }

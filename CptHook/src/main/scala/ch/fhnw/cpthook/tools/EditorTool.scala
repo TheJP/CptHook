@@ -46,6 +46,8 @@ import scala.collection.mutable.MutableList
 import ch.fhnw.ether.scene.mesh.material.ColorMaterial
 import ch.fhnw.ether.scene.mesh.IMesh.Queue
 import javafx.scene.shape.Mesh
+import ch.fhnw.ether.ui.Slider
+import ch.fhnw.ether.ui.Slider.ISliderAction
 
 /**
  * Tool, which is used in the editor.
@@ -133,14 +135,20 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       }
     })
     
-    val clearButton = new Button(0, 2, "Clear", "(C) Clears the current level",  KeyEvent.VK_Q, new IButtonAction() {
+    val volumeControle = new Slider(0, 2, "Volume", "Volume of the game", SoundManager.getVolumeAdjustment(), new ISliderAction() {
+      def execute(slider: Slider, view: IView): Unit =  {
+        SoundManager.volumeAdjust(slider.getValue)
+      }
+    })
+   
+    val clearButton = new Button(0, 3, "Clear", "(C) Clears the current level",  KeyEvent.VK_Q, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         val oldLevel = viewModel.getLevel
         viewModel.loadLevel(new Level(oldLevel.size, oldLevel.start, List()))
       }
     })
 
-    val loadLevelButton = new Button(0, 3, "Open", "(O) Open level from file", KeyEvent.VK_O, new IButtonAction() {
+    val loadLevelButton = new Button(0, 4, "Open", "(O) Open level from file", KeyEvent.VK_O, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         var level = LevelLoader.loadFromFile()
         if (level != null) {
@@ -149,11 +157,11 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       }
     })
     
-    val saveLevelButton = new Button(0, 4, "Save", "(S) Save level to file", KeyEvent.VK_S, new IButtonAction() {
+    val saveLevelButton = new Button(0, 5, "Save", "(S) Save level to file", KeyEvent.VK_S, new IButtonAction() {
       def execute(button: Button, view: IView) = { LevelLoader.saveToFile(viewModel.getLevel) }
     })
     
-    val browseLevelButton = new Button(0, 5, "Browse", "(B) Browse levels from server", KeyEvent.VK_B, new IButtonAction() {
+    val browseLevelButton = new Button(0, 6, "Browse", "(B) Browse levels from server", KeyEvent.VK_B, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         var level = LevelLoader.loadFromServer()
         if (level != null) {
@@ -168,11 +176,13 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
 
     controller.getUI.addWidget(exitButton)
     controller.getUI.addWidget(switchModeButton)
+    controller.getUI.addWidget(volumeControle)
     controller.getUI.addWidget(clearButton)
     controller.getUI.addWidget(loadLevelButton)
     controller.getUI.addWidget(saveLevelButton)
     controller.getUI.addWidget(browseLevelButton)
     controller.getUI.addWidget(uploadLevelButton)
+
   }
 
   private def setupGrid(): Unit = {

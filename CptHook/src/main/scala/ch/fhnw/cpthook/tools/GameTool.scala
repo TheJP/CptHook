@@ -34,6 +34,8 @@ import ch.fhnw.ether.ui.Button.IButtonAction
 import ch.fhnw.ether.view.IView
 import ch.fhnw.cpthook.EtherHacks
 import ch.fhnw.ether.scene.mesh.IMesh
+import ch.fhnw.ether.ui.Slider
+import ch.fhnw.ether.ui.Slider.ISliderAction
 
 /**
  * Tool, which handles the game logic.
@@ -102,14 +104,21 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   
   def setupUI(): Unit = {
     
-    var switchModeButton = new Button(0, 0, "Edit", "(M) Switches to edit mode", KeyEvent.VK_M, new IButtonAction() {
+    val switchModeButton = new Button(0, 0, "Edit", "(M) Switches to edit mode", KeyEvent.VK_M, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         EtherHacks.removeWidgets(controller)
         controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) 
       }
     })
     
+    val volumeControle = new Slider(0, 1, "Volume", "Volume of the game", SoundManager.getVolumeAdjustment(), new ISliderAction() {
+      def execute(slider: Slider, view: IView): Unit =  {
+        SoundManager.volumeAdjust(slider.getValue)
+      }
+    })
+    
     controller.getUI.addWidget(switchModeButton)
+    controller.getUI.addWidget(volumeControle)
   }
   
   override def deactivate: Unit = {
