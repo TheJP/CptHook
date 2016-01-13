@@ -93,7 +93,7 @@ class TargetBlock(position: Position, size: Size) extends GameStateBlock(positio
   def deactivate(): Unit = { body = null }
   //Win game detection
   def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = other.getBody.getUserData match {
-    case player: Player => if(getController != null){ getController.win }
+    case player: Player if !other.isSensor()=> if(getController != null){ getController.win }
     case _ =>
   }
   def endContact(self: Fixture, other: Fixture, contact: Contact): Unit = {}
@@ -113,8 +113,10 @@ class TrampolineBlock(position: Position, size: Size) extends Block(position, si
     if(body != null){ gameContactListener.register(this, body.getFixtureList) }
   //Apply jump effect when collision is detected
   def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = {
-    other.getBody.setLinearVelocity(new org.jbox2d.common.Vec2(0, 20))
-    SoundManager.playSound(SoundManager.BumpSound, false, false)
+    if (!other.isSensor()) {
+      other.getBody.setLinearVelocity(new org.jbox2d.common.Vec2(0, 20))
+      SoundManager.playSound(SoundManager.BumpSound, false, false)
+    } 
   }
   def endContact(self: Fixture, other: Fixture, contact: Contact): Unit = {}
 }
