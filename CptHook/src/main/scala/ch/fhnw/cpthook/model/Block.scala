@@ -29,7 +29,7 @@ abstract class Block(var position: Position, var size: Size, var texture: Textur
   def getRestitution: Float
 
   def linkBox2D(world: World): Unit = Block.createDefaultBox2D(world, this)
-  def toMesh(): ch.fhnw.ether.scene.mesh.IMesh = Block.createDefaultCube(texture, position, size)
+  def toMesh: IMesh = Block.createDefaultCube(texture, position, size)
 }
 
 /**
@@ -130,6 +130,10 @@ object Block {
   val LavaTexture = Entity.loadTexture("../assets/lava.png")
   val TargetTexture = Entity.loadTexture("../assets/target.png")
   val TrampolineTexture = Entity.loadTexture("../assets/jump.png")
+  val GravityTexture = Entity.loadTexture("../assets/gravity.png")
+  val GravityUsedTexture = Entity.loadTexture("../assets/gravityused.png")
+  val CheckpointTexture = Entity.loadTexture("../assets/checkpoint.png")
+  val CheckpointActiveTexture = Entity.loadTexture("../assets/checkpointactive.png")
 
   /**
    * Texture coordinates for default cube
@@ -175,5 +179,4 @@ object Block {
     body.setUserData(block)
     body
   }
-  
 }

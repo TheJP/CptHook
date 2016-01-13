@@ -36,6 +36,9 @@ import ch.fhnw.cpthook.EtherHacks
 import ch.fhnw.ether.scene.mesh.IMesh
 import ch.fhnw.ether.ui.Slider
 import ch.fhnw.ether.ui.Slider.ISliderAction
+import ch.fhnw.cpthook.model.CheckpointBlock
+import ch.fhnw.cpthook.model.Position
+import scala.reflect.api.Position
 
 /**
  * Tool, which handles the game logic.
@@ -61,15 +64,21 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   override def activate(): Unit = {
 
     //Switch sounds
-    SoundManager.playSound(SoundManager.LevelSound, 0.2f, true, false)
+    SoundManager.playSound(SoundManager.LevelSound, 0.2f, true, true)
 
-    //SoundManager.playSong(SoundManager.Level)
+    //TODO: Improve this
+    //Set checkpoint position of player
+    val position = viewModel.getPlayer.position
+    val checkpoint = viewModel.getCheckpoint
+    if(checkpoint != null){
+      viewModel.getPlayer.position = Position(checkpoint.position.x + 1, checkpoint.position.y + 1)
+    }
 
-    // link all entities to box2D
-    viewModel.entities.foreach(_._1.linkBox2D(world));
+    //Link all entities to box2D
+    (viewModel.entities.keys ++ Iterable(viewModel.getPlayer)) foreach { _.linkBox2D(world) }
 
-    // link player to box2D
-    viewModel.getPlayer.linkBox2D(world)
+    //Reset player position to level position
+    viewModel.getPlayer.position = position
 
     (viewModel.entities.keys ++ Iterable(viewModel.getPlayer)) foreach { entity =>
       if (entity.isInstanceOf[EntitiyUpdatable]) {
@@ -103,20 +112,19 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   }
   
   def setupUI(): Unit = {
-    
-    val switchModeButton = new Button(0, 1, "Edit", "(M) Switches to edit mode", KeyEvent.VK_M, new IButtonAction() {
+    val volumeControle = new Slider(0, 1, "Volume", "Volume of the game", SoundManager.getVolumeAdjustment(), new ISliderAction() {
+      def execute(slider: Slider, view: IView): Unit =  {
+        SoundManager.volumeAdjust(slider.getValue)
+      }
+    })
+        
+    val switchModeButton = new Button(0, 2, "Edit", "(M) Switches to edit mode", KeyEvent.VK_M, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         EtherHacks.removeWidgets(controller)
         controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) 
       }
     })
-    
-    val volumeControle = new Slider(0, 2, "Volume", "Volume of the game", SoundManager.getVolumeAdjustment(), new ISliderAction() {
-      def execute(slider: Slider, view: IView): Unit =  {
-        SoundManager.volumeAdjust(slider.getValue)
-      }
-    })
-    
+
     controller.getUI.addWidget(switchModeButton)
     controller.getUI.addWidget(volumeControle)
   }
@@ -168,9 +176,6 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
  
   override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
       
-    case KeyEvent.VK_G =>
-      world.setGravity(world.getGravity.mul(-1f))
-      
     case KeyEvent.VK_F =>
       follow = !follow
       if(!follow) { camera.setPosition(new Vec3(0, 0, 20)) }
@@ -191,6 +196,8 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     EtherHacks.removeWidgets(controller)
     controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) 
   }
+  def switchGravity = world.setGravity(world.getGravity.mul(-1f))
+  def setCheckpoint(point: CheckpointBlock) = viewModel.setCheckpoint(point)
 }
 
 object GameTool {

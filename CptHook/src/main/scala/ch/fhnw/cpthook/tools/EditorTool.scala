@@ -79,8 +79,10 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     ((p, s) => new LavaBlock(p, s), "Lava.. gotta roast some captains"),
     ((p, s) => new TargetBlock(p, s), "Target: You win when you touch it"),
     ((p, s) => new TrampolineBlock(p, s), "Bounce, Bounce, Bounce"),
-    ((p: Position, s: Size) => new Monster(p), "Monster.. it doesn't like to be touched")
-  ) map { npo => (npo._1(Position(0, 0), Size(1, 1)).toMesh, npo._1, npo._2) }
+    ((p: Position, s: Size) => new Monster(p), "Monster.. it doesn't like to be touched"),
+    ((p, s) => new GravityBlock(p, s), "Turn the world upside down.. literally"),
+    ((p, s) => new CheckpointBlock(p, s), "Checkpoint.. prevents rages, saves PCs")
+  ) map { npo => (npo._1(Position(0, 0), Size(1, 1)).toMesh, npo._1, npo._2) } reverse
 
   object EditingState extends Enumeration { val Adding, Removing = Value }
   /** Determines, if the user is currently adding or removing elements. */
@@ -123,20 +125,21 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
         System.exit(0) //TODO: Ask to save (also when pressing esc) and graceful shutdown
       }
     })
-
-    val switchModeButton = new Button(0, 1, "Play", "(M) Switches to play mode", KeyEvent.VK_M, new IButtonAction() {
-      def execute(button: Button, view: IView) = {
-        EtherHacks.removeWidgets(controller)
-        controller.setCurrentTool(new GameTool(controller, camera, viewModel))   
-      }
-    })
     
-    val volumeControle = new Slider(0, 2, "Volume", "Volume of the game", SoundManager.getVolumeAdjustment(), new ISliderAction() {
+    val volumeControle = new Slider(0, 1, "Volume", "Volume of the game", SoundManager.getVolumeAdjustment(), new ISliderAction() {
       def execute(slider: Slider, view: IView): Unit =  {
         SoundManager.volumeAdjust(slider.getValue)
       }
     })
-   
+
+    val switchModeButton = new Button(0, 2, "Play", "(M) Switches to play mode", KeyEvent.VK_M, new IButtonAction() {
+      def execute(button: Button, view: IView) = {
+        EtherHacks.removeWidgets(controller)
+        viewModel.setCheckpoint(null)
+        controller.setCurrentTool(new GameTool(controller, camera, viewModel))   
+      }
+    })
+    
     val clearButton = new Button(0, 3, "Clear", "(C) Clears the current level",  KeyEvent.VK_Q, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         val oldLevel = viewModel.getLevel
