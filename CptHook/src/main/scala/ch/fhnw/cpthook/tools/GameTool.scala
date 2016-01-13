@@ -112,12 +112,12 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     controller.getUI.addWidget(switchModeButton)
   }
   
-  override def deactivate(): Unit = {
-    SoundManager.stopAll()
+  override def deactivate: Unit = {
+    SoundManager.stopAll
     viewModel.removeSkyBox(skyBox)
     deathZone = 1000.0f;
     controller.kill(this)
-    activatableEntites.foreach { _.deactivate() }
+    activatableEntites.foreach { _.deactivate }
   }
 
   def run(time: Double, interval: Double) : Unit = {
@@ -139,7 +139,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
       camera.setPosition(viewModel.getPlayer.mesh.getPosition.add(new Vec3(0, 0, 20)))
     }   
   }
-  
+
   def updateSkyBox: Unit = {
     if (follow) {
       skyBoxOffsetX += ((viewModel.getPlayer.mesh.getPosition.x - lastX) * 0.5)
