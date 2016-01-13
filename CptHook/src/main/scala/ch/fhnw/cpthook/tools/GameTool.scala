@@ -61,7 +61,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   var activatableEntites = List[EntityActivatable]()
   var stateChangerEntities = List[IGameStateChanger]()
 
-  override def activate(): Unit = {
+  override def activate: Unit = {
 
     //Switch sounds
     SoundManager.playSound(SoundManager.LevelSound, 0.2f, true, true)
@@ -108,17 +108,17 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     
     controller.animate(this)
     
-    setupUI()
+    setupUI
   }
   
-  def setupUI(): Unit = {
-    val volumeControle = new Slider(0, 1, "Volume", "Volume of the game", SoundManager.getVolumeAdjustment(), new ISliderAction() {
+  def setupUI: Unit = {
+    val volumeControle = new Slider(0, 1, "Volume", "Volume of the game", SoundManager.getVolumeAdjustment, new ISliderAction {
       def execute(slider: Slider, view: IView): Unit =  {
         SoundManager.volumeAdjust(slider.getValue)
       }
     })
         
-    val switchModeButton = new Button(0, 2, "Edit", "(M) Switches to edit mode", KeyEvent.VK_M, new IButtonAction() {
+    val switchModeButton = new Button(0, 2, "Edit", "(M) Switches to edit mode", KeyEvent.VK_M, new IButtonAction {
       def execute(button: Button, view: IView) = {
         EtherHacks.removeWidgets(controller)
         controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) 

@@ -120,19 +120,19 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   }
   
   private def setupUI: Unit = {
-    val exitButton = new Button(0, 0, "Exit", "(Q) Closes the game",  KeyEvent.VK_Q, new IButtonAction() {
+    val exitButton = new Button(0, 0, "Exit", "(Q) Closes the game",  KeyEvent.VK_Q, new IButtonAction {
       def execute(button: Button, view: IView) = {
         System.exit(0) //TODO: Ask to save (also when pressing esc) and graceful shutdown
       }
     })
     
-    val volumeControle = new Slider(0, 1, "Volume", "Volume of the game", SoundManager.getVolumeAdjustment(), new ISliderAction() {
+    val volumeControle = new Slider(0, 1, "Volume", "Volume of the game", SoundManager.getVolumeAdjustment, new ISliderAction {
       def execute(slider: Slider, view: IView): Unit =  {
         SoundManager.volumeAdjust(slider.getValue)
       }
     })
 
-    val switchModeButton = new Button(0, 2, "Play", "(M) Switches to play mode", KeyEvent.VK_M, new IButtonAction() {
+    val switchModeButton = new Button(0, 2, "Play", "(M) Switches to play mode", KeyEvent.VK_M, new IButtonAction {
       def execute(button: Button, view: IView) = {
         EtherHacks.removeWidgets(controller)
         viewModel.setCheckpoint(null)
@@ -140,36 +140,36 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       }
     })
     
-    val clearButton = new Button(0, 3, "Clear", "(C) Clears the current level",  KeyEvent.VK_Q, new IButtonAction() {
+    val clearButton = new Button(0, 3, "Clear", "(C) Clears the current level",  KeyEvent.VK_Q, new IButtonAction {
       def execute(button: Button, view: IView) = {
         val oldLevel = viewModel.getLevel
         viewModel.loadLevel(new Level(oldLevel.size, oldLevel.start, List()))
       }
     })
 
-    val loadLevelButton = new Button(0, 4, "Open", "(O) Open level from file", KeyEvent.VK_O, new IButtonAction() {
+    val loadLevelButton = new Button(0, 4, "Open", "(O) Open level from file", KeyEvent.VK_O, new IButtonAction {
       def execute(button: Button, view: IView) = {
-        var level = LevelLoader.loadFromFile()
+        var level = LevelLoader.loadFromFile
         if (level != null) {
           viewModel.loadLevel(level)
         }
       }
     })
     
-    val saveLevelButton = new Button(0, 5, "Save", "(S) Save level to file", KeyEvent.VK_S, new IButtonAction() {
+    val saveLevelButton = new Button(0, 5, "Save", "(S) Save level to file", KeyEvent.VK_S, new IButtonAction {
       def execute(button: Button, view: IView) = { LevelLoader.saveToFile(viewModel.getLevel) }
     })
     
-    val browseLevelButton = new Button(0, 6, "Browse", "(B) Browse levels from server", KeyEvent.VK_B, new IButtonAction() {
+    val browseLevelButton = new Button(0, 6, "Browse", "(B) Browse levels from server", KeyEvent.VK_B, new IButtonAction {
       def execute(button: Button, view: IView) = {
-        var level = LevelLoader.loadFromServer()
+        var level = LevelLoader.loadFromServer
         if (level != null) {
           viewModel.loadLevel(level)
         }
       }
     })
     
-    val uploadLevelButton = new Button(0, 7, "Upload", "(U) Upload level to server", KeyEvent.VK_U, new IButtonAction() {
+    val uploadLevelButton = new Button(0, 7, "Upload", "(U) Upload level to server", KeyEvent.VK_U, new IButtonAction {
       def execute(button: Button, view: IView) = { LevelLoader.pushToServer(viewModel.getLevel) }
     })
 
