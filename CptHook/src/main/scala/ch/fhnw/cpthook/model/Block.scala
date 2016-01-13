@@ -129,6 +129,10 @@ object Block {
   val LavaTexture = Entity.loadTexture("../assets/lava.png")
   val TargetTexture = Entity.loadTexture("../assets/target.png")
   val TrampolineTexture = Entity.loadTexture("../assets/jump.png")
+  val GravityTexture = Entity.loadTexture("../assets/gravity.png")
+  val GravityUsedTexture = Entity.loadTexture("../assets/gravityused.png")
+  val CheckpointTexture = Entity.loadTexture("../assets/checkpoint.png")
+  val CheckpointActiveTexture = Entity.loadTexture("../assets/checkpointactive.png")
 
   /**
    * Texture coordinates for default cube
