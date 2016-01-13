@@ -56,9 +56,8 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   val GuiBlockSize = 0.5f
   val GuiBlockRotationAxis = new Vec3(0, 1, 0)
 
-  var offsetX: Float = 0
-  var startX: Float = 0
-  var offsetZ: Float = 20
+  var offsets = new Vec3(0, 0, 20)
+  var dragStart = Array[Float](0, 0)
   var currentBlockRotation: Float = 0
   var currentBlockScale: Float = 1f
   @volatile var cameraNeedsUpdate: Boolean = true
@@ -169,8 +168,8 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
    * Sets the camera position and value to the current offset information.
    */
   private def updateCamera : Unit = {
-    camera.setTarget(new Vec3(offsetX, 0, 1))
-    camera.setPosition(new Vec3(offsetX, 0, offsetZ))
+    camera.setTarget(new Vec3(offsets.x, offsets.y, 0))
+    camera.setPosition(offsets)
   }
   
   /**
@@ -279,7 +278,8 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   
   override def pointerPressed(event: IPointerEvent): Unit = event.getButton match {
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
-      startX = event.getX
+      dragStart(0) = event.getX
+      dragStart(1) = event.getY
       //Hide editor meshes while moving (because they are very jittery)
       removeEditorMeshes
     case IPointerEvent.BUTTON_1 =>
@@ -305,10 +305,12 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
    */
   override def pointerDragged(event: IPointerEvent): Unit = event.getButton match {
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
-      val delta = event.getX - startX
-      offsetX += delta * OffsetScale
+      val deltaX = event.getX - dragStart(0)
+      val deltaY = event.getY - dragStart(1)
+      offsets = offsets.add(new Vec3(deltaX * OffsetScale, deltaY * OffsetScale, 0))
       cameraNeedsUpdate = true
-      startX = event.getX
+      dragStart(0) = event.getX
+      dragStart(1) = event.getY
     case IPointerEvent.BUTTON_1 =>
       implicit val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
       if(editingState == EditingState.Adding){
@@ -324,11 +326,11 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   }
   
   override def pointerScrolled(event: IPointerEvent): Unit = {
-    offsetZ += event.getScrollY * OffsetScale
-    if (offsetZ < 13) {
-      offsetZ = 13
-    } else if (offsetZ > 120) {
-      offsetZ = 120
+    offsets = offsets.add(new Vec3(0, 0, event.getScrollY * OffsetScale))
+    if (offsets.z < 13) {
+      offsets = new Vec3(offsets.x, offsets.y, 13)
+    } else if (offsets.z > 120) {
+      offsets = new Vec3(offsets.x, offsets.y, 120)
     }
     cameraNeedsUpdate = true
   }
