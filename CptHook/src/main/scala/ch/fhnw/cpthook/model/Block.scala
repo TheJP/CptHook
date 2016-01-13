@@ -143,10 +143,10 @@ object Block {
   /**
    * Creates a default cube with the given material.
    */
-  def createDefaultCube(texture: Texture, position: Vec3, size: Vec3) : IMesh = {
+  def createDefaultCube(texture: Texture, position: Position, size: Size) : IMesh = {
     val geometry = DefaultGeometry.createVM(Primitive.TRIANGLES, MeshUtilities.UNIT_CUBE_TRIANGLES, textureCoordinates);
     val mesh = new DefaultMesh(new ColorMapMaterial(texture), geometry, Queue.DEPTH)
-    mesh.setPosition(position add (size scale 0.5f))
+    mesh.setPosition(position.toVec3(0) add size.toVec3(0).scale(0.5f))
     mesh.setTransform(Mat4 scale size)
     mesh
   }
