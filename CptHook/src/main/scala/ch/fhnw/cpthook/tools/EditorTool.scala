@@ -57,7 +57,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   val OffsetScale = 0.2f
   val GuiBlockSize = 0.5f
   val GuiBlockRotationAxis = new Vec3(0, 1, 0)
-  val GridSize = (400, 20)
+  val GridSize = (1000, 400)
 
   var offsets = new Vec3(0, 0, 20)
   var dragStart = (0f, 0f)

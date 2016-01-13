@@ -33,6 +33,7 @@ import ch.fhnw.ether.ui.Button
 import ch.fhnw.ether.ui.Button.IButtonAction
 import ch.fhnw.ether.view.IView
 import ch.fhnw.cpthook.EtherHacks
+import ch.fhnw.ether.scene.mesh.IMesh
 
 /**
  * Tool, which handles the game logic.
@@ -49,6 +50,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   var skyBoxOffsetY = 0.0
   var lastX = 0.0
   var lastY = 0.0
+  var deathZone = 1000.0;
   
   var updateableEntites = List[EntitiyUpdatable]()
   var activatableEntites = List[EntityActivatable]()
@@ -89,6 +91,10 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     lastX = viewModel.getPlayer.mesh.getPosition.x
     lastY = viewModel.getPlayer.mesh.getPosition.y
     
+    //calculate death zone
+    viewModel.entities.foreach((entity : (Entity, IMesh)) => deathZone = Math.min(deathZone, entity._2.getPosition.y))
+    deathZone -= 10
+    
     controller.animate(this)
     
     setupUI()
@@ -109,12 +115,15 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   override def deactivate: Unit = {
     SoundManager.stopAll
     viewModel.removeSkyBox(skyBox)
+    deathZone = 1000.0f;
     controller.kill(this)
     activatableEntites.foreach { _.deactivate }
   }
 
   def run(time: Double, interval: Double) : Unit = {
     world.step(interval.toFloat, GameTool.VelocityIterations, GameTool.PositionIterations)
+    
+    if(viewModel.getPlayer.mesh.getPosition.y < deathZone) gameOver
     
     updateableEntites.foreach { _.update(inputManager, time) }
     
@@ -161,11 +170,11 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   //Game Over and win sounds?
   def isActive = controller.getCurrentTool == this
   def gameOver: Unit = if(isActive){ controller.setCurrentTool(new GameTool(controller, camera, viewModel)) }
-  def killMonser(body: Body): Unit = {
-    println("Kill monster") //TODO:
+  def killMonser(body: Body): Unit = println("Kill monster") //TODO:
+  def win: Unit = if(isActive){ 
+    EtherHacks.removeWidgets(controller)
+    controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) 
   }
-  def win: Unit = if(isActive){ controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) }
-
 }
 
 object GameTool {
