@@ -80,7 +80,8 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     ((p, s) => new TargetBlock(p, s), "Target: You win when you touch it"),
     ((p, s) => new TrampolineBlock(p, s), "Bounce, Bounce, Bounce"),
     ((p: Position, s: Size) => new Monster(p), "Monster.. it doesn't like to be touched"),
-    ((p, s) => new GravityBlock(p, s), "Turn the world upside down.. literally")
+    ((p, s) => new GravityBlock(p, s), "Turn the world upside down.. literally"),
+    ((p, s) => new CheckpointBlock(p, s), "Checkpoint.. prevents rages, saves PCs")
   ) map { npo => (npo._1(Position(0, 0), Size(1, 1)).toMesh, npo._1, npo._2) } reverse
 
   object EditingState extends Enumeration { val Adding, Removing = Value }
@@ -128,6 +129,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     val switchModeButton = new Button(0, 1, "Play", "(M) Switches to play mode", KeyEvent.VK_M, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         EtherHacks.removeWidgets(controller)
+        viewModel.setCheckpoint(null)
         controller.setCurrentTool(new GameTool(controller, camera, viewModel))   
       }
     })

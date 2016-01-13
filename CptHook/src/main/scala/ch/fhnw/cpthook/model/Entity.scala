@@ -41,6 +41,7 @@ trait IGameStateController {
   def win
   def killMonser(body: Body)
   def switchGravity
+  def setCheckpoint(point: CheckpointBlock)
 }
 
 object Entity {

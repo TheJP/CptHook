@@ -10,6 +10,7 @@ import ch.fhnw.cpthook.model.TrampolineBlock
 import ch.fhnw.cpthook.model.TargetBlock
 import ch.fhnw.cpthook.model.Monster
 import ch.fhnw.cpthook.model.GravityBlock
+import ch.fhnw.cpthook.model.CheckpointBlock
 
 class TypeFormats extends Formats {
     val dateFormat = DefaultFormats.lossless.dateFormat
@@ -20,6 +21,7 @@ class TypeFormats extends Formats {
                                                  classOf[TargetBlock],
                                                  classOf[TrampolineBlock],
                                                  classOf[Monster],
-                                                 classOf[GravityBlock]))
+                                                 classOf[GravityBlock],
+                                                 classOf[CheckpointBlock]))
     override def typeHintFieldName = "type"
 }

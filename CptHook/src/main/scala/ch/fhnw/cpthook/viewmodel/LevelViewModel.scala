@@ -14,6 +14,10 @@ import ch.fhnw.cpthook.json.JsonSerializer
 import ch.fhnw.cpthook.model.SkyBox
 import ch.fhnw.ether.scene.mesh.IMesh
 import ch.fhnw.cpthook.SoundManager
+import ch.fhnw.cpthook.model.CheckpointBlock
+import ch.fhnw.cpthook.model.CheckpointBlock
+import ch.fhnw.cpthook.model.CheckpointBlock
+import ch.fhnw.cpthook.model.CheckpointBlock
 
 /**
  * Converts Level objects to 3d objects, which can be added to a Ether-GL IScene.
@@ -22,15 +26,17 @@ import ch.fhnw.cpthook.SoundManager
 trait ILevelViewModel {
   def getMeshes: Iterable[IMesh]
   def entities: Map[Entity, IMesh]
-  def removeNpo(entity: Entity): Unit
-  def addNpo(entity: Entity): Unit
+  def removeNpo(entity: Entity)
+  def addNpo(entity: Entity)
   def getPlayer: Player
   def getLevel: Level
-  def saveLevel(filename: String): Unit
-  def openLevel(filename: String): Unit
-  def loadLevel(level: Level): Unit
-  def addSkyBox(skyBox: I3DObject) : Unit
-  def removeSkyBox(skyBox : I3DObject) : Unit
+  def saveLevel(filename: String)
+  def openLevel(filename: String)
+  def loadLevel(level: Level)
+  def addSkyBox(skyBox: I3DObject)
+  def removeSkyBox(skyBox : I3DObject)
+  def getCheckpoint: CheckpointBlock
+  def setCheckpoint(point: CheckpointBlock)
 }
 
 class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILevelViewModel {
@@ -39,6 +45,7 @@ class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILe
   private var player: Player = null
   private var level: Level = null
   private var meshes: Map[Entity, IMesh] = Map()
+  private var checkpoint: CheckpointBlock = null
 
   loadLevel(initialLevel)
 
@@ -46,6 +53,11 @@ class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILe
   def getMeshes = meshes.values
   def getLevel = level
   def entities = meshes
+  def getCheckpoint = checkpoint
+  def setCheckpoint(point: CheckpointBlock) = {
+    if(checkpoint != null && checkpoint != point){ checkpoint.disable }
+    checkpoint = point
+  }
 
   def removeNpo(entity: Entity): Unit = {
     scene.remove3DObject(meshes(entity))
