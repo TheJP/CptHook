@@ -80,6 +80,7 @@ object SoundManager {
     if (clipCache(sound).length > 0) {
       clip = clipCache(sound).pop
       clip.setFramePosition(0)
+      clip.loop(0)
     } else {
       val audio = URLAudioSource.getStream(new ByteArrayInputStream(sounds(sound)))
       val info = new DataLine.Info(classOf[Clip], audio.getFormat())
