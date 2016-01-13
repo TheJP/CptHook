@@ -45,6 +45,7 @@ import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
 import scala.collection.mutable.MutableList
 import ch.fhnw.ether.scene.mesh.material.ColorMaterial
 import ch.fhnw.ether.scene.mesh.IMesh.Queue
+import javafx.scene.shape.Mesh
 
 /**
  * Tool, which is used in the editor.
@@ -273,51 +274,31 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   }
 
   /**
-   * Check if a control was clicked and handle the clicking if this is the case.
-   */
-  private def clickedControl(event: IPointerEvent)(implicit viewCameraState: IViewCameraState): Boolean = {
-    val hitDistance = (mesh: I3DObject) => this.hitDistance(mesh, event.getX, event.getY)
-    val hits = editorMeshes
-      .map(mesh => (hitDistance(mesh._1) -> mesh._2))
-      .filter(_._1 < Float.PositiveInfinity)
-    if(hits.isEmpty) { false }
-    else {
-      currentFactory = hits.minBy(_._1)._2
-      true
-    }
-  }
-
-  /**
    * Remove nearest clicked block. Returns true if a block was removed and false otherwise.
    */
-  private def remove(event: IPointerEvent)(implicit viewCameraState: IViewCameraState): Boolean = {
-    val npo = findNearest(event)
-    if(npo != null){ viewModel.removeNpo(npo) }
-    return npo != null
+  private def remove(event: IPointerEvent): Boolean = {
+    val entity = findEntityAtPosition(event)
+    if (entity.isDefined) {
+      viewModel.removeNpo(entity.get)
+      return true
+    }
+    return false
   }
-
+  
   /**
-   * Calculates the distance from a click location to a mesh.
+   * Checks whether the field under the cursor is already containing an entity
    */
-  private def hitDistance(mesh: I3DObject, x: Int, y: Int)(implicit viewCameraState: IViewCameraState) =
-    PickUtilities.pickObject(PickMode.POINT, x, y, 0, 0, viewCameraState, mesh)
+  private def findEntityAtPosition(event: IPointerEvent): Option[Entity] = {
+    val p = rayToXYPlane(event.getX, event.getY, 0)
+    val pos = roundVec3(p)
 
-  /**
-   * Finds nearest clicked block. If no block was clicked null is returned.
-   */
-  private def findNearest(event: IPointerEvent)(implicit viewCameraState: IViewCameraState): Entity = {
-    val hitDistance = (mesh: I3DObject) => this.hitDistance(mesh, event.getX, event.getY)
-    val hits = viewModel.entities
-      .map(npo => (hitDistance(npo._2) -> npo._1))
-      .filter(_._1 < Float.PositiveInfinity)
-    if(!hits.isEmpty) { return hits.minBy(_._1)._2 }
-    return null
+    return viewModel.entities.map(_._1).find(_.position == pos)
   }
 
   /**
    * Adds a block at the pointer position if possible.
    */
-  private def add(event: IPointerEvent)(implicit viewCameraState: IViewCameraState): Unit = {
+  private def add(event: IPointerEvent): Unit = {
       val p = rayToXYPlane(event.getX, event.getY, 0)
       val size = currentSize()
       viewModel.addNpo(currentFactory(roundVec3(p), size))
@@ -331,14 +312,40 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       removeEditorMeshes
     case IPointerEvent.BUTTON_1 =>
       implicit val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
-      val control = clickedControl(event)
-      if(!control){
-        val removed = remove(event)
-        if(!removed){ add(event) }
-        editingState = if(removed) EditingState.Removing else EditingState.Adding
+      if (clickedControl(event)) {
+        return
+      }
+      if (findEntityAtPosition(event).isDefined) {
+        remove(event)
+        editingState = EditingState.Removing
+      } else {
+        add(event)
+        editingState = EditingState.Adding
       }
     case default => //Unknown key
   }
+  
+ /**
+   * Check if a control was clicked and handle the clicking if this is the case.
+   */
+  private def clickedControl(event: IPointerEvent) (implicit viewCameraState: IViewCameraState): Boolean = {
+    val hitDistance = (mesh: I3DObject) => this.hitDistance(mesh, event.getX, event.getY)
+    val hits = editorMeshes
+      .map(mesh => (hitDistance(mesh._1) -> mesh._2))
+      .filter(_._1 < Float.PositiveInfinity)
+    if(hits.isEmpty) { false }
+    else {
+      currentFactory = hits.minBy(_._1)._2
+      true
+    }
+  }
+  
+  /**
+   * Calculates the distance from a click location to a mesh.
+   */
+  private def hitDistance(mesh: I3DObject, x: Int, y: Int)(implicit viewCameraState: IViewCameraState) =
+    PickUtilities.pickObject(PickMode.POINT, x, y, 0, 0, viewCameraState, mesh)
+
 
   override def pointerReleased(event: IPointerEvent): Unit = event.getButton match {
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
@@ -359,9 +366,8 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       dragStart(0) = event.getX
       dragStart(1) = event.getY
     case IPointerEvent.BUTTON_1 =>
-      implicit val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
       if(editingState == EditingState.Adding){
-        if(findNearest(event) == null){ add(event) }
+        if(findEntityAtPosition(event).isEmpty){ add(event) }
       } else {
         remove(event)
       }
