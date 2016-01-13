@@ -29,7 +29,7 @@ abstract class Block(var position: Position, var size: Size, var texture: Textur
   def getRestitution: Float
 
   def linkBox2D(world: World): Unit = Block.createDefaultBox2D(world, this)
-  def toMesh(): ch.fhnw.ether.scene.mesh.IMesh = Block.createDefaultCube(texture, position, size)
+  def toMesh: IMesh = Block.createDefaultCube(texture, position, size)
 }
 
 /**
@@ -178,5 +178,4 @@ object Block {
     body.setUserData(block)
     body
   }
-  
 }

@@ -79,8 +79,9 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     ((p, s) => new LavaBlock(p, s), "Lava.. gotta roast some captains"),
     ((p, s) => new TargetBlock(p, s), "Target: You win when you touch it"),
     ((p, s) => new TrampolineBlock(p, s), "Bounce, Bounce, Bounce"),
-    ((p: Position, s: Size) => new Monster(p), "Monster.. it doesn't like to be touched")
-  ) map { npo => (npo._1(Position(0, 0), Size(1, 1)).toMesh, npo._1, npo._2) }
+    ((p: Position, s: Size) => new Monster(p), "Monster.. it doesn't like to be touched"),
+    ((p, s) => new GravityBlock(p, s), "Turn the world upside down.. literally")
+  ) map { npo => (npo._1(Position(0, 0), Size(1, 1)).toMesh, npo._1, npo._2) } reverse
 
   object EditingState extends Enumeration { val Adding, Removing = Value }
   /** Determines, if the user is currently adding or removing elements. */

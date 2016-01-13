@@ -165,9 +165,6 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
  
   override def keyPressed(event: IKeyEvent): Unit = event.getKeyCode match {
       
-    case KeyEvent.VK_G =>
-      world.setGravity(world.getGravity.mul(-1f))
-      
     case KeyEvent.VK_F =>
       follow = !follow
       if(!follow) { camera.setPosition(new Vec3(0, 0, 20)) }
@@ -188,6 +185,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     EtherHacks.removeWidgets(controller)
     controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) 
   }
+  def switchGravity = world.setGravity(world.getGravity.mul(-1f))
 }
 
 object GameTool {
