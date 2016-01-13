@@ -158,6 +158,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
 
   }
 
+  //Game Over and win sounds?
   def isActive = controller.getCurrentTool == this
   def gameOver: Unit = if(isActive){ controller.setCurrentTool(new GameTool(controller, camera, viewModel)) }
   def killMonser(body: Body): Unit = println("Kill monster") //TODO:

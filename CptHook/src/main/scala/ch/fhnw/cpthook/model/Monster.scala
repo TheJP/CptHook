@@ -20,6 +20,7 @@ import org.jbox2d.dynamics.contacts.Contact
 import org.jbox2d.dynamics.Body
 import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
 import ch.fhnw.util.math.Mat4
+import ch.fhnw.cpthook.SoundManager
 
 class Monster(var position: Position) extends Entity
   with EntitiyUpdatable
@@ -34,7 +35,7 @@ class Monster(var position: Position) extends Entity
   var leftSensor: Fixture = null
   var rightSensor: Fixture = null
   
-  var velocity: Float = -Monster.Speed
+  var velocity: Float = -Speed
 
   // animation
   var animationStep = 0
@@ -91,17 +92,17 @@ class Monster(var position: Position) extends Entity
   def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = other.getBody.getUserData match {
     case _: Monster | _: Block if self == leftSensor =>
       velocity = Speed
+      SoundManager.playEffect(SoundManager.BumpSound)
     case _: Monster | _: Block if self == rightSensor =>
       velocity = -Speed
+      SoundManager.playEffect(SoundManager.BumpSound)
     case Player if controller != null =>
       controller.gameOver
     case _ =>
   }
-  
-  def endContact(self: Fixture, other: Fixture,contact: Contact): Unit = {
-    
-  }
-  
+
+  def endContact(self: Fixture, other: Fixture,contact: Contact): Unit = { }
+
 }
 
 object Monster {
