@@ -42,6 +42,7 @@ import ch.fhnw.ether.scene.mesh.material.LineMaterial
 import ch.fhnw.util.color.RGBA
 import ch.fhnw.ether.scene.mesh.geometry.DefaultGeometry
 import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
+import scala.collection.mutable.MutableList
 
 /**
  * Tool, which is used in the editor.
@@ -59,6 +60,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   var dragStart = Array[Float](0, 0)
   var currentBlockRotation: Float = 0
   var currentBlockScale: Float = 1f
+  var gridMesh: IMesh = null
   @volatile var cameraNeedsUpdate: Boolean = true
 
 
@@ -103,6 +105,11 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   override def deactivate = {
     SoundManager.stopAll()
     removeEditorMeshes
+    
+    if (gridMesh != null) {
+      getController.getScene.remove3DObject(gridMesh)
+    }
+    
     cameraNeedsUpdate = true
     controller.kill(this)
   }
@@ -169,19 +176,21 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     val halfX = GridSize(0) / 2
     val halfY = GridSize(1) / 2
     
+    val vertices = MutableList[Float]()
+    
     // horizontal
     for (y <- 0 to GridSize(1)) {
-      val geometry = DefaultGeometry.createV(Primitive.LINES, Array[Float](-halfX, halfY - y, 0, halfX, halfY - y, 0))
-      val mesh = new DefaultMesh(material, geometry)
-      controller.getScene.add3DObject(mesh)
+      vertices.+=(-halfX, halfY - y, 0, halfX, halfY - y, 0)
     }
     
     // vertical
     for (x <- 0 to GridSize(0)) {
-      val geometry = DefaultGeometry.createV(Primitive.LINES, Array[Float](halfX - x, halfY, 0, halfX - x, -halfY, 0))
-      val mesh = new DefaultMesh(material, geometry)
-      controller.getScene.add3DObject(mesh)
+      vertices.+=(halfX - x, -halfY, 0, halfX - x, halfY, 0)
     }
+    
+    val geometry = DefaultGeometry.createV(Primitive.LINES, vertices.toArray)
+    gridMesh = new DefaultMesh(material, geometry)
+    getController.getScene.add3DObject(gridMesh)
   }
   
   /**
