@@ -43,6 +43,8 @@ import ch.fhnw.util.color.RGBA
 import ch.fhnw.ether.scene.mesh.geometry.DefaultGeometry
 import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
 import scala.collection.mutable.MutableList
+import ch.fhnw.ether.scene.mesh.material.ColorMaterial
+import ch.fhnw.ether.scene.mesh.IMesh.Queue
 
 /**
  * Tool, which is used in the editor.
@@ -61,6 +63,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   var currentBlockRotation: Float = 0
   var currentBlockScale: Float = 1f
   var gridMesh: IMesh = null
+  var selectMesh: IMesh = null
   @volatile var cameraNeedsUpdate: Boolean = true
 
 
@@ -100,15 +103,15 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     
     setupUI()
     setupGrid()
+    setupSelection()
   }
 
   override def deactivate = {
     SoundManager.stopAll()
     removeEditorMeshes
     
-    if (gridMesh != null) {
-      getController.getScene.remove3DObject(gridMesh)
-    }
+    if (gridMesh != null) { getController.getScene.remove3DObject(gridMesh) }
+    if (selectMesh != null) { getController.getScene.remove3DObject(selectMesh) }
     
     cameraNeedsUpdate = true
     controller.kill(this)
@@ -191,6 +194,21 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     val geometry = DefaultGeometry.createV(Primitive.LINES, vertices.toArray)
     gridMesh = new DefaultMesh(material, geometry)
     getController.getScene.add3DObject(gridMesh)
+  }
+  
+  private def setupSelection(): Unit = {
+    val material = new ColorMaterial(new RGBA(0f, 1f, 0f, 0.3f), false)
+    val vertices = Array[Float](
+        0, 0, 0,
+        0, -1, 0,
+        1, 0, 0,
+        1, 0, 0,
+        1, -1, 0,
+        0, -1, 0
+    )
+    val geometry = DefaultGeometry.createV(Primitive.TRIANGLES, vertices)
+    selectMesh = new DefaultMesh(material, geometry, Queue.TRANSPARENCY)
+    getController.getScene.add3DObject(selectMesh)
   }
   
   /**
@@ -349,7 +367,15 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   }
 
   override def pointerMoved(event: IPointerEvent): Unit = {
-    //TODO: Ghost block
+    val p: Vec3 = rayToXYPlane(event.getX, event.getY, 0)
+    val pos = roundVec3(p)
+    if (pos.x != selectMesh.getPosition.x || pos.y != selectMesh.getPosition.y) {
+      selectMesh.setPosition(new Vec3(pos.x, pos.y, 0))
+    }  
+  }
+  
+  private def roundVec3(v: Vec3): Position = {
+    new Position(Math.floor(v.x).toInt, Math.ceil(v.y).toInt)
   }
   
   override def pointerScrolled(event: IPointerEvent): Unit = {
