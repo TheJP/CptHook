@@ -36,6 +36,6 @@ public class LevelResource {
 
 	@Override
 	public String toString() {
-		return "Name: " + name + ", Author: " + author;
+		return name;
 	}
 }

@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response;
  * This is more or less meant as a proof of concept.
  */
 public class ServerApi {
-	public final String BaseUrl = "http://localhost:8080";
+	public final String BaseUrl = "http://cpthook.eich.in:8080";
 	
 	/**
 	 * Returns a list of saved levels
@@ -45,12 +45,10 @@ public class ServerApi {
 		LevelUploadResource lur = new LevelUploadResource();
 		lur.setLevel(lr);
 		lur.setData(data);
-		System.out.println(lur);
 		try {
 			Client client = ClientBuilder.newClient();
 			WebTarget target = client.target(BaseUrl + "/api/v1/levels");
-			Response response = target.request().post(Entity.entity(lur, MediaType.APPLICATION_JSON_TYPE));
-			System.out.println("status: " + response.getStatus());
+			target.request().post(Entity.entity(lur, MediaType.APPLICATION_JSON_TYPE));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

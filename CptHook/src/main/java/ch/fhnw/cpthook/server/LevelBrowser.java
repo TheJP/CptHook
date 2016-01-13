@@ -13,12 +13,15 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableModel;
 
 public class LevelBrowser extends JFrame {
 
 	private ServerApi api = new ServerApi();
-	private JList<LevelResource> levelList = new JList<>();
+	private JTable levelTable = new JTable();
 	private JButton loadButton = new JButton("load");
 	private JButton cancelButton = new JButton("cancel");
 	
@@ -28,7 +31,9 @@ public class LevelBrowser extends JFrame {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setLayout(new BorderLayout());
 		
-		add(levelList, BorderLayout.CENTER);
+		JScrollPane tablePane = new JScrollPane();
+		tablePane.getViewport().add(levelTable);
+		add(tablePane, BorderLayout.CENTER);
 		
 		JPanel panel = new JPanel();	
 		panel.add(loadButton);
@@ -48,13 +53,13 @@ public class LevelBrowser extends JFrame {
 		
 		refreshData();
 		setSize(200, 200);
-		pack();
 		setVisible(true);
 	}
 	
 	public void load(ActionEvent e) {
-		if (levelList.getSelectedValue() != null) {
-			result = api.getLevel(levelList.getSelectedValue().getId());
+		if (levelTable.getSelectedRow() != -1) {
+			LevelResource levelResource =  (LevelResource)levelTable.getValueAt(levelTable.getSelectedRow(), 0);
+			result = api.getLevel(levelResource.getId());
 			dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 		}
 	}
@@ -65,9 +70,12 @@ public class LevelBrowser extends JFrame {
 	
 	public void refreshData() {
 		List<LevelResource> levels = api.getLevels();
-		DefaultListModel<LevelResource> model = new DefaultListModel<>();
-		levels.forEach(l -> model.addElement(l));
-		levelList.setModel(model);
+		
+		DefaultTableModel model = new DefaultTableModel();
+		model.addColumn("Name:");
+		model.addColumn("Author:");
+		levels.forEach(l -> model.addRow(new Object[] {l, l.getAuthor()}));
+		levelTable.setModel(model);
 	}
 
 	public String getResult() {

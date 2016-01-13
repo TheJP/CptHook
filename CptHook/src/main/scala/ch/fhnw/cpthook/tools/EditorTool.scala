@@ -136,7 +136,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       def execute(button: Button, view: IView) = { LevelLoader.saveToFile(viewModel.getLevel) }
     })
     
-    val browseLevelButton = new Button(0, 3, "Browse", "(B) Browse levels from server", KeyEvent.VK_B, new IButtonAction() {
+    val browseLevelButton = new Button(0, 4, "Browse", "(B) Browse levels from server", KeyEvent.VK_B, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         var level = LevelLoader.loadFromServer()
         if (level != null) {
@@ -145,7 +145,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       }
     })
     
-    val uploadLevelButton = new Button(0, 4, "Upload", "(U) Upload level to server", KeyEvent.VK_U, new IButtonAction() {
+    val uploadLevelButton = new Button(0, 5, "Upload", "(U) Upload level to server", KeyEvent.VK_U, new IButtonAction() {
       def execute(button: Button, view: IView) = { LevelLoader.pushToServer(viewModel.getLevel) }
     })  
 
