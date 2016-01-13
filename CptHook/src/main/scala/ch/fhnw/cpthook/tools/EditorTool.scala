@@ -38,12 +38,10 @@ import ch.fhnw.ether.ui.Button.IButtonAction
 import ch.fhnw.ether.view.IView
 import ch.fhnw.cpthook.LevelLoader
 import ch.fhnw.cpthook.EtherHacks
-
-/**
- * Tool, which is used in the editor.
- * Responsible for movement and level changes (e.g. block adding).
- */
-
+import ch.fhnw.ether.scene.mesh.material.LineMaterial
+import ch.fhnw.util.color.RGBA
+import ch.fhnw.ether.scene.mesh.geometry.DefaultGeometry
+import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
 
 /**
  * Tool, which is used in the editor.
@@ -55,6 +53,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   val OffsetScale = 0.2f
   val GuiBlockSize = 0.5f
   val GuiBlockRotationAxis = new Vec3(0, 1, 0)
+  val GridSize = Array[Int] (400, 20)
 
   var offsets = new Vec3(0, 0, 20)
   var dragStart = Array[Float](0, 0)
@@ -98,6 +97,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     controller.animate(this)
     
     setupUI()
+    setupGrid()
   }
 
   override def deactivate = {
@@ -107,7 +107,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     controller.kill(this)
   }
   
-  def setupUI(): Unit = {
+  private def setupUI(): Unit = {
 
     val exitButton = new Button(0, 0, "Exit", "(Q) Closes the game",  KeyEvent.VK_Q, new IButtonAction() {
       def execute(button: Button, view: IView) = {
@@ -164,6 +164,26 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     controller.getUI.addWidget(uploadLevelButton)
   }
 
+  private def setupGrid(): Unit = {
+    val material = new LineMaterial(RGBA.BLACK)
+    val halfX = GridSize(0) / 2
+    val halfY = GridSize(1) / 2
+    
+    // horizontal
+    for (y <- 0 to GridSize(1)) {
+      val geometry = DefaultGeometry.createV(Primitive.LINES, Array[Float](-halfX, halfY - y, 0, halfX, halfY - y, 0))
+      val mesh = new DefaultMesh(material, geometry)
+      controller.getScene.add3DObject(mesh)
+    }
+    
+    // vertical
+    for (x <- 0 to GridSize(0)) {
+      val geometry = DefaultGeometry.createV(Primitive.LINES, Array[Float](halfX - x, halfY, 0, halfX - x, -halfY, 0))
+      val mesh = new DefaultMesh(material, geometry)
+      controller.getScene.add3DObject(mesh)
+    }
+  }
+  
   /**
    * Sets the camera position and value to the current offset information.
    */
