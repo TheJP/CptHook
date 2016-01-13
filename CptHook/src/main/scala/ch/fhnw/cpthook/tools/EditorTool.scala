@@ -57,10 +57,10 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   val OffsetScale = 0.2f
   val GuiBlockSize = 0.5f
   val GuiBlockRotationAxis = new Vec3(0, 1, 0)
-  val GridSize = Array[Int] (400, 20)
+  val GridSize = (400, 20)
 
   var offsets = new Vec3(0, 0, 20)
-  var dragStart = Array[Float](0, 0)
+  var dragStart = (0f, 0f)
   var currentBlockRotation: Float = 0
   var currentBlockScale: Float = 1f
   var gridMesh: IMesh = null
@@ -177,19 +177,19 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
 
   private def setupGrid(): Unit = {
     val material = new LineMaterial(RGBA.BLACK)
-    val halfX = GridSize(0) / 2
-    val halfY = GridSize(1) / 2
+    val halfX = GridSize._1 / 2
+    val halfY = GridSize._2 / 2
     
     val vertices = MutableList[Float]()
     
     // horizontal
-    for (y <- 0 to GridSize(1)) {
-      vertices.+=(-halfX, halfY - y, 0, halfX, halfY - y, 0)
+    for (y <- 0 to GridSize._2) {
+      vertices += (-halfX, halfY - y, 0, halfX, halfY - y, 0)
     }
     
     // vertical
-    for (x <- 0 to GridSize(0)) {
-      vertices.+=(halfX - x, -halfY, 0, halfX - x, halfY, 0)
+    for (x <- 0 to GridSize._1) {
+      vertices += (halfX - x, -halfY, 0, halfX - x, halfY, 0)
     }
     
     val geometry = DefaultGeometry.createV(Primitive.LINES, vertices.toArray)
@@ -306,8 +306,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   
   override def pointerPressed(event: IPointerEvent): Unit = event.getButton match {
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
-      dragStart(0) = event.getX
-      dragStart(1) = event.getY
+      dragStart = (event.getX, event.getY)
       //Hide editor meshes while moving (because they are very jittery)
       removeEditorMeshes
     case IPointerEvent.BUTTON_1 =>
@@ -359,12 +358,11 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
    */
   override def pointerDragged(event: IPointerEvent): Unit = event.getButton match {
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
-      val deltaX = event.getX - dragStart(0)
-      val deltaY = event.getY - dragStart(1)
+      val deltaX = event.getX - dragStart._1
+      val deltaY = event.getY - dragStart._2
       offsets = offsets.add(new Vec3(deltaX * OffsetScale, deltaY * OffsetScale, 0))
       cameraNeedsUpdate = true
-      dragStart(0) = event.getX
-      dragStart(1) = event.getY
+      dragStart = (event.getX, event.getY)
     case IPointerEvent.BUTTON_1 =>
       if(editingState == EditingState.Adding){
         if(findEntityAtPosition(event).isEmpty){ add(event) }

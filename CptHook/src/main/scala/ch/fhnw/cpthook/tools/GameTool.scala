@@ -118,20 +118,20 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     
     updateableEntites.foreach { _.update(inputManager, time) }
     
-    updateCamera()
-    updateSkyBox()
+    updateCamera
+    updateSkyBox
    
-    inputManager.clearWasPressed()
+    inputManager.clearWasPressed
   }
   
-  def updateCamera(): Unit = {
+  def updateCamera: Unit = {
     camera.setTarget(viewModel.getPlayer.mesh.getPosition)
     if(follow) {
       camera.setPosition(viewModel.getPlayer.mesh.getPosition.add(new Vec3(0, 0, 20)))
     }   
   }
   
-  def updateSkyBox(): Unit = {
+  def updateSkyBox: Unit = {
     if (follow) {
       skyBoxOffsetX += ((viewModel.getPlayer.mesh.getPosition.x - lastX) * 0.5)
       skyBoxOffsetY += ((viewModel.getPlayer.mesh.getPosition.y - lastY) * 0.5)
@@ -160,7 +160,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
 
   def isActive = controller.getCurrentTool == this
   def gameOver: Unit = if(isActive){ controller.setCurrentTool(new GameTool(controller, camera, viewModel)) }
-  def killMonser(body: Body): Unit = println("Kill monster")
+  def killMonser(body: Body): Unit = println("Kill monster") //TODO:
   def win: Unit = if(isActive){ controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) }
 
 }
