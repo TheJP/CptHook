@@ -24,7 +24,7 @@ import org.jbox2d.dynamics.contacts.Contact
 import ch.fhnw.ether.scene.mesh.material.Texture
 import ch.fhnw.cpthook.SoundManager
 
-abstract class Block(var position: Position, var size: Size, var texture: Texture) extends Entity {
+abstract class Block(position: Position, var size: Size, var texture: Texture) extends Entity(position) {
   def getFriction: Float
   def getRestitution: Float
 
@@ -146,7 +146,8 @@ object Block {
   def createDefaultCube(texture: Texture, position: Position, size: Size) : IMesh = {
     val geometry = DefaultGeometry.createVM(Primitive.TRIANGLES, MeshUtilities.UNIT_CUBE_TRIANGLES, textureCoordinates);
     val mesh = new DefaultMesh(new ColorMapMaterial(texture), geometry, Queue.DEPTH)
-    mesh.setPosition(position.toVec3(0) add size.toVec3(0).scale(0.5f))
+    val halfBlockSize = size.toVec3(0).scale(0.5f)
+    mesh.setPosition(position.toVec3(0) add new Vec3(halfBlockSize.x, -halfBlockSize.y, 0))
     mesh.setTransform(Mat4 scale size)
     mesh
   }
@@ -157,7 +158,7 @@ object Block {
    */
   def createDefaultBox2D(world: World, block: Block): Body = {
     val bodyDef: BodyDef = new BodyDef
-    bodyDef.position.set(block.position.x + block.size.width / 2f, block.position.y + block.size.height / 2f)
+    bodyDef.position.set(block.position.x + block.size.width / 2f, block.position.y - block.size.height / 2f)
     bodyDef.`type` = BodyType.STATIC
 
     val shape: PolygonShape = new PolygonShape

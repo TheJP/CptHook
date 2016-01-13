@@ -22,7 +22,7 @@ import ch.fhnw.cpthook.tools.GameContactListener
 import ch.fhnw.ether.scene.mesh.material.Texture
 import org.jbox2d.dynamics.Body
 
-abstract class Entity {
+abstract class Entity(var position: Position) {
   def toMesh(): IMesh
   def linkBox2D(world: World): Unit
 }
