@@ -62,7 +62,7 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
     fixtureDef.density = 200000000000f;
         
     val groundSensorShape: PolygonShape = new PolygonShape
-    groundSensorShape.setAsBox(0.2f, 0.1f, new org.jbox2d.common.Vec2(0f, -0.7f), 0f)
+    groundSensorShape.setAsBox(0.2f, 0.2f, new org.jbox2d.common.Vec2(0f, -0.7f), 0f)
     val groundSensorFixtureDef: FixtureDef = new FixtureDef
     groundSensorFixtureDef.shape = groundSensorShape
     groundSensorFixtureDef.isSensor = true
@@ -150,6 +150,7 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
   }
 
   def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = {
+    println("contact")
     jumpCount = 2
     onGroundCount += 1
   }
