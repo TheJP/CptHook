@@ -106,11 +106,11 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     controller.getUI.addWidget(switchModeButton)
   }
   
-  override def deactivate(): Unit = {
-    SoundManager.stopAll()
+  override def deactivate: Unit = {
+    SoundManager.stopAll
     viewModel.removeSkyBox(skyBox)
     controller.kill(this)
-    activatableEntites.foreach { _.deactivate() }
+    activatableEntites.foreach { _.deactivate }
   }
 
   def run(time: Double, interval: Double) : Unit = {
@@ -130,7 +130,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
       camera.setPosition(viewModel.getPlayer.mesh.getPosition.add(new Vec3(0, 0, 20)))
     }   
   }
-  
+
   def updateSkyBox: Unit = {
     if (follow) {
       skyBoxOffsetX += ((viewModel.getPlayer.mesh.getPosition.x - lastX) * 0.5)
@@ -161,7 +161,9 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   //Game Over and win sounds?
   def isActive = controller.getCurrentTool == this
   def gameOver: Unit = if(isActive){ controller.setCurrentTool(new GameTool(controller, camera, viewModel)) }
-  def killMonser(body: Body): Unit = println("Kill monster") //TODO:
+  def killMonser(body: Body): Unit = {
+    println("Kill monster") //TODO:
+  }
   def win: Unit = if(isActive){ controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) }
 
 }

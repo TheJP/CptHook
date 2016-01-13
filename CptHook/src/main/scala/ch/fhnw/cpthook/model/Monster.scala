@@ -29,18 +29,21 @@ class Monster(var position: Position) extends Entity
   with IGameStateChanger {
 
   import Monster._
+  import MovementState._
   
   var mesh: IMesh = null
   var body: Body = null
   var leftSensor: Fixture = null
   var rightSensor: Fixture = null
   
-  var velocity: Float = -Speed
-
   // animation
   var animationStep = 0
   var lastTimeOfAnimation: Double = 0.0
   var currentRotation: Double = 0.0
+  var currentMovement = WalkingLeft
+
+  var leftContacts = Set[Fixture]()
+  var rightContacts = Set[Fixture]()
 
   private var controller: IGameStateController = null;
   def init(controller: IGameStateController): Unit = { this.controller = controller }
@@ -50,12 +53,13 @@ class Monster(var position: Position) extends Entity
   
   def activate(gameContactListener: GameContactListener): Unit = {
     currentRotation = 0
+    currentMovement = WalkingLeft
     animationStep = 0
     lastTimeOfAnimation = 0
-    velocity = -Speed
+    leftContacts = Set()
+    rightContacts = Set()
     gameContactListener.register(this, leftSensor)
     gameContactListener.register(this, rightSensor)
-    
   }
   
   def deactivate(): Unit = {
@@ -81,13 +85,29 @@ class Monster(var position: Position) extends Entity
       }
     }
 
+    //Change direction upon collision
+    if(currentMovement == WalkingLeft && !leftContacts.isEmpty){
+      currentMovement = TurningRight
+    } else if(currentMovement == WalkingRight && !rightContacts.isEmpty){
+      currentMovement = TurningLeft
+    }
+
     // paper mario effect
-    if (velocity == -Speed && currentRotation > 0) {
+    if (currentMovement == TurningLeft) {
       currentRotation -= RotationStep
-    } else if (velocity == Speed && currentRotation < 180) {
+      if(currentRotation <= 0){ currentMovement = WalkingLeft }
+    } else if (currentMovement == TurningRight) {
       currentRotation += RotationStep
+      if(currentRotation >= 180){ currentMovement = WalkingRight }
     }
     mesh.setTransform(Mat4.rotate(currentRotation.toFloat, new Vec3(0, 1, 0)))
+
+    //Define velocity according to current movement
+    val velocity = currentMovement match {
+      case WalkingLeft => -Speed
+      case WalkingRight => Speed
+      case _ => 0
+    }
 
     val v = body.getLinearVelocity
     body.setLinearVelocity(new org.jbox2d.common.Vec2(velocity, v.y))
@@ -97,19 +117,24 @@ class Monster(var position: Position) extends Entity
   
   def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = other.getBody.getUserData match {
     case _: Monster | _: Block if self == leftSensor =>
-      velocity = Speed
       SoundManager.playEffect(SoundManager.BumpSound)
+      leftContacts += other
     case _: Monster | _: Block if self == rightSensor =>
-      velocity = -Speed
       SoundManager.playEffect(SoundManager.BumpSound)
+      rightContacts += other
     case _: Player if controller != null =>
       controller.gameOver
     case _ =>
   }
 
-  def endContact(self: Fixture, other: Fixture,contact: Contact): Unit = { }
+  def endContact(self: Fixture, other: Fixture, contact: Contact): Unit = {
+    leftContacts -= other
+    rightContacts -= other
+  }
 
 }
+
+object MovementState extends Enumeration { val WalkingLeft, WalkingRight, TurningLeft, TurningRight = Value }
 
 object Monster {
   
