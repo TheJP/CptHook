@@ -22,7 +22,7 @@ import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
 import ch.fhnw.util.math.Mat4
 import ch.fhnw.cpthook.SoundManager
 
-class Monster(position: Position) extends Entity(position)
+class Monster(var position: Position) extends Entity
   with EntitiyUpdatable
   with EntityActivatable
   with ContactUpdates

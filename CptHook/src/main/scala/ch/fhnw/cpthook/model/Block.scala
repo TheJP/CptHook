@@ -24,7 +24,7 @@ import org.jbox2d.dynamics.contacts.Contact
 import ch.fhnw.ether.scene.mesh.material.Texture
 import ch.fhnw.cpthook.SoundManager
 
-abstract class Block(position: Position, var size: Size, var texture: Texture) extends Entity(position) {
+abstract class Block(var position: Position, var size: Size, var texture: Texture) extends Entity {
   def getFriction: Float
   def getRestitution: Float
 

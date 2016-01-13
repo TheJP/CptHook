@@ -1,29 +1,18 @@
 package ch.fhnw.cpthook.model
 
-import ch.fhnw.ether.scene.I3DObject
-import org.jbox2d.dynamics.BodyDef
-import org.jbox2d.dynamics.FixtureDef
-import ch.fhnw.ether.scene.mesh.material.ColorMapMaterial
-import ch.fhnw.ether.image.Frame
-import ch.fhnw.ether.scene.mesh.MeshUtilities
-import ch.fhnw.ether.scene.mesh.material.IMaterial
-import ch.fhnw.ether.scene.mesh.geometry.DefaultGeometry
-import ch.fhnw.ether.scene.mesh.geometry.IGeometry.Primitive
-import ch.fhnw.ether.scene.mesh.IMesh.Queue
-import ch.fhnw.ether.scene.mesh.DefaultMesh
-import ch.fhnw.util.math.Vec3
-import ch.fhnw.util.math.Mat4
-import org.jbox2d.collision.shapes.PolygonShape
-import org.jbox2d.dynamics.BodyType
-import ch.fhnw.ether.scene.mesh.IMesh
-import ch.fhnw.cpthook.InputManager
-import org.jbox2d.dynamics.World
-import ch.fhnw.cpthook.tools.GameContactListener
-import ch.fhnw.ether.scene.mesh.material.Texture
 import org.jbox2d.dynamics.Body
+import org.jbox2d.dynamics.World
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import ch.fhnw.cpthook.InputManager
+import ch.fhnw.cpthook.tools.GameContactListener
+import ch.fhnw.ether.image.Frame
+import ch.fhnw.ether.scene.mesh.IMesh
+import ch.fhnw.ether.scene.mesh.material.Texture
+import com.fasterxml.jackson.annotation.JsonIgnore
 
-abstract class Entity(var position: Position) {
-  def toMesh(): IMesh
+abstract class Entity() {
+  def position: Position
+  def toMesh: IMesh
   def linkBox2D(world: World): Unit
 }
 

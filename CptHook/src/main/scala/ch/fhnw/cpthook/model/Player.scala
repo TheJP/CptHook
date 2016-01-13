@@ -26,7 +26,7 @@ import ch.fhnw.cpthook.tools.GameContactListener
 /**
  * TODO: Comment this shizzle
  */
-class Player(position: Position) extends Entity(position) with EntitiyUpdatable
+class Player(var position: Position) extends Entity with EntitiyUpdatable
                                                     with EntityActivatable
                                                     with ContactUpdates {
   
