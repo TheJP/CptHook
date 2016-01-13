@@ -19,9 +19,11 @@ import scala.collection.immutable.Queue
  * PlaySound, StopSound and StopAll are commands that can be queued
  */
 case class PlaySound(val sound: String, val gain: Float, val loop: Boolean, val stopOthers: Boolean)
+case class PlayEffect(val sound: String, val hearingDistance: Float, val x: Float, val y: Float)
 case class StopSound(val sound: String)
 case class StopAll()
 case class VolumeAdjust(val gain: Float)
+case class CenterUpdate(val x: Float, val y: Float)
 /**
  * MappedClip is used to save the currently playing clips and keep a mapping to what sound it was
  */
@@ -56,6 +58,7 @@ object SoundManager {
   private var queue: Queue[AnyRef] = Queue()
 
   private var volumeAdjustment = 1.0f;
+  private var center = (0f, 0f)
   
   private def loadSound(path: String): Array[Byte] = {
     try {
@@ -76,16 +79,20 @@ object SoundManager {
   
   def getVolumeAdjustment(): Float = volumeAdjustment
 
-  def playEffect(sound: String) = playSound(sound, 1.0f, false, false)
+  def playEffect(sound: String, x: Float, y: Float) = {
+    this.synchronized {
+      queue = queue.enqueue(PlayEffect(sound, 20, x, y))
+    }
+  }
+  
+  def playSound(sound: String): Unit = playSound(sound,0.6f, false, false)
 
-  def playSound(sound: String, loop: Boolean, stopOthers: Boolean): Unit = playSound(sound, 1.0f, loop, stopOthers)
+  def playSound(sound: String, loop: Boolean, stopOthers: Boolean): Unit = playSound(sound, 0.6f, loop, stopOthers)
 
   def playSound(sound: String, gain: Float, loop: Boolean, stopOthers: Boolean): Unit = {
-
     this.synchronized {
       queue = queue.enqueue(PlaySound(sound, gain, loop, stopOthers))
     }
-
   }
 
   def stopSound(sound: String): Unit = {
@@ -105,16 +112,28 @@ object SoundManager {
       queue = queue.enqueue(VolumeAdjust(gain))
     }
   }
+  
+  def updateCenter(x: Float, y: Float) {
+    center = (x, y)
+    /*this.synchronized {
+      queue = queue.enqueue(CenterUpdate(x, y))
+    }*/
+  }
+  
+  private def getClip(sound: String): Clip = {
+    var clip: Clip = null
+    if (!cache(sound).isEmpty) {
+      clip = cache(sound).pop()
+      clip.setFramePosition(0)
+    } else {
+      clip = createClip(sound)
+    }
+    clip
+  }
 
   private def playSound(c: PlaySound): Unit = {
     
-    var clip: Clip = null
-    if (!cache(c.sound).isEmpty) {
-      clip = cache(c.sound).pop()
-      clip.setFramePosition(0)
-    } else {
-      clip = createClip(c.sound)
-    }
+    val clip = getClip(c.sound)
     
     if (c.loop) {
       clip.loop(Clip.LOOP_CONTINUOUSLY)
@@ -130,7 +149,24 @@ object SoundManager {
     gainControl.setValue(toDb(c.gain * volumeAdjustment))
     
     playing ::= MappedClip(c.sound, c.gain, clip)
+    clip.start()
+  }
+  
+  private def playEffect(c: PlayEffect): Unit = {
     
+    val distance = Math.abs(Math.sqrt(Math.pow(center._1 - c.x, 2) + Math.pow(center._2 - c.y, 2))).toFloat
+    
+    if (distance > 2 * c.hearingDistance) {
+      return
+    }
+    
+    val clip = getClip(c.sound)
+    var gain: Float = Math.max(0f, 1f - distance / c.hearingDistance)
+    
+    val gainControl = clip.getControl(FloatControl.Type.MASTER_GAIN).asInstanceOf[FloatControl];
+    gainControl.setValue(toDb(gain * volumeAdjustment))
+    
+    playing ::= MappedClip(c.sound, gain, clip)
     clip.start()
   }
   
@@ -171,9 +207,11 @@ object SoundManager {
         workingQueue.foreach { cmd =>
           cmd match {
             case c: PlaySound if playing.length < MaxSounds => playSound(c)
+            case c: PlayEffect if playing.length < MaxSounds => playEffect(c)
             case c: StopSound => stopSound(c)
             case c: StopAll => stopAll(c)
             case c: VolumeAdjust => volumeAdjust(c)
+            case CenterUpdate(x, y) => center = (x, y)
             case _ => println("overloaded")
           }
         }

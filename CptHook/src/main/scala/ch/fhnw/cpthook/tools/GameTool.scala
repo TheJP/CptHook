@@ -138,6 +138,9 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     
     updateCamera
     updateSkyBox
+    
+    val playerPosition = viewModel.getPlayer.body.getPosition
+    SoundManager.updateCenter(playerPosition.x, playerPosition.y)
    
     inputManager.clearWasPressed
   }
