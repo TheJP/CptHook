@@ -318,9 +318,9 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
    * Adds a block at the pointer position if possible.
    */
   private def add(event: IPointerEvent)(implicit viewCameraState: IViewCameraState): Unit = {
-      val p: Vec3 = rayToXYPlane(event.getX, event.getY, 0)
+      val p = rayToXYPlane(event.getX, event.getY, 0)
       val size = currentSize()
-      viewModel.addNpo(currentFactory(new Position((p.x - size.x / 2).round.toInt, (p.y - size.y / 2).round.toInt), size))
+      viewModel.addNpo(currentFactory(roundVec3(p), size))
   }
   
   override def pointerPressed(event: IPointerEvent): Unit = event.getButton match {

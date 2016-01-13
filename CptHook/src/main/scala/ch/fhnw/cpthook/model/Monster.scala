@@ -56,7 +56,11 @@ class Monster(var position: Position) extends Entity
   }
   
   def deactivate(): Unit = {
-    mesh.setPosition(position.add(new Vec3(Monster.Width / 2f, Monster.Height / 2f, -0.5f)))
+    resetMeshPosition()
+  }
+  
+  def resetMeshPosition() {
+    mesh.setPosition(position add new Vec3(0.5f, -0.5f, 0))
     mesh.setTransform(Mat4.multiply(Mat4.rotate(-currentRotation.floatValue(), new Vec3(0, 1, 0)), mesh.getTransform))
   }
   
@@ -82,7 +86,7 @@ class Monster(var position: Position) extends Entity
     
     val v = body.getLinearVelocity
     body.setLinearVelocity(new org.jbox2d.common.Vec2(velocity, v.y))
-    val newPosition = new Vec3(body.getPosition.x, body.getPosition.y, 2f)
+    val newPosition = new Vec3(body.getPosition.x, body.getPosition.y, 0f)
     mesh.setPosition(newPosition)
   }
   
@@ -118,7 +122,7 @@ object Monster {
   
   def toMesh(monster: Monster): IMesh = {
     monster.mesh = new DefaultMesh(new ColorMapMaterial(AnimationFrames(0)), Geometry, Queue.TRANSPARENCY);
-    monster.mesh.setPosition(monster.position.add(new Vec3(Width / 2f, Height / 2f, -0.5f)))
+    monster.resetMeshPosition()
     monster.mesh
   }
   
@@ -129,7 +133,7 @@ object Monster {
     bodyDef.fixedRotation = true
     
     val shape: PolygonShape = new PolygonShape
-    shape.set(Player.createPlayerPolygon(Width / 2f, Height / 2f, 0.1f), 8)
+    shape.set(Player.createPlayerPolygon(Width  / 2f, Height / 2f, 0.1f), 8)
     val fixtureDef: FixtureDef = new FixtureDef
     fixtureDef.shape = shape
     fixtureDef.friction = 0.1f;        
