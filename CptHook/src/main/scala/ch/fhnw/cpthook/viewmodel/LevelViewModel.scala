@@ -64,7 +64,7 @@ class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILe
     meshes -= entity
     level.entities = level.entities filter { _ != entity } //TODO: Improve model => no linear search
     //TODO: Find better place for this
-    SoundManager.playEffect(SoundManager.BlockRemoveSound)
+    SoundManager.playSound(SoundManager.BlockRemoveSound)
   }
 
   def addNpo(entity: Entity): Unit = {
@@ -72,7 +72,7 @@ class LevelViewModel(initialLevel: Level, private val scene: IScene) extends ILe
     level.entities ::= entity
     scene.add3DObject(meshes(entity))
     //TODO: Find better place for this
-    SoundManager.playEffect(SoundManager.BlockPlaceSound)
+    SoundManager.playSound(SoundManager.BlockPlaceSound)
   }
 
   def getPlayer = player

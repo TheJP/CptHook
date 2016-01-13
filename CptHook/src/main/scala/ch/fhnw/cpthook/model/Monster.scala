@@ -117,10 +117,12 @@ class Monster(var position: Position) extends Entity
   
   def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = other.getBody.getUserData match {
     case _: Monster | _: Block if self == leftSensor =>
-      SoundManager.playEffect(SoundManager.BumpSound)
+      val position = self.getBody.getPosition
+      SoundManager.playEffect(SoundManager.BumpSound, position.x, position.y)
       leftContacts += other
     case _: Monster | _: Block if self == rightSensor =>
-      SoundManager.playEffect(SoundManager.BumpSound)
+      val position = self.getBody.getPosition
+      SoundManager.playEffect(SoundManager.BumpSound, position.x, position.y)
       rightContacts += other
     case _: Player if controller != null =>
       controller.gameOver

@@ -115,7 +115,8 @@ class TrampolineBlock(position: Position, size: Size) extends Block(position, si
   def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = {
     if (!other.isSensor()) {
       other.getBody.setLinearVelocity(new org.jbox2d.common.Vec2(0, 20))
-      SoundManager.playSound(SoundManager.BumpSound, false, false)
+      val position = self.getBody.getPosition
+      SoundManager.playEffect(SoundManager.BumpSound, position.x, position.y)
     } 
   }
   def endContact(self: Fixture, other: Fixture, contact: Contact): Unit = {}
