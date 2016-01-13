@@ -154,7 +154,6 @@ object SoundManager {
         playing = playing.filter(_.clip.isActive())
         
         workingQueue.foreach { cmd =>
-          println(cmd)
           cmd match {
             case c: PlaySound if playing.length < MaxSounds => playSound(c)
             case c: StopSound => stopSound(c)
