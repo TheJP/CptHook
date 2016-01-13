@@ -26,6 +26,8 @@ class Monster(var position: Position) extends Entity
   with EntityActivatable
   with ContactUpdates
   with IGameStateChanger {
+
+  import Monster._
   
   var mesh: IMesh = null
   var body: Body = null
@@ -49,14 +51,14 @@ class Monster(var position: Position) extends Entity
     currentRotation = 0
     animationStep = 0
     lastTimeOfAnimation = 0
-    velocity = -Monster.Speed
+    velocity = -Speed
     gameContactListener.register(this, leftSensor)
     gameContactListener.register(this, rightSensor)
     
   }
   
   def deactivate(): Unit = {
-    mesh.setPosition(position.add(new Vec3(Monster.Width / 2f, Monster.Height / 2f, -0.5f)))
+    mesh.setPosition(position.add(new Vec3(Width / 2f, Height / 2f, -0.5f)))
     mesh.setTransform(Mat4.multiply(Mat4.rotate(-currentRotation.floatValue(), new Vec3(0, 1, 0)), mesh.getTransform))
   }
   
@@ -65,19 +67,19 @@ class Monster(var position: Position) extends Entity
     val delta = time - lastTimeOfAnimation
     
     // animation
-    if (delta > Monster.AnimationStepTime) {
+    if (delta > AnimationStepTime) {
       lastTimeOfAnimation = time
-      animationStep = (animationStep + 1) % Monster.AnimationFrames.length
-      mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(Monster.AnimationFrames(animationStep))
+      animationStep = (animationStep + 1) % AnimationFrames.length
+      mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(AnimationFrames(animationStep))
     }
     
     // paper mario effect
-    if (velocity == -Monster.Speed && currentRotation > 0) {
-      mesh.setTransform(Mat4.multiply(Mat4.rotate(Monster.RotationStep, new Vec3(0, 1, 0)), mesh.getTransform))
-      currentRotation -= Monster.RotationStep
-    } else if (velocity == Monster.Speed && currentRotation < 180) {
-      mesh.setTransform(Mat4.multiply(Mat4.rotate(Monster.RotationStep, new Vec3(0, 1, 0)), mesh.getTransform))
-      currentRotation += Monster.RotationStep
+    if (velocity == -Speed && currentRotation > 0) {
+      mesh.setTransform(Mat4.multiply(Mat4.rotate(RotationStep, new Vec3(0, 1, 0)), mesh.getTransform))
+      currentRotation -= RotationStep
+    } else if (velocity == Speed && currentRotation < 180) {
+      mesh.setTransform(Mat4.multiply(Mat4.rotate(RotationStep, new Vec3(0, 1, 0)), mesh.getTransform))
+      currentRotation += RotationStep
     }  
     
     val v = body.getLinearVelocity
@@ -86,16 +88,14 @@ class Monster(var position: Position) extends Entity
     mesh.setPosition(newPosition)
   }
   
-  def beginContact(self: Fixture, other: Fixture,contact: Contact): Unit = {
-    if (self == leftSensor && other.getBody.getUserData.isInstanceOf[Block]) {
-      velocity = Monster.Speed
-    } else if (self == rightSensor && other.getBody.getUserData.isInstanceOf[Block] ) {
-      velocity = -Monster.Speed
-    } else {}
-
-    if(other.getBody.getUserData.isInstanceOf[Player] && controller != null){
+  def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = other.getBody.getUserData match {
+    case _: Monster | _: Block if self == leftSensor =>
+      velocity = Speed
+    case _: Monster | _: Block if self == rightSensor =>
+      velocity = -Speed
+    case Player if controller != null =>
       controller.gameOver
-    }
+    case _ =>
   }
   
   def endContact(self: Fixture, other: Fixture,contact: Contact): Unit = {

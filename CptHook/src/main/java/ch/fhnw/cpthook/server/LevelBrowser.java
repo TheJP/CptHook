@@ -8,10 +8,8 @@ import java.awt.event.WindowEvent;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -19,6 +17,8 @@ import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 
 public class LevelBrowser extends JFrame {
+
+	private static final long serialVersionUID = -7792370917010361979L;
 
 	private ServerApi api = new ServerApi();
 	private JTable levelTable = new JTable();
