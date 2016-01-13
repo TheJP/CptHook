@@ -125,8 +125,14 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
         System.exit(0) //TODO: Ask to save (also when pressing esc) and graceful shutdown
       }
     })
+    
+    val volumeControle = new Slider(0, 1, "Volume", "Volume of the game", SoundManager.getVolumeAdjustment(), new ISliderAction() {
+      def execute(slider: Slider, view: IView): Unit =  {
+        SoundManager.volumeAdjust(slider.getValue)
+      }
+    })
 
-    val switchModeButton = new Button(0, 1, "Play", "(M) Switches to play mode", KeyEvent.VK_M, new IButtonAction() {
+    val switchModeButton = new Button(0, 2, "Play", "(M) Switches to play mode", KeyEvent.VK_M, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         EtherHacks.removeWidgets(controller)
         viewModel.setCheckpoint(null)
@@ -134,12 +140,6 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       }
     })
     
-    val volumeControle = new Slider(0, 2, "Volume", "Volume of the game", SoundManager.getVolumeAdjustment(), new ISliderAction() {
-      def execute(slider: Slider, view: IView): Unit =  {
-        SoundManager.volumeAdjust(slider.getValue)
-      }
-    })
-   
     val clearButton = new Button(0, 3, "Clear", "(C) Clears the current level",  KeyEvent.VK_Q, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         val oldLevel = viewModel.getLevel
