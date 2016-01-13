@@ -55,9 +55,6 @@ object SoundManager {
   private var cache: Map[String, Stack[Clip]] = sounds.map { case (key, value) => (key, Stack[Clip]()) }
   private var queue: Queue[AnyRef] = Queue()
 
-  // preload
-  cache.keys.foreach { k => cache(k).push(createClip(k)) }
-
   private def loadSound(path: String): Array[Byte] = {
     try {
       return Files.readAllBytes(Paths.get(getClass.getResource(path).toURI()))
