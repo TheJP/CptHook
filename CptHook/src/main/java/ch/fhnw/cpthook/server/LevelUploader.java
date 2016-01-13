@@ -6,20 +6,18 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SpringLayout;
 import javax.swing.WindowConstants;
 
 public class LevelUploader extends JFrame {
+
+	private static final long serialVersionUID = 6520044215255582466L;
 
 	private ServerApi api = new ServerApi();
 	private JTextField nameTextField = new JTextField();

@@ -2,8 +2,6 @@ package ch.fhnw.cpthook.server;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import ch.fhnw.cpthook.model.Level;
-
 public class LevelUploadResource {
 	
 	@JsonProperty("Level")

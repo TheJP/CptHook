@@ -63,8 +63,9 @@ class Monster(position: Position) extends Entity(position)
   }
   
   def resetMeshPosition() {
+    currentRotation = 0
     mesh.setPosition(position add new Vec3(Monster.RealDimensions._1 / 2f, -Monster.RealDimensions._2 / 2f, 0))
-    mesh.setTransform(Mat4.multiply(Mat4.rotate(-currentRotation.floatValue(), new Vec3(0, 1, 0)), mesh.getTransform))
+    mesh.setTransform(Mat4.rotate(currentRotation.toFloat, new Vec3(0, 1, 0)))
   }
   
   def update(inputManager: InputManager, time: Double): Unit = {
@@ -75,18 +76,19 @@ class Monster(position: Position) extends Entity(position)
     if (delta > AnimationStepTime) {
       lastTimeOfAnimation = time
       animationStep = (animationStep + 1) % AnimationFrames.length
-      mesh.getMaterial().asInstanceOf[ColorMapMaterial].setColorMap(AnimationFrames(animationStep))
+      if(mesh.getMaterial.isInstanceOf[ColorMapMaterial]){
+        mesh.getMaterial.asInstanceOf[ColorMapMaterial].setColorMap(AnimationFrames(animationStep))
+      }
     }
-    
+
     // paper mario effect
     if (velocity == -Speed && currentRotation > 0) {
-      mesh.setTransform(Mat4.multiply(Mat4.rotate(RotationStep, new Vec3(0, 1, 0)), mesh.getTransform))
       currentRotation -= RotationStep
     } else if (velocity == Speed && currentRotation < 180) {
-      mesh.setTransform(Mat4.multiply(Mat4.rotate(RotationStep, new Vec3(0, 1, 0)), mesh.getTransform))
       currentRotation += RotationStep
-    }  
-    
+    }
+    mesh.setTransform(Mat4.rotate(currentRotation.toFloat, new Vec3(0, 1, 0)))
+
     val v = body.getLinearVelocity
     body.setLinearVelocity(new org.jbox2d.common.Vec2(velocity, v.y))
     val newPosition = new Vec3(body.getPosition.x, body.getPosition.y, 0f)
@@ -115,7 +117,7 @@ object Monster {
   val Box2DDimensions = (0.9f, 0.9f)
   val RealDimensions = (1.0f, 1.0f)
   val AnimationFrames = (1 to 11).map { n => Entity.loadTexture(s"../assets/monster_step$n.png") }.toArray
-  val AnimationStepTime = 0.3f
+  val AnimationStepTime = 0.06f
   val RotationStep = 10
   
   val Vertices = Entity.twoDimensionalPlane(Box2DDimensions._1, Box2DDimensions._2, 0f)
@@ -129,7 +131,7 @@ object Monster {
   
   def linkBox2d(monster: Monster, world: World): Unit = {
     val bodyDef = new BodyDef
-    bodyDef.position.set(monster.position.x + RealDimensions._1 / 2.0f, monster.position.y - RealDimensions._2 / 2.0f)
+    bodyDef.position.set(monster.position.x + RealDimensions._1 / 2f, monster.position.y - RealDimensions._2 / 2f)
     bodyDef.`type` = BodyType.DYNAMIC
     bodyDef.fixedRotation = true
     
