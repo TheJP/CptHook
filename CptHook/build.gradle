@@ -13,8 +13,6 @@ ext {
 	jbox2dVersion = '2.2.1.1'
 	// reasteasy
 	reasteasyVersion = '3.0.14.Final'
-	// jLayer
-	jlayerVersion = '1.0.1-1'
 }
 
 repositories {
@@ -35,9 +33,6 @@ dependencies {
     compile "org.jboss.resteasy:resteasy-jaxrs:$reasteasyVersion"
     compile "org.jboss.resteasy:resteasy-jackson2-provider:$reasteasyVersion"
 	compile "org.jboss.resteasy:resteasy-client:$reasteasyVersion"
-	// jLayer
-    compile "com.googlecode.soundlibs:jlayer:$jlayerVersion"
-    
 }
 
 eclipse {
