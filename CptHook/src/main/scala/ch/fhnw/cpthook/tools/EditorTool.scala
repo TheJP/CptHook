@@ -166,7 +166,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       }
     })
     
-    val uploadLevelButton = new Button(0, 6, "Upload", "(U) Upload level to server", KeyEvent.VK_U, new IButtonAction() {
+    val uploadLevelButton = new Button(0, 7, "Upload", "(U) Upload level to server", KeyEvent.VK_U, new IButtonAction() {
       def execute(button: Button, view: IView) = { LevelLoader.pushToServer(viewModel.getLevel) }
     })
 
