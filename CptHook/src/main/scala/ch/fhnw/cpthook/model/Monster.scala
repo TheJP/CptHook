@@ -102,7 +102,7 @@ class Monster(var position: Position) extends Entity
     case _: Monster | _: Block if self == rightSensor =>
       velocity = -Speed
       SoundManager.playEffect(SoundManager.BumpSound)
-    case Player if controller != null =>
+    case _: Player if controller != null =>
       controller.gameOver
     case _ =>
   }
