@@ -14,6 +14,7 @@ import javax.sound.sampled.Clip
 import javax.sound.sampled.LineEvent
 import javax.sound.sampled.LineListener
 import scala.collection.immutable.Queue
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * PlaySound, StopSound and StopAll are commands that can be queued
@@ -55,7 +56,7 @@ object SoundManager {
 
   private var playing: List[MappedClip] = List()
   private var cache: Map[String, Stack[Clip]] = sounds.map { case (key, value) => (key, Stack[Clip]()) }
-  private var queue: Queue[AnyRef] = Queue()
+  private var queue: AtomicReference[Queue[AnyRef]] = new AtomicReference(Queue())
 
   private var volumeAdjustment = 1.0f;
   private var center = (0f, 0f)
@@ -80,9 +81,7 @@ object SoundManager {
   def getVolumeAdjustment(): Float = volumeAdjustment
 
   def playEffect(sound: String, x: Float, y: Float) = {
-    this.synchronized {
-      queue = queue.enqueue(PlayEffect(sound, 20, x, y))
-    }
+    enqueueCommand(PlayEffect(sound, 20, x, y))
   }
   
   def playSound(sound: String): Unit = playSound(sound,0.6f, false, false)
@@ -90,27 +89,19 @@ object SoundManager {
   def playSound(sound: String, loop: Boolean, stopOthers: Boolean): Unit = playSound(sound, 0.6f, loop, stopOthers)
 
   def playSound(sound: String, gain: Float, loop: Boolean, stopOthers: Boolean): Unit = {
-    this.synchronized {
-      queue = queue.enqueue(PlaySound(sound, gain, loop, stopOthers))
-    }
+    enqueueCommand(PlaySound(sound, gain, loop, stopOthers))
   }
 
   def stopSound(sound: String): Unit = {
-    this.synchronized {
-      queue = queue.enqueue(StopSound(sound))
-    }
+    enqueueCommand(StopSound(sound))
   }
 
   def stopAll(): Unit = {
-    this.synchronized {
-      queue = queue.enqueue(StopAll())
-    }
+    enqueueCommand(StopAll())
   }
   
   def volumeAdjust(gain: Float): Unit = {
-    this.synchronized {
-      queue = queue.enqueue(VolumeAdjust(gain))
-    }
+    enqueueCommand(VolumeAdjust(gain))
   }
   
   def updateCenter(x: Float, y: Float) {
@@ -118,6 +109,15 @@ object SoundManager {
     /*this.synchronized {
       queue = queue.enqueue(CenterUpdate(x, y))
     }*/
+  }
+  
+  def enqueueCommand(cmd: AnyRef) {
+    var oldQueue = queue.get
+    var newQueue = oldQueue.enqueue(cmd)
+    while(!queue.compareAndSet(oldQueue, newQueue)) {
+      oldQueue = queue.get
+      newQueue = oldQueue.enqueue(cmd)
+    }    
   }
   
   private def getClip(sound: String): Clip = {
@@ -156,7 +156,7 @@ object SoundManager {
     
     val distance = Math.abs(Math.sqrt(Math.pow(center._1 - c.x, 2) + Math.pow(center._2 - c.y, 2))).toFloat
     
-    if (distance > 2 * c.hearingDistance) {
+    if (distance > c.hearingDistance) {
       return
     }
     
@@ -193,12 +193,10 @@ object SoundManager {
   private val thread = new Thread(new Runnable() {
     def run(): Unit = {
       while (!Thread.interrupted()) {
-        var workingQueue: Queue[AnyRef] = null
-        this.synchronized {
-          workingQueue = queue
-          queue = Queue()
+        var workingQueue: Queue[AnyRef] = queue.get
+        while (!queue.compareAndSet(workingQueue, Queue())) {
+          workingQueue = queue.get
         }
-        
         playing.filter(!_.clip.isActive()).foreach { x =>
           cache(x.sound).push(x.clip)
         }
@@ -216,7 +214,7 @@ object SoundManager {
           }
         }
         
-        Thread.sleep(5)
+        Thread.sleep(30)
       }
     }
   })
