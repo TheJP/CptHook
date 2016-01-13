@@ -29,48 +29,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
-
-
-class Sound(var data:Array[Byte], var loop: Boolean) extends Runnable {
-  
-  private var player: Player = null
-  private var stopped: AtomicBoolean = new AtomicBoolean(false)
-  private var running: AtomicBoolean = new AtomicBoolean(true)
-  private var done: Sound => Unit = null
-  
-  override def run(): Unit = {
-    player = createPlayer
-    while(!stopped.get) {
-      if (!player.play(1)) {
-        if (loop) {
-          player = createPlayer
-        } else {
-          stopped.set(true)
-        }
-      }
-    }
-    running.set(false)
-    if (done != null) {
-      done(this)
-    }
-  }
-  
-  private def createPlayer(): Player = {
-    new Player(new ByteArrayInputStream(data))
-  }
-  
-  def stop(): Unit = {
-    stopped.set(true)
-  }
-  
-  def isRunning(): Boolean = {
-    running.get
-  }
-  
-  def setDone(f: Sound => Unit) {
-    done = f
-  }
-}
+import ch.fhnw.ether.audio.URLAudioSource
+import javax.sound.sampled.DataLine
+import scala.collection.mutable.Stack
 
 /**
  * Object that manages, which sounds are currently played.
@@ -79,8 +40,7 @@ object SoundManager {
   
   val MaxSounds = 25
   private val soundCount = new AtomicInteger(0)
-  private val executor = Executors.newFixedThreadPool(MaxSounds)
-  
+
   val AmbientSound = "ambient"
   val BlockPlaceSound = "place"
   val BlockRemoveSound = "remove"
@@ -100,7 +60,10 @@ object SoundManager {
   )
   
   private var clipsLock = new ReentrantLock()
-  private var clips: Map[String, MutableList[Sound]] = sounds.map { case (key, value) => (key, MutableList[Sound]()) }
+  private var clips: Map[String, MutableList[Clip]] = sounds.map { case (key, value) => (key, MutableList[Clip]()) }
+  private var clipCache: Map[String, Stack[Clip]] = sounds.map { case (key, value) => (key, Stack[Clip]()) }
+  
+  clipCache.keys.foreach { k => clipCache(k).push(getClip(k)) }
   
   private def loadSound(path: String): Array[Byte] = {
     try {
@@ -110,20 +73,39 @@ object SoundManager {
     }
     return null
   }
+  
+  def getClip(sound: String): Clip = {
+    var clip: Clip = null
+    clipsLock.lock()
+    if (clipCache(sound).length > 0) {
+      clip = clipCache(sound).pop
+      clip.setFramePosition(0)
+    } else {
+      val audio = URLAudioSource.getStream(new ByteArrayInputStream(sounds(sound)))
+      val info = new DataLine.Info(classOf[Clip], audio.getFormat())
+      clip = AudioSystem.getLine(info).asInstanceOf[Clip]
+      clip.open(audio)
+    }
+    clipsLock.unlock()
+ 
+    clip
+  }
 
   def playEffect(sound: String) = playSound(sound, 1.0f, false, false)
 
   def playSound(sound: String, loop: Boolean, stopOthers: Boolean): Unit = playSound(sound, 1.0f, loop, stopOthers)
-  
+
   def playSound(sound: String, gain: Float, loop: Boolean, stopOthers: Boolean): Unit = {
-    
+
+    cleanUp()
+
     var lastCount = soundCount.get
     if (lastCount >= MaxSounds) {
       println("sound limit reached")
       return
     }
-    
-    while(!soundCount.compareAndSet(lastCount, lastCount + 1)) {
+
+    while (!soundCount.compareAndSet(lastCount, lastCount + 1)) {
       var lastCount = soundCount.get
       if (lastCount >= MaxSounds) {
         println("sound limit reached")
@@ -131,20 +113,37 @@ object SoundManager {
       }
     }
     
-    val s = new Sound(sounds(sound), loop)
-    
+    val clip = getClip(sound)
+
     clipsLock.lock()
-    clips(sound) += s
+    clips(sound) += clip
     clipsLock.unlock()
-    
-    s.setDone { s => 
-      clipsLock.lock()
-      clips(sound) = clips(sound).filter(_ != s)
-      soundCount.decrementAndGet()
-      clipsLock.unlock()
+
+    if (loop) {
+      clip.loop(Clip.LOOP_CONTINUOUSLY)
     }
-    
-    executor.execute(s)
+
+    val gainControl = clip.getControl(FloatControl.Type.MASTER_GAIN).asInstanceOf[FloatControl];
+    gainControl.setValue(toDb(gain))
+
+    clip.start()
+  }
+  
+  def toDb(gain: Float) = {
+    (Math.log(gain)/Math.log(10.0)*20.0).toFloat;
+  }
+  
+  def cleanUp(): Unit = {
+    clipsLock.lock()
+    clips.keys.foreach {k => 
+      val done = clips(k).filter(!_.isRunning())
+      clips(k) = clips(k).filter(_.isRunning())
+      done.foreach {c =>
+        clipCache(k).push(c)
+        soundCount.decrementAndGet()
+      }
+    }
+    clipsLock.unlock()
   }
   
   def stopSound(sound: String): Unit = {
