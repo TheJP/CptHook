@@ -69,19 +69,18 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   var selectMesh: IMesh = null
   @volatile var cameraNeedsUpdate: Boolean = true
 
-
   type EntityFactory = (Position, Size) => Entity
   
   // Tuples with entities that can be added
   val editorMeshes = List(
-    (p, s) => new GrassBlock(p, s),
-    (p, s) => new DirtBlock(p, s),
-    (p, s) => new IceBlock(p, s),
-    (p, s) => new LavaBlock(p, s),
-    (p, s) => new TargetBlock(p, s),
-    (p, s) => new TrampolineBlock(p, s),
-    (p: Position, s: Size) => new Monster(p)
-  ) map { npo => (npo(Position(0, 0), Size(1, 1)).toMesh(), npo) }
+    ((p, s) => new GrassBlock(p, s), "Nice green grass"),
+    ((p, s) => new DirtBlock(p, s), "Dirt"),
+    ((p, s) => new IceBlock(p, s), "Ice with gliding properties"),
+    ((p, s) => new LavaBlock(p, s), "Lava.. gotta roast some captains"),
+    ((p, s) => new TargetBlock(p, s), "Target: You win when you touch it"),
+    ((p, s) => new TrampolineBlock(p, s), "Bounce, Bounce, Bounce"),
+    ((p: Position, s: Size) => new Monster(p), "Monster.. it doesn't like to be touched")
+  ) map { npo => (npo._1(Position(0, 0), Size(1, 1)).toMesh, npo._1, npo._2) }
 
   object EditingState extends Enumeration { val Adding, Removing = Value }
   /** Determines, if the user is currently adding or removing elements. */
@@ -96,21 +95,19 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   override def activate = {
 
     //Switch sounds
-    //TODO: To slow loading.. has to be fixed
-    //SoundManager.playSong(SoundManager.Ambient)
     SoundManager.playSound(SoundManager.AmbientSound, 0.8f, true, true)
     
     addEditorMeshes
     cameraNeedsUpdate = true
     controller.animate(this)
     
-    setupUI()
-    setupGrid()
-    setupSelection()
+    setupUI
+    setupGrid
+    setupSelection
   }
 
   override def deactivate = {
-    SoundManager.stopAll()
+    SoundManager.stopAll
     removeEditorMeshes
     
     if (gridMesh != null) { getController.getScene.remove3DObject(gridMesh) }
@@ -120,8 +117,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     controller.kill(this)
   }
   
-  private def setupUI(): Unit = {
-
+  private def setupUI: Unit = {
     val exitButton = new Button(0, 0, "Exit", "(Q) Closes the game",  KeyEvent.VK_Q, new IButtonAction() {
       def execute(button: Button, view: IView) = {
         System.exit(0) //TODO: Ask to save (also when pressing esc) and graceful shutdown
@@ -172,7 +168,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     
     val uploadLevelButton = new Button(0, 6, "Upload", "(U) Upload level to server", KeyEvent.VK_U, new IButtonAction() {
       def execute(button: Button, view: IView) = { LevelLoader.pushToServer(viewModel.getLevel) }
-    })  
+    })
 
     controller.getUI.addWidget(exitButton)
     controller.getUI.addWidget(switchModeButton)
@@ -185,7 +181,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
 
   }
 
-  private def setupGrid(): Unit = {
+  private def setupGrid: Unit = {
     val material = new LineMaterial(RGBA.BLACK)
     val halfX = GridSize._1 / 2
     val halfY = GridSize._2 / 2
@@ -321,7 +317,9 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       removeEditorMeshes
     case IPointerEvent.BUTTON_1 =>
       implicit val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
-      if (clickedControl(event)) {
+      val control = hitControl(event)
+      if (control.isDefined) {
+        currentFactory = control.get._1
         return
       }
       if (findEntityAtPosition(event).isDefined) {
@@ -337,15 +335,14 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
  /**
    * Check if a control was clicked and handle the clicking if this is the case.
    */
-  private def clickedControl(event: IPointerEvent) (implicit viewCameraState: IViewCameraState): Boolean = {
+  private def hitControl(event: IPointerEvent) (implicit viewCameraState: IViewCameraState): Option[(EntityFactory, String)] = {
     val hitDistance = (mesh: I3DObject) => this.hitDistance(mesh, event.getX, event.getY)
     val hits = editorMeshes
-      .map(mesh => (hitDistance(mesh._1) -> mesh._2))
+      .map(mesh => (hitDistance(mesh._1) -> (mesh._2, mesh._3)))
       .filter(_._1 < Float.PositiveInfinity)
-    if(hits.isEmpty) { false }
+    if(hits.isEmpty) { None }
     else {
-      currentFactory = hits.minBy(_._1)._2
-      true
+      Option(hits.minBy(_._1)._2)
     }
   }
   
@@ -383,6 +380,13 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   }
 
   override def pointerMoved(event: IPointerEvent): Unit = {
+    //Show ui text
+    implicit val viewCameraState = getController.getRenderManager.getViewCameraState(event.getView)
+    val control = hitControl(event)
+    if(control.isDefined){
+      controller.getUI.setMessage(control.get._2)
+    }
+    //Move grid position marker
     val p: Vec3 = rayToXYPlane(event.getX, event.getY, 0)
     val pos = roundVec3(p)
     if (pos.x != selectMesh.getPosition.x || pos.y != selectMesh.getPosition.y) {
@@ -417,7 +421,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
       updateGuiPositions
     }
 
-    editorMeshes map {_._1} foreach { mesh =>
+    editorMeshes map { _._1 } foreach { mesh =>
       mesh.setTransform(Mat4.multiply(Mat4.rotate(currentBlockRotation, 0, 1, 0), Mat4.scale(currentBlockScale)))
     }
   }

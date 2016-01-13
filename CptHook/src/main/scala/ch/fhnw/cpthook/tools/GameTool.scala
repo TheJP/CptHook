@@ -183,7 +183,7 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     viewModel.getPlayer.jumpCount = 0
     controller.setCurrentTool(new GameTool(controller, camera, viewModel)) 
   }
-  def killMonser(body: Body): Unit = println("Kill monster") //TODO:
+  def killMonser(body: Body): Unit = {} //TODO:
   def win: Unit = if(isActive){ 
     EtherHacks.removeWidgets(controller)
     controller.setCurrentTool(new EditorTool(controller, camera, viewModel)) 
