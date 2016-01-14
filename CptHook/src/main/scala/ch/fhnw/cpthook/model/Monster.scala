@@ -39,7 +39,8 @@ class Monster(var position: Position) extends Entity
   // animation
   var animationStep = 0
   var lastTimeOfAnimation: Double = 0.0
-  var currentRotation: Double = 0.0
+  var currentRotation = 0.0f
+  var verticalRotation = 0.0f
   var currentMovement = WalkingLeft
 
   var leftContacts = Set[Fixture]()
@@ -53,6 +54,7 @@ class Monster(var position: Position) extends Entity
   
   def activate(gameContactListener: GameContactListener): Unit = {
     currentRotation = 0
+    verticalRotation = 0
     currentMovement = WalkingLeft
     animationStep = 0
     lastTimeOfAnimation = 0
@@ -100,7 +102,13 @@ class Monster(var position: Position) extends Entity
       currentRotation += RotationStep
       if(currentRotation >= 180){ currentMovement = WalkingRight }
     }
-    mesh.setTransform(Mat4.rotate(currentRotation.toFloat, new Vec3(0, 1, 0)))
+    //Vertical rotation (on gravity switch)
+    if(body.getWorld.getGravity.y > 0 && verticalRotation < 180){
+      verticalRotation += RotationStep
+    } else if(body.getWorld.getGravity.y < 0 && verticalRotation > 0){
+      verticalRotation -= RotationStep
+    }
+    mesh.setTransform(Mat4.multiply(Mat4.rotate(verticalRotation, 1, 0, 0), Mat4.rotate(currentRotation, 0, 1, 0)))
 
     //Define velocity according to current movement
     val velocity = currentMovement match {
