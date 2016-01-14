@@ -35,6 +35,7 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
   var body: Body = null
   var jumpCount: Integer = 0
   var onGroundCount = 0
+  var onTopCount = 0
   var stepAnimation: Integer = 0
   val mesh: IMesh = Player.createMesh(this)
   val walkingAnimation = (1 to 7).map { n => 
@@ -47,6 +48,10 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
   var currentRotation = 0.0f
   var verticalRotation = 0.0f
   var currentDirection: Integer = 0
+  
+  
+  var groundSensor: Fixture = null
+  var topSensor: Fixture = null
   
   def toMesh: IMesh = Player.createMesh(this)
   
@@ -70,18 +75,27 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
     groundSensorFixtureDef.shape = groundSensorShape
     groundSensorFixtureDef.isSensor = true
     
+    val topSensorShape: PolygonShape = new PolygonShape
+    topSensorShape.setAsBox(0.2f, 0.2f, new org.jbox2d.common.Vec2(0f, 0.7f), 0f)
+    val topSensorFixtureDef: FixtureDef = new FixtureDef
+    topSensorFixtureDef.shape = topSensorShape
+    topSensorFixtureDef.isSensor = true
+    
     body = world.createBody(bodyDef)
     body.createFixture(fixtureDef)
-    body.createFixture(groundSensorFixtureDef)
+    groundSensor = body.createFixture(groundSensorFixtureDef)
+    topSensor = body.createFixture(topSensorFixtureDef)
     body.setUserData(this)
   }
   
   def activate(gameContactListener: GameContactListener): Unit = {
     jumpCount = 0
     onGroundCount = 0
+    onTopCount = 0
     // register player update listener (Small hack here. Be aware that if you add a new fixture to the player
     // this will no longer work!)
-    gameContactListener.register(this, body.getFixtureList)
+    gameContactListener.register(this, groundSensor)
+    gameContactListener.register(this, topSensor)
   }
   
   def deactivate(): Unit =  {
@@ -116,7 +130,7 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
     
     if(time - timeOfAnimation > Math.abs(0.7 / velocity.x) || time - timeOfAnimation > 0.2){
       timeOfAnimation = time
-      if (!isOnGround) {
+      if ((!isOnGround && body.getWorld.getGravity.y < 0) || (!isOnTop && body.getWorld.getGravity.y > 0)) {
         mesh.getMaterial.asInstanceOf[ColorMapMaterial].setColorMap(materialPlayerJump.getColorMap)
       } else {
         if(Math.abs(velocity.x) < 0.5) {
@@ -159,15 +173,29 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
   }
 
   def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = {
-    jumpCount = 2
-    onGroundCount += 1
+    if (self == groundSensor) {
+      if (body.getWorld.getGravity.y < 0) {
+        jumpCount = 2
+      }
+      onGroundCount += 1
+    } else if (self == topSensor) {
+      if (body.getWorld.getGravity.y > 0) {
+        jumpCount = 2
+      }
+      onTopCount += 1
+    }
   }
 
   def endContact(self: Fixture, other: Fixture, contact: Contact): Unit = {
-    onGroundCount -= 1
+    if (self == groundSensor) {
+      onGroundCount -= 1
+    } else if (self == topSensor) {
+      onTopCount -= 1
+    }
   }
 
   def isOnGround(): Boolean = onGroundCount > 0
+  def isOnTop(): Boolean = onTopCount > 0
 }
 
 object Player {
