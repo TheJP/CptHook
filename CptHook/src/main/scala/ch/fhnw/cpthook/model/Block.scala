@@ -71,7 +71,7 @@ class LavaBlock(position: Position, size: Size) extends GameStateBlock(position,
       if(body != null) { gameContactListener.register(this, body.getFixtureList) }
   //Kill when collision is detected
   def beginContact(self: Fixture, other: Fixture, contact: Contact): Unit = other.getBody.getUserData match {
-    case player: Player => if(getController != null){ getController.gameOver }
+    case player: Player if getController != null && !other.isSensor() => getController.gameOver
     case monster: Monster => if(getController != null){ getController.killMonser(other.getBody) }
     case _ =>
   }
