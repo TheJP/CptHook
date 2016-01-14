@@ -37,3 +37,6 @@ build/
 .texlipse
 /build/
 
+#Default level
+./save.json
+

@@ -19,6 +19,8 @@ import ch.fhnw.cpthook.server.ServerApi
 import java.util.function.Consumer
 import java.util.concurrent.CountDownLatch
 import ch.fhnw.cpthook.server.LevelBrowser
+import org.apache.commons.io.FileUtils
+import java.io.File
 
 trait Context {
   def controller: ICptHookController
@@ -46,8 +48,15 @@ class ControllerAction(val context: Context, val config: Configuration) extends 
     
     val camera = controller.getCamera(view)
 
+    //Create save from resource if it does not exist
+    val file = new File("save.json")
+    if(!file.exists){
+      val save = getClass.getClassLoader.getResource("save.json")
+      FileUtils.copyURLToFile(save, file);
+    }
+
     //Load the example level
-    val level = JsonSerializer.readLevel("save.json")
+    val level = JsonSerializer.readLevel(file.getAbsolutePath)
     val viewModel: ILevelViewModel = new LevelViewModel(level, scene)
     
     //Add editor tool
