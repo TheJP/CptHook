@@ -65,13 +65,14 @@ class Monster(var position: Position) extends Entity
   }
   
   def deactivate(): Unit = {
-    resetMeshPosition()
+    resetMeshPosition
   }
   
   def resetMeshPosition() {
     currentRotation = 0
+    verticalRotation = 0
     mesh.setPosition(position.toVec3(0) add new Vec3(Monster.RealDimensions._1 / 2f, -Monster.RealDimensions._2 / 2f, 0f))
-    mesh.setTransform(Mat4.rotate(currentRotation.toFloat, new Vec3(0, 1, 0)))
+    mesh.setTransform(Mat4.ID)
   }
   
   def update(inputManager: InputManager, time: Double): Unit = {

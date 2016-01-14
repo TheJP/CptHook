@@ -29,6 +29,8 @@ import ch.fhnw.cpthook.tools.GameContactListener
 class Player(var position: Position) extends Entity with EntitiyUpdatable
                                                     with EntityActivatable
                                                     with ContactUpdates {
+
+  import Player._
   
   var body: Body = null
   var jumpCount: Integer = 0
@@ -42,10 +44,11 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
   val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player.png")).getTexture())
   val materialPlayerJump = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step5.png")).getTexture())
   var timeOfAnimation: Double = 0.0
-  var currentRotation: Double = 0.0
+  var currentRotation = 0.0f
+  var verticalRotation = 0.0f
   var currentDirection: Integer = 0
   
-  def toMesh(): IMesh = Player.createMesh(this)
+  def toMesh: IMesh = Player.createMesh(this)
   
   def linkBox2D(world: World): Unit = {
     val bodyDef = new BodyDef
@@ -83,8 +86,9 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
   
   def deactivate(): Unit =  {
     body = null
-    mesh.setTransform(Mat4.multiply(Mat4.rotate(-currentRotation.floatValue(), new Vec3(0, 1, 0)), mesh.getTransform))
+    mesh.setTransform(Mat4.ID)
     currentRotation = 0
+    verticalRotation = 0
     currentDirection = 0
     mesh.setPosition(position)
   }
@@ -98,12 +102,17 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
     var velocity = body.getLinearVelocity
     
     if (currentDirection == 0 && currentRotation > 0) {
-      mesh.setTransform(Mat4.multiply(Mat4.rotate(-10, new Vec3(0, 1, 0)), mesh.getTransform))
-      currentRotation -= 10
+      currentRotation -= RotationStep
     } else if (currentDirection == 1 && currentRotation < 180) {
-      mesh.setTransform(Mat4.multiply(Mat4.rotate(10, new Vec3(0, 1, 0)), mesh.getTransform))
-      currentRotation += 10
+      currentRotation += RotationStep
     }
+    //Vertical rotation (on gravity switch)
+    if(body.getWorld.getGravity.y > 0 && verticalRotation < 180){
+      verticalRotation += RotationStep
+    } else if(body.getWorld.getGravity.y < 0 && verticalRotation > 0){
+      verticalRotation -= RotationStep
+    }
+    mesh.setTransform(Mat4.multiply(Mat4.rotate(verticalRotation, 1, 0, 0), Mat4.rotate(currentRotation, 0, 1, 0)))
     
     if(time - timeOfAnimation > Math.abs(0.7 / velocity.x) || time - timeOfAnimation > 0.2){
       timeOfAnimation = time
@@ -162,6 +171,7 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
 }
 
 object Player {
+  val RotationStep = 10.0f
   val MaxXVelocity: Float = 10.0f
   val MoveVelocity: Float = 1.0f
   val JumpVelocity: Float = 11.0f
