@@ -43,12 +43,12 @@ abstract class GameStateBlock(position: Position, size: Size, texture: Texture) 
 }
 
 class GrassBlock(position: Position, size: Size) extends Block(position, size, Block.GrassTexture) {
-  def getFriction = 0.9f
+  def getFriction = 0.6f
   def getRestitution = 0.1f
 }
 
 class DirtBlock(position: Position, size: Size) extends Block(position, size, Block.DirtTexture) {
-  def getFriction = 0.9f
+  def getFriction = 0.6f
   def getRestitution = 0.1f
 }
 
