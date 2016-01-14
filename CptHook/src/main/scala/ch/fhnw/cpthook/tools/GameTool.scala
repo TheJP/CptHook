@@ -55,7 +55,8 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   var skyBoxOffsetY = 0.0
   var lastX = 0.0
   var lastY = 0.0
-  var deathZone = 1000.0;
+  var deathZoneBottom = 1000.0;
+  var deathZoneTop = -1000.0;
   
   var updateableEntites = List[EntitiyUpdatable]()
   var activatableEntites = List[EntityActivatable]()
@@ -103,8 +104,12 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
     lastY = viewModel.getPlayer.mesh.getPosition.y
     
     //calculate death zone
-    viewModel.entities.foreach((entity : (Entity, IMesh)) => deathZone = Math.min(deathZone, entity._2.getPosition.y))
-    deathZone -= 10
+    viewModel.entities.foreach((entity : (Entity, IMesh)) => {
+      deathZoneBottom = Math.min(deathZoneBottom, entity._2.getPosition.y)
+      deathZoneTop = Math.max(deathZoneTop, entity._2.getPosition.y)
+    })
+    deathZoneBottom -= 10
+    deathZoneTop += 20
     
     controller.animate(this)
     
@@ -132,7 +137,8 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   override def deactivate: Unit = {
     SoundManager.stopAll
     viewModel.removeSkyBox(skyBox)
-    deathZone = 1000.0f;
+    deathZoneBottom = 1000.0f;
+    deathZoneTop = -1000.0f
     controller.kill(this)
     activatableEntites.foreach { _.deactivate }
   }
@@ -140,7 +146,8 @@ class GameTool(val controller: ICptHookController, val camera: ICamera, val view
   def run(time: Double, interval: Double) : Unit = {
     world.step(interval.toFloat, GameTool.VelocityIterations, GameTool.PositionIterations)
     
-    if(viewModel.getPlayer.mesh.getPosition.y < deathZone) gameOver
+    if(viewModel.getPlayer.mesh.getPosition.y < deathZoneBottom) gameOver
+    else if(viewModel.getPlayer.mesh.getPosition.y > deathZoneTop) gameOver
     
     updateableEntites.foreach { _.update(inputManager, time) }
     
