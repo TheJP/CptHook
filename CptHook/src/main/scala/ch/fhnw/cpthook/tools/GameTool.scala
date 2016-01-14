@@ -38,7 +38,6 @@ import ch.fhnw.ether.ui.Slider
 import ch.fhnw.ether.ui.Slider.ISliderAction
 import ch.fhnw.cpthook.model.CheckpointBlock
 import ch.fhnw.cpthook.model.Position
-import scala.reflect.api.Position
 
 /**
  * Tool, which handles the game logic.
