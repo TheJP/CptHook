@@ -124,16 +124,16 @@ class TrampolineBlock(position: Position, size: Size) extends Block(position, si
 
 object Block {
   
-  val GrassTexture = Entity.loadTexture("../assets/grass.png")
-  val DirtTexture = Entity.loadTexture("../assets/dirt.png")
-  val IceTexture = Entity.loadTexture("../assets/ice.png")
-  val LavaTexture = Entity.loadTexture("../assets/lava.png")
-  val TargetTexture = Entity.loadTexture("../assets/target.png")
-  val TrampolineTexture = Entity.loadTexture("../assets/jump.png")
-  val GravityTexture = Entity.loadTexture("../assets/gravity.png")
-  val GravityUsedTexture = Entity.loadTexture("../assets/gravityused.png")
-  val CheckpointTexture = Entity.loadTexture("../assets/checkpoint.png")
-  val CheckpointActiveTexture = Entity.loadTexture("../assets/checkpointactive.png")
+  val GrassTexture = Entity.loadTexture("/ch/fhnw/cpthook/assets/grass.png")
+  val DirtTexture = Entity.loadTexture("/ch/fhnw/cpthook/assets/dirt.png")
+  val IceTexture = Entity.loadTexture("/ch/fhnw/cpthook/assets/ice.png")
+  val LavaTexture = Entity.loadTexture("/ch/fhnw/cpthook/assets/lava.png")
+  val TargetTexture = Entity.loadTexture("/ch/fhnw/cpthook/assets/target.png")
+  val TrampolineTexture = Entity.loadTexture("/ch/fhnw/cpthook/assets/jump.png")
+  val GravityTexture = Entity.loadTexture("/ch/fhnw/cpthook/assets/gravity.png")
+  val GravityUsedTexture = Entity.loadTexture("/ch/fhnw/cpthook/assets/gravityused.png")
+  val CheckpointTexture = Entity.loadTexture("/ch/fhnw/cpthook/assets/checkpoint.png")
+  val CheckpointActiveTexture = Entity.loadTexture("/ch/fhnw/cpthook/assets/checkpointactive.png")
 
   /**
    * Texture coordinates for default cube

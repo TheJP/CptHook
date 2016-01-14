@@ -39,11 +39,11 @@ class Player(var position: Position) extends Entity with EntitiyUpdatable
   var stepAnimation: Integer = 0
   val mesh: IMesh = Player.createMesh(this)
   val walkingAnimation = (1 to 7).map { n => 
-    new ColorMapMaterial(Frame.create(getClass.getResource(s"../assets/step$n.png")).getTexture())
+    new ColorMapMaterial(Frame.create(getClass.getResource(s"/ch/fhnw/cpthook/assets/step$n.png")).getTexture())
   }.toArray
   
-  val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player.png")).getTexture())
-  val materialPlayerJump = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/step5.png")).getTexture())
+  val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("/ch/fhnw/cpthook/assets/player.png")).getTexture())
+  val materialPlayerJump = new ColorMapMaterial(Frame.create(getClass.getResource("/ch/fhnw/cpthook/assets/step5.png")).getTexture())
   var timeOfAnimation: Double = 0.0
   var currentRotation = 0.0f
   var verticalRotation = 0.0f
@@ -212,7 +212,7 @@ object Player {
   val g = DefaultGeometry.createVM(Primitive.TRIANGLES, vertices, texCoords);
   
   def createMesh(player: Player): IMesh = {
-    val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("../assets/player.png")).getTexture())
+    val materialPlayer = new ColorMapMaterial(Frame.create(getClass.getResource("/ch/fhnw/cpthook/assets/player.png")).getTexture())
     val mesh = new DefaultMesh(materialPlayer, g, Queue.TRANSPARENCY);
     mesh.setPosition(player.position toVec3 0.5f)
     mesh

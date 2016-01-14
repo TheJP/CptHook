@@ -15,6 +15,7 @@ import javax.sound.sampled.LineEvent
 import javax.sound.sampled.LineListener
 import scala.collection.immutable.Queue
 import java.util.concurrent.atomic.AtomicReference
+import org.apache.commons.io.IOUtils
 
 /**
  * PlaySound, StopSound and StopAll are commands that can be queued
@@ -46,13 +47,13 @@ object SoundManager {
   val LevelSound = "level"
 
   private val sounds = Map(
-    AmbientSound -> loadSound("./sounds/ambient.mp3"),
-    BlockPlaceSound -> loadSound("./sounds/blockplace.mp3"),
-    BlockRemoveSound -> loadSound("./sounds/blockremove.mp3"),
-    BumpSound -> loadSound("./sounds/bump.mp3"),
-    BumpLoopSound -> loadSound("./sounds/bumploop.mp3"),
-    JumpSound -> loadSound("./sounds/jump.mp3"),
-    LevelSound -> loadSound("./sounds/level.mp3"))
+    AmbientSound -> loadSound("/ch/fhnw/cpthook/sounds/ambient.mp3"),
+    BlockPlaceSound -> loadSound("/ch/fhnw/cpthook/sounds/blockplace.mp3"),
+    BlockRemoveSound -> loadSound("/ch/fhnw/cpthook/sounds/blockremove.mp3"),
+    BumpSound -> loadSound("/ch/fhnw/cpthook/sounds/bump.mp3"),
+    BumpLoopSound -> loadSound("/ch/fhnw/cpthook/sounds/bumploop.mp3"),
+    JumpSound -> loadSound("/ch/fhnw/cpthook/sounds/jump.mp3"),
+    LevelSound -> loadSound("/ch/fhnw/cpthook/sounds/level.mp3"))
 
   private var playing: List[MappedClip] = List()
   private var cache: Map[String, Stack[Clip]] = sounds.map { case (key, value) => (key, Stack[Clip]()) }
@@ -63,7 +64,7 @@ object SoundManager {
   
   private def loadSound(path: String): Array[Byte] = {
     try {
-      return Files.readAllBytes(Paths.get(getClass.getResource(path).toURI()))
+      return IOUtils.toByteArray(getClass.getResourceAsStream(path))
     } catch {
       case e: Throwable => e.printStackTrace()
     }

@@ -152,7 +152,7 @@ object Monster {
   val Speed = 2f
   val Box2DDimensions = (0.9f, 0.9f)
   val RealDimensions = (1.0f, 1.0f)
-  val AnimationFrames = (1 to 11).map { n => Entity.loadTexture(s"../assets/monster_step$n.png") }.toArray
+  val AnimationFrames = (1 to 11).map { n => Entity.loadTexture(s"/ch/fhnw/cpthook/assets/monster_step$n.png") }.toArray
   val AnimationStepTime = 0.06f
   val RotationStep = 10
   
