@@ -60,8 +60,10 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   val GuiBlockSize = 0.5f
   val GuiBlockRotationAxis = new Vec3(0, 1, 0)
   val GridSize = (1000, 400)
+  val MovementFactor = 5.0f
 
   var offsets = new Vec3(0, 0, 20)
+  var dragging = false
   var dragStart = (0f, 0f)
   var currentBlockRotation: Float = 0
   var currentBlockScale: Float = 1f
@@ -315,6 +317,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
   
   override def pointerPressed(event: IPointerEvent): Unit = event.getButton match {
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
+      dragging = true
       dragStart = (event.getX, event.getY)
       //Hide editor meshes while moving (because they are very jittery)
       removeEditorMeshes
@@ -358,6 +361,7 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
 
   override def pointerReleased(event: IPointerEvent): Unit = event.getButton match {
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
+      dragging = false
       //Add editor meshes back after moving
       addEditorMeshes
     case default => //Unknown key
@@ -368,10 +372,10 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
    */
   override def pointerDragged(event: IPointerEvent): Unit = event.getButton match {
     case IPointerEvent.BUTTON_2 | IPointerEvent.BUTTON_3 =>
-      val deltaX = event.getX - dragStart._1
-      val deltaY = event.getY - dragStart._2
-      offsets = offsets.add(new Vec3(deltaX * OffsetScale, deltaY * OffsetScale, 0))
+      val delta = (event.getX - dragStart._1, event.getY - dragStart._2)
+      offsets = offsets add new Vec3(delta._1 * OffsetScale, delta._2 * OffsetScale, 0)
       cameraNeedsUpdate = true
+      dragging = true
       dragStart = (event.getX, event.getY)
     case IPointerEvent.BUTTON_1 =>
       if(editingState == EditingState.Adding){
@@ -411,7 +415,22 @@ class EditorTool(val controller: ICptHookController, val camera: ICamera, val vi
     cameraNeedsUpdate = true
   }
 
-  override def keyPressed(event: IKeyEvent): Unit = {}
+  override def keyPressed(event: IKeyEvent): Unit = if(!dragging){
+    event.getKeyCode match {
+      case KeyEvent.VK_UP =>
+        offsets = offsets add new Vec3(0, MovementFactor * OffsetScale, 0)
+        cameraNeedsUpdate = true
+      case KeyEvent.VK_LEFT =>
+        offsets = offsets add new Vec3(-MovementFactor * OffsetScale, 0, 0)
+        cameraNeedsUpdate = true
+      case KeyEvent.VK_DOWN =>
+        offsets = offsets add new Vec3(0, -MovementFactor * OffsetScale, 0)
+        cameraNeedsUpdate = true
+      case KeyEvent.VK_RIGHT =>
+        offsets = offsets add new Vec3(MovementFactor * OffsetScale, 0, 0)
+        cameraNeedsUpdate = true
+    }
+  }
 
   /**
    * Animation of editor controls.

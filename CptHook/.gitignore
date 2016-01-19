@@ -38,5 +38,5 @@ build/
 /build/
 
 #Default level
-./save.json
+/save.json
 
